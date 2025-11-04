@@ -76,7 +76,7 @@ namespace CabinCrewCareer.Infrastructure
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddDbContext<CabinCrewCareerDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("DeployConnection"));
             });
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
