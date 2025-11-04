@@ -34,7 +34,7 @@ jobs:
         working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Publish 📂
-        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build  --output .\publish
         working-directory: ${{ env.API_PROJECT_PATH }}
 
   deploy:
@@ -53,4 +53,4 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           slot-name: 'production'
-          package: './publish'
+          package: '.\publish'
