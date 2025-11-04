@@ -23,10 +23,9 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUsers
                     request.SearchTerm,
                     request.SortColumn,
                     request.SortOrder,
-                    request.RoleId,
-                    request.GradeId,
-                    request.SchoolId,
                     request.IsActive,
+                    request.RoleId,
+                    request.PartnerId,
                     request.Page,
                     request.PageSize
                 )),
