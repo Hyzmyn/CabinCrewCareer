@@ -21,8 +21,8 @@ namespace CabinCrewCareer.Application.Authentication.Queries.Login
         {
             var userQuery = await _unitOfWork.Users.GetAsync(
                 expression: user => user.UserName.ToLower().Equals(request.Username.ToLower())
-                                    && user.PasswordHash != null
-                                    && user.PasswordHash.Equals(request.Password),
+                                    && user.Password != null
+                                    && user.Password.Equals(request.Password),
                 includeFunc: user => user.Include(u => u.Role));
 
             var user = userQuery.FirstOrDefault() ?? throw new ApiException(ResponseCode.INVALID_CREDENTIALS);
