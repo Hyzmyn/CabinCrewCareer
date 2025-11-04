@@ -4,11 +4,27 @@ namespace CabinCrewCareer.Domain.Common
 {
     public enum AvailableRole
     {
-        [Description("Administator")]
-        Administrator = 1,
-        [Description("Subject Specialist Manager")]
-        SubjectSpecialistManager = 2,
-        [Description("Teacher")]
-        Teacher = 4,
+        //[Description("Admin")]
+        //Admin = 1,
+        //[Description("Director")]
+        //Director,
+
+        //[Description("Senior Recruiter")]
+        //SeniorRecruiter,
+
+        [Description("Recruiter")]
+        Recruiter = 1,
+
+        [Description("Examiner")]
+        Examiner,
+
+        [Description("Cabin Crew")]
+        CabinCrew,
+
+        [Description("Candidate")]
+        Candidate,
+
+        [Description("Airline Partner")]
+        AirlinePartner,
     }
 }

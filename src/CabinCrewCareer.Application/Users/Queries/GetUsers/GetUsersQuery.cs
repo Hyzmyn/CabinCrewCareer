@@ -11,8 +11,7 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUsers
         string? SortOrder,
         int? IsActive,
         int? RoleId,
-        int? GradeId,
-        int? SchoolId,
+        int? PartnerId,
         int Page,
         int PageSize) : IRequest<Response<PaginatedList<GetUserResponse>>>;
 }

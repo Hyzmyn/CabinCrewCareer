@@ -1,6 +1,8 @@
-﻿namespace CabinCrewCareer.Application.Users.Commands.DisableUser
+﻿using CabinCrewCareer.Application.Users.Common;
+using CabinCrewCareer.Domain.Wrappers;
+using MediatR;
+
+namespace CabinCrewCareer.Application.Users.Commands.DisableUser
 {
-    public class DisableUserCommand
-    {
-    }
+    public record DisableUserCommand(int UserId) : IRequest<Response<GetUserResponse>>;
 }

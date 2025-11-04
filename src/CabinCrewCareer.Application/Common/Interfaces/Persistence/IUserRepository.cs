@@ -10,10 +10,9 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             (string? searchTerm
             , string? sortColumn
             , string? sortOrder
-            , int? roleId
-            , int? gradeId
-            , int? schooId
             , int? isActive
+            , int? roleId
+            , int? partnerId
             , int page
             , int pageSize);
     }
