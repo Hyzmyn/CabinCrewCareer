@@ -16,5 +16,6 @@
 
         // Navigation Properties
         public virtual ICollection<User> Users { get; set; } = [];
+        public virtual ICollection<CampaignRequest> CampaignRequests { get; set; } = [];
     }
 }

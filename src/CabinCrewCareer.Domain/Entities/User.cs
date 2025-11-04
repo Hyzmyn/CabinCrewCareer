@@ -37,6 +37,13 @@ namespace CabinCrewCareer.Domain.Entities
         public int? PartnerId { get; set; }
         public virtual AirlinePartner AirlinePartner { get; set; } = null!;
 
+        public virtual UserApplication? Application { get; set; } = null!;
+
         // Navigation Properties
+        public virtual ICollection<Blog> Blogs { get; set; } = [];
+        public virtual ICollection<Comment> Comments { get; set; } = [];
+        public virtual ICollection<Notification> Notifications { get; set; } = [];
+        public virtual ICollection<CampaignRequest> CampaignRequests { get; set; } = [];
+        public virtual ICollection<Campaign> Campaigns { get; set; } = [];
     }
 }
