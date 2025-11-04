@@ -9,7 +9,7 @@ on:
 env:
   API_PROJECT_PATH: 'src\CabinCrewCareer.Api'
   AZURE_WEBAPP_NAME: 'cabincrewcareer'
-  DOTNET_VERSION: '8.x'
+  DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: 'Release'
 
 jobs:
