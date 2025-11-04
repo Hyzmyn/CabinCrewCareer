@@ -7,6 +7,7 @@ on:
       - main
 
 env:
+  API_PROJECT_PATH: 'src\CabinCrewCareer.Api'
   AZURE_WEBAPP_NAME: 'cabincrewcareer'
   DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: 'Release'
@@ -26,12 +27,15 @@ jobs:
 
       - name: Restore 📦
         run: dotnet restore
+        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Build 🏗️
         run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Publish 📂
         run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build
+        working-directory: ${{ env.API_PROJECT_PATH }}
 
   deploy:
     name: deploy
