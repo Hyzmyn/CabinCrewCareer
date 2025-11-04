@@ -7,9 +7,8 @@ on:
       - main
 
 env:
-  API_PROJECT_PATH: 'src\CabinCrewCareer.Api'
   AZURE_WEBAPP_NAME: 'cabincrewcareer'
-  DOTNET_VERSION: '8.x'
+  DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: 'Release'
 
 jobs:
@@ -27,15 +26,12 @@ jobs:
 
       - name: Restore 📦
         run: dotnet restore
-        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Build 🏗️
         run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
-        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Publish 📂
-        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build
-        working-directory: ${{ env.API_PROJECT_PATH }}
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --output ${{ env.DOTNET_ROOT }}/myapp
 
   deploy:
     name: deploy
@@ -53,4 +49,4 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           slot-name: 'production'
-          package: .
+          package: '${{ env.DOTNET_ROOT }}/myapp'
