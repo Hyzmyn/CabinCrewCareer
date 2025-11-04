@@ -10,6 +10,7 @@ env:
   API_PROJECT_PATH: 'src\CabinCrewCareer.Api'
   AZURE_WEBAPP_NAME: 'cabincrewcareer'
   DOTNET_VERSION: '8.x'
+  BUILD_CONFIGURATION: 'Release'
 
 jobs:
   build:
@@ -29,18 +30,12 @@ jobs:
         working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Build 🏗️
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
         working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Publish 📂
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}\cabincrewcareerapi --no-build
+        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build
         working-directory: ${{ env.API_PROJECT_PATH }}
-
-      - name: Publish Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}\cabincrewcareerapi
 
   deploy:
     name: deploy
@@ -63,4 +58,4 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           slot-name: 'production'
-          package: .
+          package: './publish'
