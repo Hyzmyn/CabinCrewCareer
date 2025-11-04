@@ -23,7 +23,6 @@
 	<ItemGroup>
 	  <Folder Include="Authentication\Queries\RequestToken\" />
 	  <Folder Include="Common\Models\Responses\" />
-	  <Folder Include="Users\Commands\" />
 	</ItemGroup>
 
 </Project>
