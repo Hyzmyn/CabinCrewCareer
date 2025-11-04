@@ -42,7 +42,8 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
                 Gender = (Gender)request.Gender,
                 RoleId = (int)AvailableRole.Candidate,
                 IsActive = true,
-                ImgURL = DefaultAvatar.UserPicture
+                ImgURL = DefaultAvatar.UserPicture,
+                CreatedBy = request.Username
             };
 
             var newResult = await _unitOfWork.Users.AddAsync(user);
