@@ -23,5 +23,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
             Users = new UserRepository(_dbContext, _logger);
         }
+
+        public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
     }
 }
