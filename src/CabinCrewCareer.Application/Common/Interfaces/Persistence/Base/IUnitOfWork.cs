@@ -10,6 +10,8 @@
 
         IWardRepository Wards { get; }
 
+        ICampaignRequestRepository CampaignRequests { get; }
+
         Task CompleteAsync();
     }
 }
