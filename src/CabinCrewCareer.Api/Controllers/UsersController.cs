@@ -25,7 +25,7 @@ namespace CabinCrewCareer.Api.Controllers
     {
         #region Create User
         /// <summary>
-        /// Admin create an account for Recruiter: 4, Examiner: 5 and Airline Partner: 8
+        /// Admin create an account for Recruiter, Examiner and Airline Partner
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -38,7 +38,8 @@ namespace CabinCrewCareer.Api.Controllers
         ///       "dateOfBirth": "2003-01-01",
         ///       "roleId": 4
         ///     }
-        ///         
+        ///  
+        /// Recruiter: 4, Examiner: 5 and Airline Partner: 8
         /// </remarks> 
         /// <returns>Successful code</returns>
         /// <response code="200">Ok</response>
