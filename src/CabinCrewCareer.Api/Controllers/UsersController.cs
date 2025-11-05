@@ -25,7 +25,7 @@ namespace CabinCrewCareer.Api.Controllers
     {
         #region Create User
         /// <summary>
-        /// An account created by Admin
+        /// Admin create an account for Recruiter: 4, Examiner: 5 and Airline Partner: 8
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -35,7 +35,8 @@ namespace CabinCrewCareer.Api.Controllers
         ///       "fullName": "Nguyễn Phi Hùng",     
         ///       "phoneNumber": "0123456789",
         ///       "email": "hungphn@gmail.com",
-        ///       "dateOfBirth": "2003-01-01"
+        ///       "dateOfBirth": "2003-01-01",
+        ///       "roleId": 4
         ///     }
         ///         
         /// </remarks> 
@@ -71,12 +72,14 @@ namespace CabinCrewCareer.Api.Controllers
         /// <summary>
         /// Get all accounts
         /// </summary>
-        /// <param name="query.SearchTerm">User active or not</param>
-        /// <param name="query.SortColumn">Current page the user is on</param>
-        /// <param name="pageSize">Number of entities you want to show</param>
-        /// <param name="searchTerm">Search query</param>
-        /// <param name="sortColumn">Column you want to sort</param>
-        /// <param name="sortOrder">Sort column by ascending or descening</param>
+        /// <param name="searchTerm">Search by account's full name</param>
+        /// <param name="sortColumn">Sort on a specifice column. Example: "name"</param>
+        /// <param name="sortOrder">"asc" or "desc"</param>
+        /// <param name="isActive">1: Active, 0: Inactive</param>
+        /// <param name="roleId">4: Recruiter, 5: Examiner, 6: Cabin Crew, 7: Candidate, 8: Airline Partner</param>
+        /// <param name="partnerId">1: VietJet Air, 3: Vietnam Airlines, 4: Bamboo Airways, 5: Sun PhuQuoc Airways</param>
+        /// <param name="page">Current page</param>
+        /// <param name="pageSize">Number of records of a specific page</param>
         /// <returns>A list of all users</returns>
         /// <response code="200">Ok</response>
         /// <response code="400">Bad Request</response>
@@ -87,11 +90,28 @@ namespace CabinCrewCareer.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(Response<PaginatedList<GetUserResponse>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetAllAsync([FromQuery] GetUsersQuery query)
+        public async Task<IActionResult> GetAllAsync([FromQuery]
+        string? searchTerm,
+        string? sortColumn,
+        string? sortOrder,
+        int? isActive,
+        int? roleId,
+        int? partnerId,
+        int page,
+        int pageSize)
         {
             try
             {
-                return Ok(await mediator.Send(query));
+                return Ok(await mediator.Send(
+                    new GetUsersQuery(
+                        searchTerm,
+                        sortColumn,
+                        sortOrder,
+                        isActive,
+                        roleId,
+                        partnerId,
+                        page,
+                        pageSize)));
             }
             catch (ApiException e)
             {
@@ -220,7 +240,18 @@ namespace CabinCrewCareer.Api.Controllers
         #endregion
 
         #region Update Profile Img
-        [HttpPost("profile-img")]
+        /// <summary>
+        /// Update account's profile image
+        /// </summary>
+        /// <param name="file">Picture file</param>
+        /// <returns>Successful code</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut("profile-img")]
         [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UploadAsync(IFormFile file)

@@ -9,5 +9,6 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
     string FullName,
     string PhoneNumber,
     string Email,
-    DateOnly DateOfBirth) : IRequest<Response<GetUserResponse>>;
+    DateOnly DateOfBirth,
+    int RoleId) : IRequest<Response<GetUserResponse>>;
 }

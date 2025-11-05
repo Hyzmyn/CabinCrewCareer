@@ -12,41 +12,44 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Fail")]
         FAIL = 1,
 
-        [Description("Refresh token is invalid")]
-        AUTH_ERR_REFRESH_TOKEN = 2,
+        [Description("Created successfuly")]
+        CREATED_SUCCESS = 2,
 
-        [Description("Refresh token is invalid")]
-        INVALID_CREDENTIALS = 3,
+        [Description("Created unsuccessfuly")]
+        CREATED_UNSUCC = 3,
 
-        [Description("Refresh token is invalid")]
-        INACTIVE_USER = 4,
+        [Description("Updated successfully")]
+        UPDATED_SUCCESS = 4,
 
-        [Description("User not found")]
-        USER_NOT_FOUND = 5,
+        [Description("Updated unsuccessfully")]
+        UPDATED_UNSUCC = 5,
 
         [Description("Disabled successfully")]
         DISABLED_SUCCESS = 6,
 
-        [Description("Updated successfully")]
-        UPDATED_SUCCESS = 7,
+        [Description("Disabled unsuccessfully")]
+        DISABLED_UNSUCC = 7,
+
+        [Description("Refresh token is invalid")]
+        AUTH_ERR_REFRESH_TOKEN = 8,
+
+        [Description("Refresh token is invalid")]
+        INVALID_CREDENTIALS = 9,
 
         [Description("Failed authentication")]
-        FAILED_AUTHENTICATION = 8,
+        FAILED_AUTHENTICATION = 10,
 
         [Description("Invalid file size")]
-        INVALID_FILE_SIZE = 9,
+        INVALID_FILE_SIZE = 11,
 
         [Description("Invalid file extension")]
-        INVALID_FILE_EXTENSION = 10,
+        INVALID_FILE_EXTENSION = 12,
 
-        [Description("Updated unsuccessfully")]
-        UPDATED_UNSUCC = 11,
+        [Description("Refresh token is invalid")]
+        INACTIVE_USER = 13,
 
-        [Description("Created unsuccessfuly")]
-        CREATED_UNSUCC = 12,
-
-        [Description("Created successfuly")]
-        CREATED_SUCCESS = 13,
+        [Description("User not found")]
+        USER_NOT_FOUND = 14,
 
         #endregion
     }

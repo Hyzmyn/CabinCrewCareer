@@ -28,7 +28,7 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
                 {
                     errorMessages.Add(error.ErrorMessage);
                 }
-                throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
             }
 
             var user = new User
