@@ -39,26 +39,26 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
             //    .WithMessage("Role does not exist!");            
         }
 
-        private async Task<bool> AlreadyExistId(int id, string option)
-        {
-            switch (option.ToLower())
-            {
-                //case "roleid":
-                //    var role = await _unitOfWork.Roles.GetByIdAsync(id);
-                //    if (role is null) return false;
-                //    return true;
-                //case "schoolid":
-                //    var school = await _unitOfWork.Schools.GetByIdAsync(id);
-                //    if (school is null) return false;
-                //    return true;
-                //case "gradeid":
-                //    var grade = await _unitOfWork.Grades.GetByIdAsync(id);
-                //    if (grade is null) return false;
-                //    return true;
-                default:
-                    return false;
-            }
-        }
+        //private async Task<bool> AlreadyExistId(int id, string option)
+        //{
+        //    switch (option.ToLower())
+        //    {
+        //        case "roleid":
+        //            var role = await _unitOfWork.Roles.GetByIdAsync(id);
+        //            if (role is null) return false;
+        //            return true;
+        //        case "schoolid":
+        //            var school = await _unitOfWork.Schools.GetByIdAsync(id);
+        //            if (school is null) return false;
+        //            return true;
+        //        case "gradeid":
+        //            var grade = await _unitOfWork.Grades.GetByIdAsync(id);
+        //            if (grade is null) return false;
+        //            return true;
+        //        default:
+        //            return false;
+        //    }
+        //}
 
         private async Task<bool> CheckExistUsernameEmail(string value, string option)
         {
@@ -66,12 +66,12 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
             {
                 case "Username":
                     var usernameQuery = await _unitOfWork.Users
-                        .GetAsync(user => user.UserName.ToLower().Equals(value.ToLower()));
+                        .GetAsync(user => user.UserName.Equals(value));
                     if (usernameQuery.FirstOrDefault() is null) return true;
                     return false;
                 case "Email":
                     var emailQuery = await _unitOfWork.Users
-                        .GetAsync(user => user.Email.ToLower().Equals(value.ToLower()));
+                        .GetAsync(user => user.Email.Equals(value));
                     if (emailQuery.FirstOrDefault() is null) return true;
                     return false;
                 case "PhoneNumber":
