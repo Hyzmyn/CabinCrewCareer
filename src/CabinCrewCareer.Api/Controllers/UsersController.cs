@@ -47,6 +47,22 @@ namespace CabinCrewCareer.Api.Controllers
         #endregion
 
         #region Get Users
+        /// <summary>
+        /// Get all accounts
+        /// </summary>
+        /// <param name="query.SearchTerm">User active or not</param>
+        /// <param name="query.SortColumn">Current page the user is on</param>
+        /// <param name="pageSize">Number of entities you want to show</param>
+        /// <param name="searchTerm">Search query</param>
+        /// <param name="sortColumn">Column you want to sort</param>
+        /// <param name="sortOrder">Sort column by ascending or descening</param>
+        /// <returns>A list of all users</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [ProducesResponseType(typeof(Response<PaginatedList<GetUserResponse>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -69,6 +85,17 @@ namespace CabinCrewCareer.Api.Controllers
         #endregion
 
         #region Get User
+        /// <summary>
+        /// Get account profile
+        /// </summary>
+        /// <param name="id">Id of a specific account</param>
+        /// <returns>Account profile</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Response<GetUserDetailResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -113,6 +140,17 @@ namespace CabinCrewCareer.Api.Controllers
         #endregion
 
         #region Disable User
+        /// <summary>
+        /// Disable an account
+        /// </summary>
+        /// <param name="id">Id of a specific account</param>
+        /// <returns>Sucessful code</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]

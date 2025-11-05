@@ -4,6 +4,12 @@
     {
         IUserRepository Users { get; }
 
+        IRoleRepository Roles { get; }
+
+        ICityRepository Cities { get; }
+
+        IWardRepository Wards { get; }
+
         Task CompleteAsync();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Users.Common;
@@ -24,6 +25,12 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.WardId, u => u.MapFrom(u => u.WardId != null ? u.WardId : 0));
 
             CreateMap<PaginatedList<User>, PaginatedList<GetUserResponse>>();
+            #endregion
+
+            #region City
+            CreateMap<City, GetCityResponse>();
+
+            CreateMap<Ward, GetWardResponse>();
             #endregion
         }
     }
