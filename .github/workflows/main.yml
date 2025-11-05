@@ -7,41 +7,55 @@ on:
       - main
 
 env:
+  API_PROJECT_PATH: 'src/CabinCrewCareer.Api'
   AZURE_WEBAPP_NAME: 'cabincrewcareer'
-  DOTNET_VERSION: '8.0.x'
-  BUILD_CONFIGURATION: 'Release'
+  DOTNET_VERSION: '8.x'
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository 🛠️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup .NET ⚙️
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore 📦
         run: dotnet restore
+        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Build 🏗️
-        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+        run: dotnet build --configuration Release --no-restore
+        working-directory: ${{ env.API_PROJECT_PATH }}
 
       - name: Publish 📂
-        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --no-build
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/cabincrewcareerapi --no-build
+        working-directory: ${{ env.API_PROJECT_PATH }}
+
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/cabincrewcareerapi
 
   deploy:
     name: deploy
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment:
       name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+    
       - name: Deploy 🚀
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2

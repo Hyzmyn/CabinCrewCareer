@@ -1,5 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Cities;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IWardRepository Wards { get; private set; }
 
+        public ICampaignRequestRepository CampaignRequests { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -35,6 +38,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Cities = new CityRepository(_dbContext, _logger);
 
             Wards = new WardRepository(_dbContext, _logger);
+
+            CampaignRequests = new CampaignRequestRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
