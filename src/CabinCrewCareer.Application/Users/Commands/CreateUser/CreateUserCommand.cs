@@ -1,6 +1,13 @@
-﻿namespace CabinCrewCareer.Application.Users.Commands.CreateUser
+﻿using CabinCrewCareer.Application.Users.Common;
+using CabinCrewCareer.Domain.Wrappers;
+using MediatR;
+
+namespace CabinCrewCareer.Application.Users.Commands.CreateUser
 {
-    public class CreateUserCommand
-    {
-    }
+    public record CreateUserCommand(
+    string Username,
+    string FullName,
+    string PhoneNumber,
+    string Email,
+    DateOnly DateOfBirth) : IRequest<Response<GetUserResponse>>;
 }

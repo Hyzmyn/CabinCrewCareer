@@ -4,6 +4,6 @@ namespace CabinCrewCareer.Infrastructure.Services
 {
     public class SystemDateTimeProvider : IDateTimeProvider
     {
-        public DateTime UtcNow => DateTime.UtcNow;
+        public DateTime UtcNow => DateTime.UtcNow.AddHours(7);
     }
 }

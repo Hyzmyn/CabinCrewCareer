@@ -24,6 +24,27 @@ namespace CabinCrewCareer.Api.Controllers
         ILogger<UsersController> logger) : ApiController(mediator, logger)
     {
         #region Create User
+        /// <summary>
+        /// An account created by Admin
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     {
+        ///       "username": "howsyourday",
+        ///       "fullName": "Nguyễn Phi Hùng",     
+        ///       "phoneNumber": "0123456789",
+        ///       "email": "hungphn@gmail.com",
+        ///       "dateOfBirth": "2003-01-01"
+        ///     }
+        ///         
+        /// </remarks> 
+        /// <returns>Successful code</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthenticated</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
@@ -39,8 +60,8 @@ namespace CabinCrewCareer.Api.Controllers
                 return BadRequest(new
                 {
                     errorCode = e.ErrorCode,
-                    errors = e.Errors,
-                    errorMessage = e.ErrorMessage
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
                 });
             }
         }
@@ -118,6 +139,32 @@ namespace CabinCrewCareer.Api.Controllers
         #endregion
 
         #region Update User
+        /// <summary>
+        /// Update account's profile
+        /// </summary>
+        /// <param name="id">Id of a specific account</param>
+        /// <param name="request">Request body</param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     {
+        ///       "fullname": "Nguyễn Phi Hùng",
+        ///       "email": "hungphn@gmail.com",
+        ///       "phoneNumber": "0123456789",
+        ///       "dateOfBirth": "2003-01-01",
+        ///       "gender": 1,
+        ///       "address": "1 Lê Duẩn",
+        ///       "wardId": 1
+        ///     }
+        ///         
+        /// </remarks> 
+        /// <returns>Successful code</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Authenticated</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -132,8 +179,8 @@ namespace CabinCrewCareer.Api.Controllers
                 return NotFound(new
                 {
                     errorCode = e.ErrorCode,
-                    errors = e.Errors,
-                    errorMessage = e.ErrorMessage
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
                 });
             }
         }

@@ -67,12 +67,12 @@ namespace CabinCrewCareer.Api.Controllers
         ///     {
         ///       "username": "howsyourday",
         ///       "password": "callmebaby",
-        ///       "confirmPassword": "callmebaby",
+        ///       "confirmedPassword": "callmebaby",
         ///       "fullName": "Nguyễn Phi Hùng",
         ///       "gender": 1,
         ///       "dateOfBirth": "2003-01-01",
         ///       "phoneNumber": "0123456789",
-        ///       "email": "hungphn@gmail.com",
+        ///       "email": "hungphn@gmail.com"
         ///     }
         ///         
         /// </remarks> 
@@ -89,13 +89,13 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 return Ok(await mediator.Send(command));
             }
-            catch (ApiException e)
+            catch (ValidationException e)
             {
                 return BadRequest(new
                 {
                     errorCode = e.ErrorCode,
-                    error = e.Error,
-                    errorMessage = e.ErrorMessage
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
                 });
             }
         }
