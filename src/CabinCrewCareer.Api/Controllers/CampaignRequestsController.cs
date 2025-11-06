@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRequest;
 using CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRequestStatus;
+using CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCampaignRequest;
 using CabinCrewCareer.Application.CampaignRequests.Common;
 using CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignRequestDetail;
 using CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignRequests;
@@ -221,6 +222,67 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 var query = new GetCampaignRequestDetailQuery(id);
                 return Ok(await mediator.Send(query));
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Update Rejected Campaign Request
+        /// <summary>
+        /// Partner updates a rejected campaign request to resubmit
+        /// </summary>
+        /// <param name="id">Request ID</param>
+        /// <param name="request">Request body</param>
+        /// <remarks>
+        /// This endpoint allows partners to update and resubmit a campaign request that was rejected.
+        /// The request status will be changed back to Pending for re-approval.
+        /// 
+        /// Sample request:
+        /// 
+        ///     {
+        ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024 - Cập nhật",
+        ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
+        ///       "targetQuantity": 50
+        ///     }
+        ///         
+        /// </remarks> 
+        /// <returns>Updated campaign request</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+    [HttpPut("{id}/resubmit")]
+    [ProducesResponseType(typeof(Response<GetCampaignRequestResponse>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    public async Task<IActionResult> UpdateRejectedRequestAsync(int id, [FromBody] UpdateRejectedCampaignRequestDto request)
+        {
+            try
+            {
+                var command = new UpdateRejectedCampaignRequestCommand(
+                    id,
+                    request.CampaignName,
+                    request.Description,
+                    request.TargetQuantity);
+                    
+                return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
             }
             catch (ApiException e)
             {
