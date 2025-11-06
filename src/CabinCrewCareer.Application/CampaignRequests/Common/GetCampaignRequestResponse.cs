@@ -14,9 +14,9 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string? RejectReason { get; set; }
 
-        public DateTime? ApprovedAt { get; set; }
+        public string? ApprovedAt { get; set; }
 
-        public DateTime? RejectedAt { get; set; }
+        public string? RejectedAt { get; set; }
 
         public string? PartnerName { get; set; }
 
