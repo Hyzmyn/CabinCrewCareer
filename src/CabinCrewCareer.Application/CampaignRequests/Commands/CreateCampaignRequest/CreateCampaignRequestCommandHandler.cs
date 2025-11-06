@@ -7,6 +7,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 
 namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRequest
@@ -64,8 +65,16 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
             await _unitOfWork.CampaignRequests.AddAsync(campaignRequest);
             await _unitOfWork.CompleteAsync();
 
-            // Load partner information
-            var createdRequest = await _unitOfWork.CampaignRequests.GetByIdAsync(campaignRequest.RequestId);
+            // Load partner/director information to populate response
+            var createdRequestQuery = await _unitOfWork.CampaignRequests.GetAsync(
+                cr => cr.RequestId == campaignRequest.RequestId,
+                orderBy: null,
+                includeFunc: q => q
+                    .Include(cr => cr.AirlinePartner)
+                    .Include(cr => cr.Director),
+                disableTracking: true);
+
+            var createdRequest = await createdRequestQuery.FirstOrDefaultAsync(cancellationToken);
             if (createdRequest == null)
             {
                 throw new ApiException(ResponseCode.CREATED_UNSUCC);

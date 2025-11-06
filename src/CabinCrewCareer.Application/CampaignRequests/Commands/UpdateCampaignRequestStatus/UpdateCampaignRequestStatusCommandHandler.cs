@@ -7,6 +7,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRequestStatus
 {
@@ -73,8 +74,16 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
             await _unitOfWork.CampaignRequests.UpdateAsync(campaignRequest);
             await _unitOfWork.CompleteAsync();
 
-            // Load related entities
-            var updatedRequest = await _unitOfWork.CampaignRequests.GetByIdAsync(campaignRequest.RequestId);
+            // Load related entities (partner/director) for response
+            var updatedRequestQuery = await _unitOfWork.CampaignRequests.GetAsync(
+                cr => cr.RequestId == campaignRequest.RequestId,
+                orderBy: null,
+                includeFunc: q => q
+                    .Include(cr => cr.AirlinePartner)
+                    .Include(cr => cr.Director),
+                disableTracking: true);
+
+            var updatedRequest = await updatedRequestQuery.FirstOrDefaultAsync(cancellationToken);
 
             var response = new GetCampaignRequestResponse
             {
@@ -82,12 +91,13 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 CampaignName = updatedRequest.CampaignName,
                 Description = updatedRequest.Description,
                 TargetQuantity = updatedRequest.TargetQuantity,
+                RequestType = updatedRequest.RequestType.ToString(),
                 Status = updatedRequest.Status.ToString(),
                 RejectReason = updatedRequest.RejectReason,
                 ApprovedAt = updatedRequest.ApprovedAt?.GetFormatDateTime(),
                 RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
-                PartnerName = updatedRequest.AirlinePartner?.PartnerName,
-                DirectorName = updatedRequest.Director?.FullName,
+                PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,
+                DirectorName = updatedRequest.DirectorId != null ? updatedRequest.Director?.FullName : null,
                 CreatedAt = updatedRequest.CreatedAt ?? DateTime.UtcNow
             };
 
