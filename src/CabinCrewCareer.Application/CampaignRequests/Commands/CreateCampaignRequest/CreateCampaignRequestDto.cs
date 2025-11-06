@@ -1,3 +1,5 @@
+using CabinCrewCareer.Domain.Common;
+
 namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRequest
 {
     public class CreateCampaignRequestDto
@@ -7,5 +9,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
         public string Description { get; set; } = string.Empty;
 
         public int TargetQuantity { get; set; }
+
+        public CampaignType RequestType { get; set; }
     }
 }

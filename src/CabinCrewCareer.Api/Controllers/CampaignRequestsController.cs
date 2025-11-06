@@ -31,8 +31,11 @@ namespace CabinCrewCareer.Api.Controllers
         ///     {
         ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024",
         ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế",
-        ///       "targetQuantity": 50
+        ///       "targetQuantity": 50,
+        ///       "requestType": 1
         ///     }
+        /// 
+        /// RequestType: 1 = Recruitment (Tuyển dụng), 2 = Promotion (Thăng bậc)
         ///         
         /// </remarks> 
         /// <returns>Created campaign request</returns>
@@ -50,7 +53,8 @@ namespace CabinCrewCareer.Api.Controllers
                 var command = new CreateCampaignRequestCommand(
                     request.CampaignName,
                     request.Description,
-                    request.TargetQuantity);
+                    request.TargetQuantity,
+                    request.RequestType);
                     
                 return Ok(await mediator.Send(command));
             }
@@ -146,6 +150,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <param name="sortColumn">Column to sort by (name, createdat, status)</param>
         /// <param name="sortOrder">Sort order (asc or desc)</param>
         /// <param name="status">Filter by status (1=Pending, 2=Approved, 3=Rejected)</param>
+        /// <param name="requestType">Filter by request type (1=Recruitment, 2=Promotion)</param>
         /// <param name="partnerId">Filter by partner ID</param>
         /// <param name="page">Page number (default: 1)</param>
         /// <param name="pageSize">Page size (default: 10)</param>
@@ -162,6 +167,7 @@ namespace CabinCrewCareer.Api.Controllers
             [FromQuery] string? sortColumn,
             [FromQuery] string? sortOrder,
             [FromQuery] int? status,
+            [FromQuery] int? requestType,
             [FromQuery] int? partnerId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
@@ -174,6 +180,7 @@ namespace CabinCrewCareer.Api.Controllers
                     SortColumn = sortColumn,
                     SortOrder = sortOrder,
                     Status = status,
+                    RequestType = requestType,
                     PartnerId = partnerId,
                     Page = page,
                     PageSize = pageSize
