@@ -11,6 +11,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
         public string? SortColumn { get; set; }
         public string? SortOrder { get; set; }
         public int? Status { get; set; }
+        public int? RequestType { get; set; }
         public int? PartnerId { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;

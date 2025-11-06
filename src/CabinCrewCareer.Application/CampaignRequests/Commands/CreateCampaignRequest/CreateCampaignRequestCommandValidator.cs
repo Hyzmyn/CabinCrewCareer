@@ -16,6 +16,9 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
 
             RuleFor(x => x.TargetQuantity)
                 .GreaterThan(0).WithMessage("Target quantity must be greater than 0");
+
+            RuleFor(x => x.RequestType)
+                .IsInEnum().WithMessage("Request type must be valid (1 = Recruitment, 2 = Promotion)");
         }
     }
 }

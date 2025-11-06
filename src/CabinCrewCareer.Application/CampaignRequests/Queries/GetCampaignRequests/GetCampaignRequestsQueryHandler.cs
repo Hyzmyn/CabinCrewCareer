@@ -20,6 +20,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
                 request.SortColumn,
                 request.SortOrder,
                 request.Status,
+                request.RequestType,
                 request.PartnerId,
                 request.Page,
                 request.PageSize);
