@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CabinCrewCareer.Application.CampaignRequests.Common;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
@@ -31,6 +32,18 @@ namespace CabinCrewCareer.Application.Common.Mappings
             CreateMap<City, GetCityResponse>();
 
             CreateMap<Ward, GetWardResponse>();
+            #endregion
+
+            #region CampaignRequest
+            CreateMap<CampaignRequest, GetCampaignRequestResponse>()
+                .ForMember(cr => cr.Status, cr => cr.MapFrom(cr => cr.Status.GetDescription()))
+                .ForMember(cr => cr.PartnerName, cr => cr.MapFrom(cr => cr.PartnerId != null ? cr.AirlinePartner.PartnerName : null))
+                .ForMember(cr => cr.DirectorName, cr => cr.MapFrom(cr => cr.DirectorId != null ? cr.Director.FullName : null))
+                .ForMember(cr => cr.ApprovedAt, cr => cr.MapFrom(cr => cr.ApprovedAt.HasValue ? cr.ApprovedAt.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.RejectedAt, cr => cr.MapFrom(cr => cr.RejectedAt.HasValue ? cr.RejectedAt.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.CreatedAt, cr => cr.MapFrom(cr => cr.CreatedAt ?? DateTime.MinValue));
+
+            CreateMap<PaginatedList<CampaignRequest>, PaginatedList<GetCampaignRequestResponse>>();
             #endregion
         }
     }

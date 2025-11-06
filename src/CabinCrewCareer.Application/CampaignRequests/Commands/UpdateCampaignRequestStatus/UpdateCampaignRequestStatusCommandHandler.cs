@@ -84,8 +84,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 TargetQuantity = updatedRequest.TargetQuantity,
                 Status = updatedRequest.Status.ToString(),
                 RejectReason = updatedRequest.RejectReason,
-                ApprovedAt = updatedRequest.ApprovedAt,
-                RejectedAt = updatedRequest.RejectedAt,
+                ApprovedAt = updatedRequest.ApprovedAt?.GetFormatDateTime(),
+                RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = updatedRequest.AirlinePartner?.PartnerName,
                 DirectorName = updatedRequest.Director?.FullName,
                 CreatedAt = updatedRequest.CreatedAt ?? DateTime.UtcNow
