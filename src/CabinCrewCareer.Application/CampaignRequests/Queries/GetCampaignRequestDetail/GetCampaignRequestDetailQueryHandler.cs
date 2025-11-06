@@ -14,7 +14,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
         IMapper mapper) : IRequestHandler<GetCampaignRequestDetailQuery, Response<GetCampaignRequestResponse>>
     {
         public async Task<Response<GetCampaignRequestResponse>> Handle(
-            GetCampaignRequestDetailQuery request, 
+            GetCampaignRequestDetailQuery request,
             CancellationToken cancellationToken)
         {
             var campaignRequestQuery = await unitOfWork.CampaignRequests
@@ -32,7 +32,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
 
             var mappedRequest = mapper.Map<GetCampaignRequestResponse>(campaignRequest);
 
-            return new Response<GetCampaignRequestResponse>(mappedRequest, "Get campaign request detail successfully");
+            return new Response<GetCampaignRequestResponse>(code: (int)ResponseCode.SUCCESS, data: mappedRequest, message: ResponseCode.SUCCESS.ToString());
         }
     }
 }

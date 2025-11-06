@@ -75,7 +75,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -95,7 +96,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
@@ -183,7 +185,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -219,7 +222,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("RequestId");
 
@@ -368,6 +372,45 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("Document", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EnquiryRequest", b =>
+                {
+                    b.Property<int>("EnquiryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EnquiryId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NewScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("TestSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("EnquiryId");
+
+                    b.HasIndex("TestSessionId")
+                        .IsUnique()
+                        .HasFilter("[TestSessionId] IS NOT NULL");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EnquiryRequest", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Notification", b =>
                 {
                     b.Property<int>("NotificationId")
@@ -477,6 +520,252 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("Round", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
+                {
+                    b.Property<int>("TestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestId"));
+
+                    b.Property<string>("AudioFileURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JoinCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("MaxScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TestName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TestType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("TestId");
+
+                    b.ToTable("Test", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
+                {
+                    b.Property<int>("AnswerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnswerId"));
+
+                    b.Property<string>("EssayAnswer")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SelectedOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TestSessionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AnswerId");
+
+                    b.HasIndex("SelectedOptionId")
+                        .IsUnique()
+                        .HasFilter("[SelectedOptionId] IS NOT NULL");
+
+                    b.HasIndex("TestSessionId");
+
+                    b.ToTable("TestAnswer", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestOption", b =>
+                {
+                    b.Property<int>("OptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OptionId"));
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OptionContent")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OptionId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("TestOption", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestQuestion", b =>
+                {
+                    b.Property<int>("QuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionId"));
+
+                    b.Property<int>("OrderNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QuestionContent")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("QuestionId");
+
+                    b.HasIndex("TestId");
+
+                    b.ToTable("TestQuestion", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestResult", b =>
+                {
+                    b.Property<int>("ResultId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResultId"));
+
+                    b.Property<string>("EnquiryBy")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("EnquiryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EnquiryNote")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("EnquiryRequested")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ExaminedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExaminedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinalScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("TestDate")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("TestSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ResultId");
+
+                    b.HasIndex("EnquiryId")
+                        .IsUnique()
+                        .HasFilter("[EnquiryId] IS NOT NULL");
+
+                    b.HasIndex("TestSessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TestResult", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestSession", b =>
+                {
+                    b.Property<int>("TestSessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestSessionId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("TestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalScore")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TestSessionId");
+
+                    b.HasIndex("TestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TestSession", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -493,7 +782,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -541,7 +831,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -714,6 +1005,20 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EnquiryRequest", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TestSession", "TestSession")
+                        .WithOne("EnquiryRequest")
+                        .HasForeignKey("CabinCrewCareer.Domain.Entities.EnquiryRequest", "TestSessionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", null)
+                        .WithMany("EnquiryRequests")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("TestSession");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Notification", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.NotificationType", "NotificationType")
@@ -739,6 +1044,84 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("CampaignRound");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TestOption", "SelectedOption")
+                        .WithOne("TestAnswer")
+                        .HasForeignKey("CabinCrewCareer.Domain.Entities.TestAnswer", "SelectedOptionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TestSession", "TestSession")
+                        .WithMany("TestAnswers")
+                        .HasForeignKey("TestSessionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("SelectedOption");
+
+                    b.Navigation("TestSession");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestOption", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TestQuestion", "TestQuestion")
+                        .WithMany("TestOptions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("TestQuestion");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestQuestion", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Test", "Test")
+                        .WithMany("TestQuestions")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestResult", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.EnquiryRequest", "EnquiryRequest")
+                        .WithOne("TestResult")
+                        .HasForeignKey("CabinCrewCareer.Domain.Entities.TestResult", "EnquiryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TestSession", "TestSession")
+                        .WithMany("TestResults")
+                        .HasForeignKey("TestSessionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
+                        .WithMany("TestResults")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("EnquiryRequest");
+
+                    b.Navigation("TestSession");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestSession", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Test", "Test")
+                        .WithMany("TestSessions")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
+                        .WithMany("TestSessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Test");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
@@ -829,6 +1212,11 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Wards");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EnquiryRequest", b =>
+                {
+                    b.Navigation("TestResult");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.NotificationType", b =>
                 {
                     b.Navigation("Notifications");
@@ -844,6 +1232,32 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Applications");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
+                {
+                    b.Navigation("TestQuestions");
+
+                    b.Navigation("TestSessions");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestOption", b =>
+                {
+                    b.Navigation("TestAnswer");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestQuestion", b =>
+                {
+                    b.Navigation("TestOptions");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestSession", b =>
+                {
+                    b.Navigation("EnquiryRequest");
+
+                    b.Navigation("TestAnswers");
+
+                    b.Navigation("TestResults");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
                 {
                     b.Navigation("Application");
@@ -856,7 +1270,13 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("EnquiryRequests");
+
                     b.Navigation("Notifications");
+
+                    b.Navigation("TestResults");
+
+                    b.Navigation("TestSessions");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>

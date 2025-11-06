@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Enums;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -21,7 +20,7 @@ namespace CabinCrewCareer.Application.Cities.Queries.GetCities
 
             return new Response<List<GetCityResponse>>(code: (int)ResponseCode.SUCCESS,
                 data: _mapper.Map<List<GetCityResponse>>(cityQuery.ToList()),
-                message: ResponseCode.SUCCESS.GetDescription());
+                message: ResponseCode.SUCCESS.ToString());
         }
     }
 }

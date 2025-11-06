@@ -1,7 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Constants;
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Common;
@@ -48,7 +47,7 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
             var newResult = await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.GetDescription());
+            return new Response<GetUserResponse>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.ToString());
         }
     }
 }

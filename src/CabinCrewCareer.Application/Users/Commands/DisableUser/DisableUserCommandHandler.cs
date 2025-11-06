@@ -1,6 +1,5 @@
 ﻿using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Wrappers;
@@ -32,7 +31,7 @@ namespace CabinCrewCareer.Application.Users.Commands.DisableUser
 
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.DISABLED_SUCCESS, message: ResponseCode.DISABLED_SUCCESS.GetDescription());
+            return new Response<GetUserResponse>(code: (int)ResponseCode.DISABLED_SUCCESS, message: ResponseCode.DISABLED_SUCCESS.ToString());
         }
     }
 }

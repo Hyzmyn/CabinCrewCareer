@@ -1,5 +1,6 @@
 using AutoMapper;
 using CabinCrewCareer.Application.CampaignRequests.Common;
+using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Wrappers;
@@ -12,7 +13,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
         IMapper mapper) : IRequestHandler<GetCampaignRequestsQuery, Response<PaginatedList<GetCampaignRequestResponse>>>
     {
         public async Task<Response<PaginatedList<GetCampaignRequestResponse>>> Handle(
-            GetCampaignRequestsQuery request, 
+            GetCampaignRequestsQuery request,
             CancellationToken cancellationToken)
         {
             var campaignRequests = await unitOfWork.CampaignRequests.PaginatedListAsync(
@@ -27,7 +28,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
 
             var mappedRequests = mapper.Map<PaginatedList<GetCampaignRequestResponse>>(campaignRequests);
 
-            return new Response<PaginatedList<GetCampaignRequestResponse>>(mappedRequests, "Get campaign requests successfully");
+            return new Response<PaginatedList<GetCampaignRequestResponse>>(code: (int)ResponseCode.SUCCESS, data: mappedRequests, message: ResponseCode.SUCCESS.ToString());
         }
     }
 }

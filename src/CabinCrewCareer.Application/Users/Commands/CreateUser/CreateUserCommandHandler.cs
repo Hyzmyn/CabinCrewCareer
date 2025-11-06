@@ -1,7 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Constants;
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.Common.Models.Requests;
@@ -66,7 +65,7 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
 
             await _emailService.SendEmailAsync(mailRequest);
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.GetDescription());
+            return new Response<GetUserResponse>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.ToString());
         }
 
         private static string GenerateRandomString(int length)
