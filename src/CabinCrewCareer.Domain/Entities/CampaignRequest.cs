@@ -15,6 +15,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
+        public CampaignType RequestType { get; set; }
+
         public string RejectReason { get; set; } = string.Empty;
 
         public DateTime? ApprovedAt { get; set; }
