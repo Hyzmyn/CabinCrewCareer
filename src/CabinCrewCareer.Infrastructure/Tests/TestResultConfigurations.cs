@@ -34,11 +34,6 @@ namespace CabinCrewCareer.Infrastructure.Tests
                 .WithMany(u => u.TestResults)
                 .HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-            builder.HasOne(u => u.Examiner)
-                .WithMany(u => u.TestResults)
-                .HasForeignKey(u => u.ExaminerId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
