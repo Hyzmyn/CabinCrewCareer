@@ -1,5 +1,4 @@
 ﻿using CabinCrewCareer.Application.Common.Enums;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
@@ -22,7 +21,7 @@ namespace CabinCrewCareer.Application.Cities.Commands.CreateWard
             await _unitOfWork.Wards.AddAsync(ward);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<string>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.GetDescription());
+            return new Response<string>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.ToString());
         }
     }
 }

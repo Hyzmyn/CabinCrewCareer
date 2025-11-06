@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.Common.Enums;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Users.Common;
@@ -29,7 +28,7 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUsers
                     request.Page,
                     request.PageSize
                 )),
-                message: ResponseCode.SUCCESS.GetDescription());
+                message: ResponseCode.SUCCESS.ToString());
         }
     }
 }

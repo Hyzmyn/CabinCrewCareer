@@ -1,7 +1,6 @@
 ﻿using CabinCrewCareer.Application.Authentication.Common;
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Security;
 using CabinCrewCareer.Domain.Wrappers;
@@ -32,7 +31,7 @@ namespace CabinCrewCareer.Application.Authentication.Queries.Login
             var token = _jwtTokenGenerator.GenerateJwtToken(user);
             var refreshToken = _jwtTokenGenerator.GenerateJwtRefreshToken(user);
 
-            return new Response<AuthenticationResult>(code: (int)ResponseCode.SUCCESS, data: new AuthenticationResult(token, refreshToken), message: ResponseCode.SUCCESS.GetDescription());
+            return new Response<AuthenticationResult>(code: (int)ResponseCode.SUCCESS, data: new AuthenticationResult(token, refreshToken), message: ResponseCode.SUCCESS.ToString());
         }
     }
 }

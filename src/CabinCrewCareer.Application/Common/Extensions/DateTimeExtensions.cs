@@ -4,7 +4,7 @@
     {
         public static string GetFormatDateTime(this DateTime dateTime)
         {
-            return dateTime.AddHours(7).ToString("dd/MM/yyyy H:mm");
+            return dateTime.ToString("dd/MM/yyyy HH:mm");
         }
 
         public static string GetFormatDate(this DateOnly date)

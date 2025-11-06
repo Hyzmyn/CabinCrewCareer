@@ -49,7 +49,7 @@ namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.UPDATED_SUCCESS, message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            return new Response<GetUserResponse>(code: (int)ResponseCode.UPDATED_SUCCESS, message: ResponseCode.UPDATED_SUCCESS.ToString());
         }
     }
 }

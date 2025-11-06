@@ -33,7 +33,7 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Refresh token is invalid")]
         AUTH_ERR_REFRESH_TOKEN = 8,
 
-        [Description("Refresh token is invalid")]
+        [Description("Incorrect Username or Password")]
         INVALID_CREDENTIALS = 9,
 
         [Description("Failed authentication")]
@@ -45,7 +45,7 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Invalid file extension")]
         INVALID_FILE_EXTENSION = 12,
 
-        [Description("Refresh token is invalid")]
+        [Description("Inactive account. Please contact Admin for further information")]
         INACTIVE_USER = 13,
 
         [Description("User not found")]

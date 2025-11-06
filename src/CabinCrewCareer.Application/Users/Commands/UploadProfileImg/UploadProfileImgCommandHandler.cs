@@ -1,6 +1,5 @@
 ﻿using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.Users.Common;
@@ -49,7 +48,7 @@ namespace CabinCrewCareer.Application.Users.Commands.UploadProfileImg
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.UPDATED_SUCCESS, message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            return new Response<GetUserResponse>(code: (int)ResponseCode.UPDATED_SUCCESS, message: ResponseCode.UPDATED_SUCCESS.ToString());
         }
     }
 }
