@@ -18,6 +18,7 @@ namespace CabinCrewCareer.Infrastructure.CampaignRequests
             string? sortColumn,
             string? sortOrder,
             int? status,
+            int? requestType,
             int? partnerId,
             int page,
             int pageSize)
@@ -35,6 +36,11 @@ namespace CabinCrewCareer.Infrastructure.CampaignRequests
             if (status != null)
             {
                 requestsQuery = requestsQuery.Where(cr => cr.Status == (RequestStatus)status);
+            }
+
+            if (requestType != null)
+            {
+                requestsQuery = requestsQuery.Where(cr => cr.RequestType == (CampaignType)requestType);
             }
 
             if (partnerId != null)

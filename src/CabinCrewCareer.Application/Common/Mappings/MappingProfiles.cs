@@ -36,6 +36,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             #region CampaignRequest
             CreateMap<CampaignRequest, GetCampaignRequestResponse>()
+                .ForMember(cr => cr.RequestType, cr => cr.MapFrom(cr => cr.RequestType.GetDescription()))
                 .ForMember(cr => cr.Status, cr => cr.MapFrom(cr => cr.Status.GetDescription()))
                 .ForMember(cr => cr.PartnerName, cr => cr.MapFrom(cr => cr.PartnerId != null ? cr.AirlinePartner.PartnerName : null))
                 .ForMember(cr => cr.DirectorName, cr => cr.MapFrom(cr => cr.DirectorId != null ? cr.Director.FullName : null))

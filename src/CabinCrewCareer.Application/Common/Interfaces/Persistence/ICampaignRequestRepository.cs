@@ -11,6 +11,7 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             string? sortColumn,
             string? sortOrder,
             int? status,
+            int? requestType,
             int? partnerId,
             int page,
             int pageSize);
