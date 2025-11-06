@@ -13,10 +13,12 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
 {
     public class CreateCampaignRequestCommandHandler(
         IUnitOfWork unitOfWork,
-        ICurrentUserService currentUserService) : IRequestHandler<CreateCampaignRequestCommand, Response<GetCampaignRequestResponse>>
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateCampaignRequestCommand, Response<GetCampaignRequestResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
         public async Task<Response<GetCampaignRequestResponse>> Handle(CreateCampaignRequestCommand request, CancellationToken cancellationToken)
         {
@@ -84,13 +86,13 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 RejectedAt = createdRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = createdRequest.AirlinePartner?.PartnerName,
                 DirectorName = createdRequest.Director?.FullName,
-                CreatedAt = createdRequest.CreatedAt ?? DateTime.UtcNow
+                CreatedAt = createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow
             };
 
             return new Response<GetCampaignRequestResponse>(
                 data: response,
                 code: (int)ResponseCode.CREATED_SUCCESS,
-                message: ResponseCode.CREATED_SUCCESS.GetDescription());
+                message: ResponseCode.CREATED_SUCCESS.ToString());
         }
     }
 }

@@ -12,10 +12,12 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
 {
     public class UpdateCampaignRequestStatusCommandHandler(
         IUnitOfWork unitOfWork,
-        ICurrentUserService currentUserService) : IRequestHandler<UpdateCampaignRequestStatusCommand, Response<GetCampaignRequestResponse>>
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTimeProvider) : IRequestHandler<UpdateCampaignRequestStatusCommand, Response<GetCampaignRequestResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
         public async Task<Response<GetCampaignRequestResponse>> Handle(UpdateCampaignRequestStatusCommand request, CancellationToken cancellationToken)
         {
@@ -44,7 +46,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
             var campaignRequest = await _unitOfWork.CampaignRequests.GetByIdAsync(request.RequestId);
             if (campaignRequest == null)
             {
-                errorMessages.Add("Campaign request not found");
+                errorMessages.Add(ResponseCode.CAMPAIGN_REQUEST_NOT_FOUND.GetDescription());
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
@@ -61,12 +63,12 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
 
             if (request.Status == (int)RequestStatus.Approved)
             {
-                campaignRequest.ApprovedAt = DateTime.UtcNow;
+                campaignRequest.ApprovedAt = _dateTimeProvider.UtcNow;
                 campaignRequest.RejectReason = string.Empty;
             }
             else if (request.Status == (int)RequestStatus.Rejected)
             {
-                campaignRequest.RejectedAt = DateTime.UtcNow;
+                campaignRequest.RejectedAt = _dateTimeProvider.UtcNow;
                 campaignRequest.RejectReason = request.RejectReason ?? string.Empty;
             }
 
@@ -94,7 +96,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
             return new Response<GetCampaignRequestResponse>(
                 data: response,
                 code: (int)ResponseCode.UPDATED_SUCCESS,
-                message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+                message: ResponseCode.UPDATED_SUCCESS.ToString());
         }
     }
 }
