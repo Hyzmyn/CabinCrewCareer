@@ -32,7 +32,6 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPost("{id}/wards")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> LoginAsync(int id, string wardName)
