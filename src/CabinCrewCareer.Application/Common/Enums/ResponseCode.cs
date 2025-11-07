@@ -54,6 +54,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Campaign request not found")]
         CAMPAIGN_REQUEST_NOT_FOUND = 15,
 
+        [Description("Ward not found")]
+        WARD_NOT_FOUND = 16,
+
         #endregion
     }
 }

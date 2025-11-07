@@ -34,8 +34,8 @@ namespace CabinCrewCareer.Api.Startups
                         },
                         TermsOfService = new Uri("https://example.com/terms"),
                     });
-                options.AddServer(new OpenApiServer { Url = "https://localhost:7107", Description = "Development Server" });
-                options.AddServer(new OpenApiServer { Url = "https://cabincrewcareer.azurewebsites.net", Description = "Production Server" });
+                //options.AddServer(new OpenApiServer { Url = "https://localhost:7107", Description = "Development Server" });
+                //options.AddServer(new OpenApiServer { Url = "https://cabincrewcareer.azurewebsites.net", Description = "Production Server" });
             }
         }
     }

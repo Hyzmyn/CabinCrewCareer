@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using CabinCrewCareer.Application.Cities.Commands.CreateWard;
+using CabinCrewCareer.Application.Cities.Commands.UpdateWard;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Cities.Queries.GetCities;
 using CabinCrewCareer.Application.Cities.Queries.GetWardsByCityId;
@@ -32,7 +33,6 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPost("{id}/wards")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> LoginAsync(int id, string wardName)
@@ -40,6 +40,39 @@ namespace CabinCrewCareer.Api.Controllers
             try
             {
                 return Ok(await mediator.Send(new CreateWardCommand(wardName, id)));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+        }
+        #endregion
+
+        #region Update Ward
+        /// <summary>
+        /// Update ward name
+        /// </summary>
+        /// <param name="id">Id of a specific ward</param>
+        /// <param name="wardName">Name of the ward</param>
+        /// <returns>Successful code</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthenticated</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut("wards/{id}")]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateAsync(int id, string wardName)
+        {
+            try
+            {
+                return Ok(await mediator.Send(new UpdateWardCommand(id, wardName)));
             }
             catch (ValidationException e)
             {
