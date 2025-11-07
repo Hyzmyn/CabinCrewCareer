@@ -1,9 +1,4 @@
-﻿using Asp.Versioning.ApiExplorer;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-
-namespace CabinCrewCareer.Api.Startups
+﻿namespace CabinCrewCareer.Api.Startups
 {
     public class ConfigureSwaggerOptions(
         IApiVersionDescriptionProvider provider) : IConfigureOptions<SwaggerGenOptions>
@@ -35,7 +30,7 @@ namespace CabinCrewCareer.Api.Startups
                         TermsOfService = new Uri("https://example.com/terms"),
                     });
                 options.AddServer(new OpenApiServer { Url = "https://localhost:7107", Description = "Development Server" });
-                options.AddServer(new OpenApiServer { Url = "https://cabincrewcareer.azurewebsites.net/", Description = "Production Server" });
+                options.AddServer(new OpenApiServer { Url = "https://cabincrewcareer.azurewebsites.net", Description = "Production Server" });
             }
         }
     }
