@@ -14,7 +14,7 @@ namespace CabinCrewCareer.Application.Users.Common
 
         public string FullName { get; set; } = string.Empty;
 
-        public DateOnly DateOfBirth { get; set; }
+        public string DateOfBirth { get; set; } = string.Empty;
 
         public Gender Gender { get; set; }
 
