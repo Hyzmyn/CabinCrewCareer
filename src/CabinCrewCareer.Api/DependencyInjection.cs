@@ -1,5 +1,8 @@
 ﻿using Asp.Versioning;
+using CabinCrewCareer.Api.Startups;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
 namespace CabinCrewCareer.Api
@@ -9,11 +12,19 @@ namespace CabinCrewCareer.Api
         public static IServiceCollection AddPresentation(this IServiceCollection services)
         {
             services
+                .AddSwaggerOptions()
                 .AddEndpointsApiExplorer()
                 .AddSwagger()
                 .UseCors()
                 .AddVersoning()
                 .AddControllers();
+
+            return services;
+        }
+
+        private static IServiceCollection AddSwaggerOptions(this IServiceCollection services)
+        {
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
             return services;
         }
@@ -26,23 +37,23 @@ namespace CabinCrewCareer.Api
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "Cabin Crew Career API",
-                    Description = "A .NET Core Web API that allows you to work with recruitment and promotion process.",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "GFA25SE113",
-                        Email = "example@email.com",
-                        Url = new Uri("https://github.com/thanhnhan151/CabinCrewCareer"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "MIT License",
-                        Url = new Uri("https://opensource.org/licenses/MIT")
-                    }
-                });
+                //options.SwaggerDoc("v1", new OpenApiInfo
+                //{
+                //    Version = "v1",
+                //    Title = "Cabin Crew Career API",
+                //    Description = "A .NET Core Web API that allows you to work with recruitment and promotion process.",
+                //    Contact = new OpenApiContact
+                //    {
+                //        Name = "GFA25SE113",
+                //        Email = "example@email.com",
+                //        Url = new Uri("https://github.com/thanhnhan151/CabinCrewCareer"),
+                //    },
+                //    License = new OpenApiLicense
+                //    {
+                //        Name = "MIT License",
+                //        Url = new Uri("https://opensource.org/licenses/MIT")
+                //    }
+                //});
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
