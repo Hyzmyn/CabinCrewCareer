@@ -1,8 +1,8 @@
 ﻿using CabinCrewCareer.Application.Common.Constants;
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
-using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
@@ -11,11 +11,11 @@ using MediatR;
 namespace CabinCrewCareer.Application.Authentication.Commands.Registration
 {
     public class RegistrationCommandHandler(
-        IUnitOfWork unitOfWork) : IRequestHandler<RegistrationCommand, Response<GetUserResponse>>
+        IUnitOfWork unitOfWork) : IRequestHandler<RegistrationCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<Response<GetUserResponse>> Handle(RegistrationCommand request, CancellationToken cancellationToken)
+        public async Task<Response<string>> Handle(RegistrationCommand request, CancellationToken cancellationToken)
         {
             List<string> errorMessages = [];
 
@@ -47,7 +47,7 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
             var newResult = await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.CREATED_SUCCESS, message: ResponseCode.CREATED_SUCCESS.ToString());
+            return new Response<string>(code: (int)ResponseCode.CREATED_SUCCESS, data: ResponseCode.CREATED_SUCCESS.ToString(), message: ResponseCode.CREATED_SUCCESS.GetDescription());
         }
     }
 }

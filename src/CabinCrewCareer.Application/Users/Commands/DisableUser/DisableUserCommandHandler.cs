@@ -1,18 +1,18 @@
 ﻿using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
-using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Users.Commands.DisableUser
 {
     public class DisableUserCommandHandler(
-        IUnitOfWork unitOfWork) : IRequestHandler<DisableUserCommand, Response<GetUserResponse>>
+        IUnitOfWork unitOfWork) : IRequestHandler<DisableUserCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<Response<GetUserResponse>> Handle(DisableUserCommand request, CancellationToken cancellationToken)
+        public async Task<Response<string>> Handle(DisableUserCommand request, CancellationToken cancellationToken)
         {
             var userQuery = await _unitOfWork.Users.GetAsync(expression: u => u.UserId == request.UserId, disableTracking: true);
 
@@ -31,7 +31,7 @@ namespace CabinCrewCareer.Application.Users.Commands.DisableUser
 
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.DISABLED_SUCCESS, message: ResponseCode.DISABLED_SUCCESS.ToString());
+            return new Response<string>(code: (int)ResponseCode.DISABLED_SUCCESS, data: ResponseCode.DISABLED_SUCCESS.ToString(), message: ResponseCode.DISABLED_SUCCESS.GetDescription());
         }
     }
 }

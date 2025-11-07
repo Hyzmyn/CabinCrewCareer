@@ -1,4 +1,6 @@
-﻿namespace CabinCrewCareer.Api.Startups
+﻿using Swashbuckle.AspNetCore.SwaggerUI;
+
+namespace CabinCrewCareer.Api.Startups
 {
     public static class SwaggerConfiguration
     {
@@ -10,6 +12,9 @@
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "CCC API");
+                    c.DefaultModelExpandDepth(2);
+                    c.DocExpansion(DocExpansion.None);
+                    c.DisplayRequestDuration();
                 }); ;
             }
 

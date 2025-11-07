@@ -6,5 +6,5 @@ namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
 {
     public record UpdateUserCommand(
        int Id,
-       UpdateUserRequest UpdateUserRequest) : IRequest<Response<GetUserResponse>>;
+       UpdateUserRequest UpdateUserRequest) : IRequest<Response<string>>;
 }

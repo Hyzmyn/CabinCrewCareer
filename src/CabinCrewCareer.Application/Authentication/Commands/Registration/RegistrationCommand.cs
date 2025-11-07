@@ -1,5 +1,4 @@
-﻿using CabinCrewCareer.Application.Users.Common;
-using CabinCrewCareer.Domain.Wrappers;
+﻿using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Authentication.Commands.Registration
@@ -12,5 +11,5 @@ namespace CabinCrewCareer.Application.Authentication.Commands.Registration
     int Gender,
     DateOnly DateOfBirth,
     string PhoneNumber,
-    string Email) : IRequest<Response<GetUserResponse>>;
+    string Email) : IRequest<Response<string>>;
 }

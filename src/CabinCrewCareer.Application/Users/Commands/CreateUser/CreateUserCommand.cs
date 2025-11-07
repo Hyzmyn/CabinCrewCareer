@@ -1,5 +1,4 @@
-﻿using CabinCrewCareer.Application.Users.Common;
-using CabinCrewCareer.Domain.Wrappers;
+﻿using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Users.Commands.CreateUser
@@ -10,5 +9,5 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
     string PhoneNumber,
     string Email,
     DateOnly DateOfBirth,
-    int RoleId) : IRequest<Response<GetUserResponse>>;
+    int RoleId) : IRequest<Response<string>>;
 }

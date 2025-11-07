@@ -2,18 +2,17 @@
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
-using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
 {
     public class UpdateUserCommandHandler(
-        IUnitOfWork unitOfWork) : IRequestHandler<UpdateUserCommand, Response<GetUserResponse>>
+        IUnitOfWork unitOfWork) : IRequestHandler<UpdateUserCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<Response<GetUserResponse>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        public async Task<Response<string>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             List<string> errorMessages = [];
 
@@ -49,7 +48,7 @@ namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<GetUserResponse>(code: (int)ResponseCode.UPDATED_SUCCESS, message: ResponseCode.UPDATED_SUCCESS.ToString());
+            return new Response<string>(code: (int)ResponseCode.UPDATED_SUCCESS, data: ResponseCode.UPDATED_SUCCESS.ToString(), message: ResponseCode.UPDATED_SUCCESS.GetDescription());
         }
     }
 }

@@ -29,7 +29,19 @@ namespace CabinCrewCareer.Api
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "CabinCrewCareer API"
+                    Title = "Cabin Crew Career API",
+                    Description = "A .NET Core Web API that allows you to work with recruitment and promotion process.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "GFA25SE113",
+                        Email = "example@email.com",
+                        Url = new Uri("https://github.com/thanhnhan151/CabinCrewCareer"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT License",
+                        Url = new Uri("https://opensource.org/licenses/MIT")
+                    }
                 });
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
