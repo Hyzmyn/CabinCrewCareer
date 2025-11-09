@@ -1,5 +1,6 @@
 ﻿namespace CabinCrewCareer.Application.Common.Interfaces.Persistence.Base
 {
+    using CabinCrewCareer.Application.Common.Interfaces.Persistence;
     public interface IUnitOfWork
     {
         IUserRepository Users { get; }
@@ -11,6 +12,8 @@
         IWardRepository Wards { get; }
 
         ICampaignRequestRepository CampaignRequests { get; }
+
+        ICampaignRepository Campaigns { get; }
 
         Task CompleteAsync();
     }

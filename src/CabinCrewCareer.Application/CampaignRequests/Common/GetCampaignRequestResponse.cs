@@ -24,6 +24,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string? DirectorName { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+    public string? CreatedAt { get; set; }
     }
 }

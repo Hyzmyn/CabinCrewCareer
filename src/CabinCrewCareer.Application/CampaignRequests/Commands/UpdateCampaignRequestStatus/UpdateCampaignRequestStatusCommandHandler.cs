@@ -62,10 +62,24 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
             campaignRequest.Status = (RequestStatus)request.Status;
             campaignRequest.DirectorId = int.Parse(currentUserId);
 
+
             if (request.Status == (int)RequestStatus.Approved)
             {
                 campaignRequest.ApprovedAt = _dateTimeProvider.UtcNow;
                 campaignRequest.RejectReason = string.Empty;
+
+                // Tạo campaign mới với trạng thái draft
+                var newCampaign = new CabinCrewCareer.Domain.Entities.Campaign
+                {
+                    CampaignName = campaignRequest.CampaignName,
+                    Description = campaignRequest.Description,
+                    TargetQuantity = campaignRequest.TargetQuantity,
+                    CampaignType = campaignRequest.RequestType,
+                    CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Draft,
+                    RequestId = campaignRequest.RequestId,
+                    IsActive = true
+                };
+                await _unitOfWork.Campaigns.AddAsync(newCampaign);
             }
             else if (request.Status == (int)RequestStatus.Rejected)
             {
@@ -100,7 +114,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,
                 DirectorName = updatedRequest.DirectorId != null ? updatedRequest.Director?.FullName : null,
-                CreatedAt = updatedRequest.CreatedAt ?? DateTime.UtcNow
+                CreatedAt = (updatedRequest.CreatedAt ?? DateTime.UtcNow).GetFormatDateTime()
             };
 
             return new Response<GetCampaignRequestResponse>(
