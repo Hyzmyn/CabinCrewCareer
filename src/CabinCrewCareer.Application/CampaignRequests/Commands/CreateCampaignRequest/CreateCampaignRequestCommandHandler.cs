@@ -95,7 +95,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 RejectedAt = createdRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = createdRequest.AirlinePartner?.PartnerName,
                 DirectorName = createdRequest.Director?.FullName,
-                CreatedAt = createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow
+                CreatedAt = (createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow).GetFormatDateTime()
             };
 
             return new Response<GetCampaignRequestResponse>(

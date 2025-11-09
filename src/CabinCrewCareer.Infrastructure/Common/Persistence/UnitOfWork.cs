@@ -23,6 +23,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public ICampaignRequestRepository CampaignRequests { get; private set; }
 
+        public ICampaignRepository Campaigns { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -40,6 +42,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Wards = new WardRepository(_dbContext, _logger);
 
             CampaignRequests = new CampaignRequestRepository(_dbContext, _logger);
+
+            Campaigns = new CabinCrewCareer.Infrastructure.Campaigns.CampaignRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

@@ -1,0 +1,30 @@
+using System;
+using System.Collections.Generic;
+
+namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
+{
+    public class GetCampaignDetailDto
+    {
+        public int CampaignId { get; set; }
+        public string CampaignName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public int TargetQuantity { get; set; }
+        public string CampaignType { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    public string? StartDate { get; set; }
+    public string? EndDate { get; set; }
+        public List<RoundDto> Rounds { get; set; } = new();
+    }
+
+    public class RoundDto
+    {
+        public int CampaignRoundId { get; set; }
+        public string RoundName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public int TargetQuantity { get; set; }
+        public int ActualQuantiy { get; set; }
+        public string Status { get; set; } = string.Empty;
+    public string? StartDate { get; set; }
+    public string? EndDate { get; set; }
+    }
+}
