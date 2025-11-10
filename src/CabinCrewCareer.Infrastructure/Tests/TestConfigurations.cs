@@ -13,11 +13,11 @@ namespace CabinCrewCareer.Infrastructure.Tests
             builder.HasKey(n => n.TestId);
 
             builder.Property(n => n.TestName)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsRequired();
 
             builder.Property(n => n.Purpose)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsRequired();
 
             builder.Property(n => n.AudioFileURL)

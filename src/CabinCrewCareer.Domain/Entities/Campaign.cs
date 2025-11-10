@@ -12,6 +12,10 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string Description { get; set; } = string.Empty;
 
+        public string JobDescription { get; set; } = string.Empty;
+
+        public string JobRequirement { get; set; } = string.Empty;
+
         public int TargetQuantity { get; set; }
 
         public int ActualQuantiy { get; set; }
@@ -21,6 +25,8 @@ namespace CabinCrewCareer.Domain.Entities
         public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
+
+        public string RejectedReason { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
 

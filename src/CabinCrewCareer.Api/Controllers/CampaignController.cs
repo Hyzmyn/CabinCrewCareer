@@ -1,5 +1,4 @@
 using Asp.Versioning;
-using CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignFields;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -46,7 +45,7 @@ namespace CabinCrewCareer.Api.Controllers
             }
         }
 
-        [HttpPut("{id}/CampaignRound")]
+        [HttpPut("{id}/campaign-rounds")]
         [ProducesResponseType(typeof(Response<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAndCreateRoundAsync(int id, [FromBody] CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound.UpdateCampaignAndCreateRoundDto dto)

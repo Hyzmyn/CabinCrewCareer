@@ -8,6 +8,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
     public record CreateCampaignRequestCommand(
         string CampaignName,
         string Description,
+        string JobDescription,
+        string JobRequirement,
         int TargetQuantity,
         CampaignType RequestType) : IRequest<Response<GetCampaignRequestResponse>>;
 }

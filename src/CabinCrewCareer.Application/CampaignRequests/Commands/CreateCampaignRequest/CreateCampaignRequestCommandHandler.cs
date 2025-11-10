@@ -7,8 +7,8 @@ using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
-using Microsoft.EntityFrameworkCore;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRequest
 {
@@ -56,6 +56,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
             {
                 CampaignName = request.CampaignName,
                 Description = request.Description,
+                JobDescription = request.JobDescription,
+                JobRequirement = request.JobRequirement,
                 TargetQuantity = request.TargetQuantity,
                 RequestType = request.RequestType,
                 Status = RequestStatus.Pending,
@@ -87,6 +89,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 RequestId = createdRequest.RequestId,
                 CampaignName = createdRequest.CampaignName,
                 Description = createdRequest.Description,
+                JobDescription = createdRequest.JobDescription,
+                JobRequirement = createdRequest.JobRequirement,
                 TargetQuantity = createdRequest.TargetQuantity,
                 RequestType = createdRequest.RequestType.ToString(),
                 Status = createdRequest.Status.ToString(),

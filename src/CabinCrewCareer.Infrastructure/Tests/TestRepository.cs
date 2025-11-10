@@ -3,7 +3,6 @@ using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Infrastructure.Common.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
