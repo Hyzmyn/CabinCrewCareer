@@ -15,6 +15,8 @@
 
         ICampaignRepository Campaigns { get; }
 
+        ITestRepository Tests { get; }
+
         Task CompleteAsync();
     }
 }
