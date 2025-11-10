@@ -2,6 +2,7 @@ using CabinCrewCareer.Application.Tests.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
 {
@@ -10,5 +11,5 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
         string Purpose,
         TestType TestType,
         int MaxScore,
-        string? AudioFileURL) : IRequest<Response<GetTestResponse>>;
+        IFormFile? AudioFile) : IRequest<Response<GetTestResponse>>;
 }

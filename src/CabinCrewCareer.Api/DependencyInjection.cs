@@ -37,6 +37,9 @@ namespace CabinCrewCareer.Api
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
+                // Add file upload support
+                options.OperationFilter<FileUploadOperationFilter>();
+
                 //options.SwaggerDoc("v1", new OpenApiInfo
                 //{
                 //    Version = "v1",

@@ -16,11 +16,13 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
     public class CreateTestCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateTestCommand, Response<GetTestResponse>>
+        IDateTimeProvider dateTimeProvider,
+        IFirebaseStorageService firebaseStorageService) : IRequestHandler<CreateTestCommand, Response<GetTestResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
         private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IFirebaseStorageService _firebaseStorageService = firebaseStorageService;
         private const string JoinCodeCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Loại bỏ các ký tự dễ nhầm lẫn
 
         public async Task<Response<GetTestResponse>> Handle(CreateTestCommand request, CancellationToken cancellationToken)
@@ -62,10 +64,16 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
             // Generate unique join code
             string joinCode = await GenerateUniqueJoinCode(cancellationToken);
 
-            // Xử lý AudioFileURL theo TestType
-            string? audioFileUrl = request.TestType == TestType.English 
-                ? request.AudioFileURL 
-                : null;
+            // Upload audio file to Firebase if provided
+            string? audioFileUrl = null;
+            if (request.TestType == TestType.English && request.AudioFile != null)
+            {
+                using var stream = request.AudioFile.OpenReadStream();
+                audioFileUrl = await _firebaseStorageService.UploadAudioFileAsync(
+                    stream,
+                    request.AudioFile.FileName,
+                    request.AudioFile.ContentType);
+            }
 
             // Create test
             var test = new Test

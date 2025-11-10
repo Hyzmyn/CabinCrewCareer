@@ -4,6 +4,7 @@ using CabinCrewCareer.Application.Tests.Common;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Wrappers;
+using CabinCrewCareer.Api.Models;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,52 +22,47 @@ namespace CabinCrewCareer.Api.Controllers
     {
         #region Create Test
         /// <summary>
-        /// Examiner creates a new test
+        /// Examiner creates a new test with audio file upload to Firebase
         /// </summary>
-        /// <param name="request">Test creation request</param>
+        /// <param name="request">Test creation request with audio file</param>
         /// <remarks>
-        /// Sample request for English test:
+        /// **Upload audio file for test (multipart/form-data)**
         /// 
-        ///     {
-        ///       "testName": "English Listening Test - Level A",
-        ///       "purpose": "Test listening comprehension for cabin crew candidates",
-        ///       "testType": 1,
-        ///       "maxScore": 100,
-        ///       "audioFileURL": "https://example.com/audio/test-listening-a.mp3"
-        ///     }
-        ///     
-        /// Sample request for Practical test:
+        /// TestType: 
+        /// - 1 = English (requires audio file)
+        /// - 2 = Practical (audio file optional)
         /// 
-        ///     {
-        ///       "testName": "Practical Skills Assessment",
-        ///       "purpose": "Evaluate practical cabin crew skills",
-        ///       "testType": 2,
-        ///       "maxScore": 100,
-        ///       "audioFileURL": null
-        ///     }
-        ///     
-        /// TestType: 1 = English (requires AudioFileURL), 2 = Practical (AudioFileURL optional)
+        /// Audio file requirements:
+        /// - Format: .mp3 or .wav
+        /// - Max size: 50 MB
+        /// - Will be uploaded to Firebase Storage
         /// 
-        /// Note: Only users with Examiner role can create tests.
-        /// The system will automatically generate a unique 10-character join code.
+        /// Note: Only Examiner role can create tests.
+        /// System will auto-generate unique 10-character join code.
         ///         
         /// </remarks> 
-        /// <returns>Created test information with join code</returns>
+        /// <returns>Created test with Firebase Storage URL</returns>
         /// <response code="200">Ok - Test created successfully</response>
-        /// <response code="400">Bad Request - Validation errors or invalid data</response>
-        /// <response code="401">Unauthorized - User not authenticated</response>
-        /// <response code="403">Forbidden - User is not an Examiner</response>
+        /// <response code="400">Bad Request - Validation errors</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden - Not an Examiner</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPost]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(Response<GetTestResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> CreateTestAsync([FromBody] CreateTestCommand request)
+        public async Task<IActionResult> CreateTestAsync([FromForm] CreateTestRequest request)
         {
             try
             {
-                return Ok(await mediator.Send(request));
+                var command = new CreateTestCommand(
+                    request.TestName,
+                    request.Purpose,
+                    (CabinCrewCareer.Domain.Common.TestType)request.TestType,
+                    request.MaxScore,
+                    request.AudioFile);
+                    
+                return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)
             {
