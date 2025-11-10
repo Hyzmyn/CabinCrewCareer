@@ -46,7 +46,7 @@ namespace CabinCrewCareer.Domain.Entities
         public virtual ICollection<CampaignRequest> CampaignRequests { get; set; } = [];
         public virtual ICollection<Campaign> Campaigns { get; set; } = [];
         public virtual ICollection<EnquiryRequest> EnquiryRequests { get; set; } = [];
-        public virtual ICollection<TestResult> TestResults { get; set; } = [];
+        //public virtual ICollection<TestResult> TestResults { get; set; } = [];
         public virtual ICollection<TestSession> TestSessions { get; set; } = [];
     }
 }

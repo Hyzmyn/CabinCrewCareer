@@ -8,6 +8,10 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
 
         public string Description { get; set; } = string.Empty;
 
+        public string JobDescription { get; set; } = string.Empty;
+
+        public string JobRequirement { get; set; } = string.Empty;
+
         public int TargetQuantity { get; set; }
 
         public CampaignType RequestType { get; set; }

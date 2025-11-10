@@ -8,5 +8,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
         int RequestId,
         string CampaignName,
         string Description,
+        string JobDescription,
+        string JobRequirement,
         int TargetQuantity) : IRequest<Response<GetCampaignRequestResponse>>;
 }

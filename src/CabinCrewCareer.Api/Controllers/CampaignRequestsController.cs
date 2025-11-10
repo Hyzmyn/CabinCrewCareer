@@ -32,6 +32,8 @@ namespace CabinCrewCareer.Api.Controllers
         ///     {
         ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024",
         ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế",
+        ///       "jobDescription": "",
+        ///       "jobRequirement": "",
         ///       "targetQuantity": 50,
         ///       "requestType": 1
         ///     }
@@ -54,9 +56,11 @@ namespace CabinCrewCareer.Api.Controllers
                 var command = new CreateCampaignRequestCommand(
                     request.CampaignName,
                     request.Description,
+                    request.JobDescription,
+                    request.JobRequirement,
                     request.TargetQuantity,
                     request.RequestType);
-                    
+
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)
@@ -119,7 +123,7 @@ namespace CabinCrewCareer.Api.Controllers
                     id,
                     request.Status,
                     request.RejectReason);
-                    
+
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)
@@ -250,6 +254,8 @@ namespace CabinCrewCareer.Api.Controllers
         ///     {
         ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024 - Cập nhật",
         ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
+        ///       "JobDescription": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
+        ///       "jobRequirement": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
         ///       "targetQuantity": 50
         ///     }
         ///         
@@ -260,10 +266,10 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="401">Unauthorized</response>
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
-    [HttpPut("{id}/resubmit")]
-    [ProducesResponseType(typeof(Response<GetCampaignRequestResponse>), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> UpdateRejectedRequestAsync(int id, [FromBody] UpdateRejectedCampaignRequestDto request)
+        [HttpPut("{id}/resubmit")]
+        [ProducesResponseType(typeof(Response<GetCampaignRequestResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateRejectedRequestAsync(int id, [FromBody] UpdateRejectedCampaignRequestDto request)
         {
             try
             {
@@ -271,8 +277,10 @@ namespace CabinCrewCareer.Api.Controllers
                     id,
                     request.CampaignName,
                     request.Description,
+                    request.JobDescription,
+                    request.JobRequirement,
                     request.TargetQuantity);
-                    
+
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)

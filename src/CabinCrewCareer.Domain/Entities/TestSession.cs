@@ -25,6 +25,6 @@
 
         // Navigation Properties
         public virtual ICollection<TestAnswer> TestAnswers { get; set; } = [];
-        public virtual ICollection<TestResult> TestResults { get; set; } = [];
+        //public virtual ICollection<TestResult> TestResults { get; set; } = [];
     }
 }

@@ -56,7 +56,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<TestAnswer> TestAnswers { get; set; }
 
-        public DbSet<TestResult> TestResults { get; set; }
+        //public DbSet<TestResult> TestResults { get; set; }
 
         public DbSet<EnquiryRequest> EnquiryRequests { get; set; }
 

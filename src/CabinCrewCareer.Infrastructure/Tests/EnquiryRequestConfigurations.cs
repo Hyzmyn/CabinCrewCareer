@@ -13,13 +13,13 @@ namespace CabinCrewCareer.Infrastructure.Tests
             builder.HasKey(n => n.EnquiryId);
 
             builder.Property(n => n.Reason)
-                .HasMaxLength(50)
+                .HasMaxLength(250)
                 .IsRequired();
 
-            builder.HasOne(u => u.TestResult)
-                .WithOne(u => u.EnquiryRequest)
-                .HasForeignKey<TestResult>(u => u.EnquiryId)
-                .OnDelete(DeleteBehavior.SetNull);
+            //builder.HasOne(u => u.TestResult)
+            //    .WithOne(u => u.EnquiryRequest)
+            //    .HasForeignKey<TestResult>(u => u.EnquiryId)
+            //    .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

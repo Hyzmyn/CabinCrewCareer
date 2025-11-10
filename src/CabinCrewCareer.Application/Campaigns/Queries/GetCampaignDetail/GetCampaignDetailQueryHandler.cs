@@ -27,6 +27,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 CampaignId = campaign.CampaignId,
                 CampaignName = campaign.CampaignName,
                 Description = campaign.Description,
+                JobDescription = campaign.JobDescription,
+                JobRequirement = campaign.JobRequirement,
                 TargetQuantity = campaign.TargetQuantity,
                 CampaignType = campaign.CampaignType.ToString(),
                 Status = campaign.CampaignStatus.ToString(),

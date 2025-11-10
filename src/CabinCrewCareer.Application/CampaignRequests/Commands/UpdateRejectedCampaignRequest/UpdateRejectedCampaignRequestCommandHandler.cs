@@ -72,6 +72,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
             // Update campaign request
             campaignRequest.CampaignName = request.CampaignName;
             campaignRequest.Description = request.Description;
+            campaignRequest.JobDescription = request.JobDescription;
+            campaignRequest.JobRequirement = request.JobRequirement;
             campaignRequest.TargetQuantity = request.TargetQuantity;
             campaignRequest.Status = RequestStatus.Pending;
             campaignRequest.RejectReason = string.Empty;
@@ -101,6 +103,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
                 RequestId = updatedRequest.RequestId,
                 CampaignName = updatedRequest.CampaignName,
                 Description = updatedRequest.Description,
+                JobDescription = updatedRequest.JobDescription,
+                JobRequirement = updatedRequest.JobRequirement,
                 TargetQuantity = updatedRequest.TargetQuantity,
                 RequestType = updatedRequest.RequestType.ToString(),
                 Status = updatedRequest.Status.ToString(),

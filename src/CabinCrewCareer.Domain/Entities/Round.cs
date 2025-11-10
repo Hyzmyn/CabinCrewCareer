@@ -1,10 +1,14 @@
-﻿namespace CabinCrewCareer.Domain.Entities
+﻿using CabinCrewCareer.Domain.Common;
+
+namespace CabinCrewCareer.Domain.Entities
 {
     public class Round
     {
         public int RoundId { get; set; }
 
         public string Notes { get; set; } = string.Empty;
+
+        public RoundType RoundType { get; set; }
 
         public DateTime? StartDate { get; set; }
 

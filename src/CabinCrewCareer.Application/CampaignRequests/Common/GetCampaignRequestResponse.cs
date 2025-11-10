@@ -8,6 +8,10 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string Description { get; set; } = string.Empty;
 
+        public string JobDescription { get; set; } = string.Empty;
+
+        public string JobRequirement { get; set; } = string.Empty;
+
         public int TargetQuantity { get; set; }
 
         public string RequestType { get; set; } = string.Empty;
@@ -24,6 +28,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string? DirectorName { get; set; }
 
-    public string? CreatedAt { get; set; }
+        public string? CreatedAt { get; set; }
     }
 }
