@@ -36,6 +36,8 @@ namespace CabinCrewCareer.Infrastructure
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IUploadFileService, UploadFileService>();
             services.AddScoped<IEmailService, EmailService>();
+            // Use Cloudinary instead of Firebase Storage (free tier)
+            services.AddScoped<IFirebaseStorageService, CloudinaryStorageService>();
 
             return services;
         }
