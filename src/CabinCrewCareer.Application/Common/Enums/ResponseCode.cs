@@ -57,6 +57,15 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Ward not found")]
         WARD_NOT_FOUND = 16,
 
+        [Description("Unauthorized. Only Examiner can perform this action")]
+        UNAUTHORIZED_EXAMINER_ONLY = 17,
+
+        [Description("Test not found")]
+        TEST_NOT_FOUND = 18,
+
+        [Description("Duplicate join code. Please try again")]
+        DUPLICATE_JOIN_CODE = 19,
+
         #endregion
     }
 }
