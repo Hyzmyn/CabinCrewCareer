@@ -21,7 +21,12 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
             if (campaign == null)
             {
-                return new Response<bool>(false, "Campaign not found", 404);
+                return new Response<bool>
+                {
+                    Code = 404,
+                    Message = "Campaign not found",
+                    Data = false
+                };
             }
             // Lấy SeniorId từ token
             var currentUserId = _currentUserService.CurrentPrincipal;
@@ -40,34 +45,67 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             {
 
                 int campaignTarget = campaign.TargetQuantity;
-                bool needAutoSplit = request.Rounds.Any(r => r.TargetQuantity <= 0);
                 var rounds = request.Rounds;
 
-                if (needAutoSplit)
+
+                // Require targetQuantity for all rounds
+                if (rounds.Any(r => r.TargetQuantity <= 0))
                 {
-                    int remain = campaignTarget;
-                    for (int i = 0; i < rounds.Count; i++)
+                    return new Response<bool>
                     {
-                        int percent = (i == rounds.Count - 1) ? 100 : new Random().Next(60, 71); // Last round gets the remainder
-                        int qty;
-                        if (i == rounds.Count - 1)
-                        {
-                            qty = remain;
-                        }
-                        else
-                        {
-                            qty = (int)Math.Round(remain * percent / 100.0);
-                            if (qty < 1) qty = 1;
-                        }
-                        rounds[i].TargetQuantity = qty;
-                        remain -= qty;
-                    }
+                        Code = 400,
+                        Message = "Each round must have a positive targetQuantity",
+                        Data = false
+                    };
                 }
 
-                int totalRoundQty = rounds.Sum(r => r.TargetQuantity);
-                if (totalRoundQty != campaignTarget)
+                int remain = campaignTarget;
+                for (int i = 0; i < rounds.Count; i++)
                 {
-                    return new Response<bool>(false, $"Total target quantity of rounds ({totalRoundQty}) must equal campaign target ({campaignTarget})", 400);
+                    if (i == 0)
+                    {
+                        int minQty = (int)Math.Round(campaignTarget * 0.6);
+                        int maxQty = (int)Math.Round(campaignTarget * 0.7);
+                        if (rounds[i].TargetQuantity < minQty || rounds[i].TargetQuantity > maxQty)
+                        {
+                            return new Response<bool>
+                            {
+                                Code = 400,
+                                Message = $"Round 1 targetQuantity must be between 60% and 70% of campaign target ({minQty} - {maxQty})",
+                                Data = false
+                            };
+                        }
+                        remain -= rounds[i].TargetQuantity;
+                    }
+                    else if (i == rounds.Count - 1)
+                    {
+                        int minQty = (int)Math.Round(remain * 0.8);
+                        if (rounds[i].TargetQuantity < minQty)
+                        {
+                            return new Response<bool>
+                            {
+                                Code = 400,
+                                Message = $"Last round targetQuantity must be at least 80% of remaining ({minQty})",
+                                Data = false
+                            };
+                        }
+                        remain -= rounds[i].TargetQuantity;
+                    }
+                    else
+                    {
+                        int minQty = (int)Math.Round(remain * 0.6);
+                        int maxQty = (int)Math.Round(remain * 0.7);
+                        if (rounds[i].TargetQuantity < minQty || rounds[i].TargetQuantity > maxQty)
+                        {
+                            return new Response<bool>
+                            {
+                                Code = 400,
+                                Message = $"Round {i+1} targetQuantity must be between 60% and 70% of remaining ({minQty} - {maxQty})",
+                                Data = false
+                            };
+                        }
+                        remain -= rounds[i].TargetQuantity;
+                    }
                 }
 
                 foreach (var round in rounds)
