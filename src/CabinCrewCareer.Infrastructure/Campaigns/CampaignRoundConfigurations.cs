@@ -17,7 +17,6 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 .HasMaxLength(50);
 
             builder.Property(u => u.Description)
-                .IsRequired()
                 .HasMaxLength(50);
 
             builder.HasOne(n => n.Campaign)

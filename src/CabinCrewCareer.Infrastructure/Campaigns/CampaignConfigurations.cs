@@ -16,8 +16,13 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 .IsRequired()
                 .HasMaxLength(50);
 
+            builder.Property(u => u.ReviewedBy)
+                .HasMaxLength(20);
+
+            builder.Property(u => u.RejectedReason)
+                .HasMaxLength(250);
+
             builder.Property(u => u.Description)
-                .IsRequired()
                 .HasMaxLength(50);
 
             builder.HasOne(n => n.SeniorRecruiter)

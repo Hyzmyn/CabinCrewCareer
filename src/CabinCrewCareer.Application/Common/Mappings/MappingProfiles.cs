@@ -17,12 +17,12 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.AirlinePartner, u => u.MapFrom(u => u.PartnerId != null ? u.AirlinePartner.PartnerName : "N/A"))
                 .ForMember(u => u.Role, u => u.MapFrom(u => u.Role.RoleName))
                 .ForMember(u => u.Gender, u => u.MapFrom(u => u.Gender.GetDescription()))
-                .ForMember(m => m.DateOfBirth, m => m.MapFrom(m => m.DateOfBirth.GetFormatDate()));
+                .ForMember(m => m.DateOfBirth, m => m.MapFrom(m => m.DateOfBirth.HasValue ? m.DateOfBirth.Value.GetFormatDate() : null));
 
             CreateMap<User, GetUserDetailResponse>()
                 .ForMember(u => u.AirlinePartner, u => u.MapFrom(u => u.PartnerId != null ? u.AirlinePartner.PartnerName : "N/A"))
                 .ForMember(u => u.Role, u => u.MapFrom(u => u.Role.RoleName))
-                .ForMember(m => m.DateOfBirth, m => m.MapFrom(m => m.DateOfBirth.GetFormatDate()))
+                .ForMember(m => m.DateOfBirth, m => m.MapFrom(m => m.DateOfBirth.HasValue ? m.DateOfBirth.Value.GetFormatDate() : null))
                 .ForMember(u => u.CityId, u => u.MapFrom(u => u.WardId != null ? u.Ward.CityId : 0))
                 .ForMember(u => u.WardId, u => u.MapFrom(u => u.WardId != null ? u.WardId : 0));
 

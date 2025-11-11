@@ -122,6 +122,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("ActualQuantiy")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CampaignName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -152,12 +155,19 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("RejectedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("RejectedReason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int?>("RequestId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int?>("SeniorId")
                         .HasColumnType("int");
@@ -746,7 +756,7 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateOnly>("DateOfBirth")
+                    b.Property<DateOnly?>("DateOfBirth")
                         .HasColumnType("date");
 
                     b.Property<string>("Email")

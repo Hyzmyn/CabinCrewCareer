@@ -8,6 +8,8 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Services
 
         public string? Email { get; }
 
+        public string? UserName { get; }
+
         public ClaimsPrincipal GetCurrentPrincipalFromToken(string token);
     }
 }

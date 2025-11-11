@@ -10,9 +10,9 @@ namespace CabinCrewCareer.Api.Controllers
     [Route("api/v{version:apiVersion}/campaigns")]
     [ApiVersion(1)]
     [Authorize]
-    public class CampaignController(
+    public class CampaignsController(
         IMediator mediator,
-        ILogger<CampaignController> logger) : ApiController(mediator, logger)
+        ILogger<CampaignsController> logger) : ApiController(mediator, logger)
     {
     /// <summary>
     /// Get the list of campaigns.
