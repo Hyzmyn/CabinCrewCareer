@@ -146,6 +146,7 @@ namespace CabinCrewCareer.Api.Controllers
         ///
         /// Notes:
         /// - Campaign must be in Rejected status
+        /// - ⚠️ REJECTION LIMIT: Campaigns with 3+ rejections are automatically CANCELED and cannot be resubmitted
         /// - All old rounds will be deleted and replaced with new ones
         /// - Same validation rules apply for targetQuantity
         /// - After success, campaign status changes to Pending for re-approval
@@ -202,6 +203,9 @@ namespace CabinCrewCareer.Api.Controllers
         /// - rejectReason is required when status = 3
         /// - After approve: campaign status = Approved
         /// - After reject: campaign status = Rejected (Senior can resubmit)
+        /// - ⚠️ REJECTION LIMIT: After 3 rejections, campaign becomes CANCELED automatically and cannot be resubmitted
+        /// - ReviewedBy field will record the username (not ID) of the Director who approved/rejected
+        /// - RejectedCount tracks the number of times this campaign has been rejected
         /// </remarks>
         [HttpPut("{id}/status")]
         [ProducesResponseType(typeof(Response<bool>), (int)HttpStatusCode.OK)]

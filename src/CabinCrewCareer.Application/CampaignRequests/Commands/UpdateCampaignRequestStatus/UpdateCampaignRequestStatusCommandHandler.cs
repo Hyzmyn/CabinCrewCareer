@@ -38,7 +38,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
 
             // Get current user from token (Director)
             var currentUserId = _currentUserService.CurrentPrincipal;
-            if (string.IsNullOrEmpty(currentUserId))
+            var currentUserName = _currentUserService.UserName;
+            if (string.IsNullOrEmpty(currentUserId) || string.IsNullOrEmpty(currentUserName))
             {
                 throw new ApiException(ResponseCode.FAILED_AUTHENTICATION);
             }
@@ -58,13 +59,12 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
-            // Update status
-            campaignRequest.Status = (RequestStatus)request.Status;
+            // Update DirectorId
             campaignRequest.DirectorId = int.Parse(currentUserId);
-
 
             if (request.Status == (int)RequestStatus.Approved)
             {
+                campaignRequest.Status = RequestStatus.Approved;
                 campaignRequest.ApprovedAt = _dateTimeProvider.UtcNow;
                 campaignRequest.RejectReason = string.Empty;
 
@@ -85,8 +85,24 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
             }
             else if (request.Status == (int)RequestStatus.Rejected)
             {
-                campaignRequest.RejectedAt = _dateTimeProvider.UtcNow;
-                campaignRequest.RejectReason = request.RejectReason ?? string.Empty;
+                // Increment rejected count
+                campaignRequest.RejectedCount += 1;
+
+                // Check if reached rejection limit (3 times)
+                if (campaignRequest.RejectedCount >= 3)
+                {
+                    // Cancel the campaign request after 3 rejections
+                    campaignRequest.Status = RequestStatus.Canceled;
+                    campaignRequest.RejectedAt = _dateTimeProvider.UtcNow;
+                    campaignRequest.RejectReason = $"{request.RejectReason ?? string.Empty} (Request canceled after 3 rejections)";
+                }
+                else
+                {
+                    // Regular rejection (count < 3)
+                    campaignRequest.Status = RequestStatus.Rejected;
+                    campaignRequest.RejectedAt = _dateTimeProvider.UtcNow;
+                    campaignRequest.RejectReason = request.RejectReason ?? string.Empty;
+                }
             }
 
             await _unitOfWork.CampaignRequests.UpdateAsync(campaignRequest);
@@ -114,6 +130,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 RequestType = updatedRequest.RequestType.ToString(),
                 Status = updatedRequest.Status.ToString(),
                 RejectReason = updatedRequest.RejectReason,
+                RejectedCount = updatedRequest.RejectedCount,
                 ApprovedAt = updatedRequest.ApprovedAt?.GetFormatDateTime(),
                 RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,

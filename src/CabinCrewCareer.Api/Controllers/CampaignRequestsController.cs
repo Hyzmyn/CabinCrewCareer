@@ -105,6 +105,14 @@ namespace CabinCrewCareer.Api.Controllers
         ///     }
         ///         
         /// Status: 2 = Approved, 3 = Rejected
+        /// 
+        /// ⚠️ REJECTION LIMIT LOGIC:
+        /// - Each rejection increments the RejectedCount field
+        /// - After 3 rejections (RejectedCount >= 3), the request status automatically becomes CANCELED
+        /// - Canceled requests CANNOT be resubmitted using the resubmit endpoint
+        /// - ReviewedBy field records the username (not ID) of the Director who made the decision
+        /// - ApprovedAt/RejectedAt fields track when the decision was made
+        /// - For testing: Try rejecting the same request 3 times to see it become canceled
         /// </remarks> 
         /// <returns>Updated campaign request</returns>
         /// <response code="200">Ok</response>
@@ -249,6 +257,12 @@ namespace CabinCrewCareer.Api.Controllers
         /// This endpoint allows partners to update and resubmit a campaign request that was rejected.
         /// The request status will be changed back to Pending for re-approval.
         /// 
+        /// ⚠️ REJECTION LIMIT RESTRICTION:
+        /// - Requests that have been rejected 3 times (RejectedCount >= 3) are automatically CANCELED
+        /// - CANCELED requests CANNOT be resubmitted and will return error 400
+        /// - Check the RejectedCount field in GET endpoints to see how many times a request was rejected
+        /// - Only requests in "Rejected" status (not "Canceled") can be resubmitted
+        /// 
         /// Sample request:
         /// 
         ///     {
@@ -262,7 +276,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// </remarks> 
         /// <returns>Updated campaign request</returns>
         /// <response code="200">Ok</response>
-        /// <response code="400">Bad Request</response>
+        /// <response code="400">Bad Request (includes rejection limit exceeded)</response>
         /// <response code="401">Unauthorized</response>
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>

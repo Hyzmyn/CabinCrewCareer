@@ -38,6 +38,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 RejectedAt = campaign.RejectedAt.HasValue ? campaign.RejectedAt.Value.GetFormatDateTime() : null,
                 ReviewedBy = campaign.ReviewedBy,
                 RejectedReason = campaign.RejectedReason,
+                RejectedCount = campaign.RejectedCount,
                 Rounds = campaign.CampaignRounds.Select(r => new RoundDto
                 {
                     CampaignRoundId = r.CampaignRoundId,

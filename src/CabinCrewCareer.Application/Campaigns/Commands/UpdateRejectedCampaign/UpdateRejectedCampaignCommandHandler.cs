@@ -31,13 +31,24 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateRejectedCampaign
                 };
             }
 
-            // Chỉ cho phép cập nhật campaign ở trạng thái Rejected
+            // Check if campaign is in Rejected status
             if (campaign.CampaignStatus != CampaignStatus.Rejected)
             {
                 return new Response<bool>
                 {
                     Code = 400,
                     Message = "Can only update campaigns with Rejected status",
+                    Data = false
+                };
+            }
+
+            // Check if campaign is canceled (reached rejection limit)
+            if (campaign.RejectedCount >= 3)
+            {
+                return new Response<bool>
+                {
+                    Code = 400,
+                    Message = "Campaign has been canceled after 3 rejections and cannot be resubmitted",
                     Data = false
                 };
             }

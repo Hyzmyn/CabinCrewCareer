@@ -30,7 +30,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
                     ApprovedAt = c.ApprovedAt.HasValue ? c.ApprovedAt.Value.GetFormatDateTime() : null,
                     RejectedAt = c.RejectedAt.HasValue ? c.RejectedAt.Value.GetFormatDateTime() : null,
                     ReviewedBy = c.ReviewedBy,
-                    RejectedReason = c.RejectedReason
+                    RejectedReason = c.RejectedReason,
+                    RejectedCount = c.RejectedCount
                 })
                 .ToListAsync(cancellationToken);
             return result;
