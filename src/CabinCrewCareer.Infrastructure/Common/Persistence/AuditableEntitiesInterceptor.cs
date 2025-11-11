@@ -35,11 +35,11 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
                 switch (entry.State)
                 {
                     case EntityState.Added:
-                        entry.Entity.CreatedBy = _currentUserService.CurrentPrincipal;
+                        entry.Entity.CreatedBy = _currentUserService.UserName;
                         entry.Entity.CreatedAt = _dateTimeProvider.UtcNow;
                         break;
                     case EntityState.Modified:
-                        entry.Entity.UpdatedBy = _currentUserService.CurrentPrincipal;
+                        entry.Entity.UpdatedBy = _currentUserService.UserName;
                         entry.Entity.UpdatedAt = _dateTimeProvider.UtcNow;
                         break;
                     default:

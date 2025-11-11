@@ -39,7 +39,7 @@ namespace CabinCrewCareer.Infrastructure.Security
             new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
             new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
             new Claim(ClaimTypes.Role, user.Role.RoleName),
-            new Claim(ClaimTypes.UserData, user.ImgURL  ?? string.Empty),
+            new Claim(ClaimTypes.UserData, user.UserName  ?? string.Empty),
             new Claim(ClaimTypes.PrimarySid, user.RoleId.ToString() ?? string.Empty)
         };
 

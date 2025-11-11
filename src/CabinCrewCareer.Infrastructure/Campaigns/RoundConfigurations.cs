@@ -13,7 +13,6 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
             builder.HasKey(n => n.RoundId);
 
             builder.Property(u => u.Notes)
-                .IsRequired()
                 .HasMaxLength(50);
 
             builder.HasOne(n => n.CampaignRound)

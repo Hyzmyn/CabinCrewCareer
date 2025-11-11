@@ -17,7 +17,7 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string FullName { get; set; } = string.Empty;
 
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         public Gender Gender { get; set; }
 
