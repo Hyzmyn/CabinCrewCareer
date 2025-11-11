@@ -28,7 +28,19 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                     Data = false
                 };
             }
-            // Lấy SeniorId từ token
+
+            // Chỉ cho phép cập nhật campaign ở trạng thái Draft hoặc Rejected
+            if (campaign.CampaignStatus != CabinCrewCareer.Domain.Common.CampaignStatus.Draft && 
+                campaign.CampaignStatus != CabinCrewCareer.Domain.Common.CampaignStatus.Rejected)
+            {
+                return new Response<bool>
+                {
+                    Code = 400,
+                    Message = "Can only update campaigns in Draft or Rejected status",
+                    Data = false
+                };
+            }
+            // Get SeniorId from token
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (!string.IsNullOrEmpty(currentUserId))
             {
@@ -37,10 +49,12 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             // Update campaign fields
             campaign.StartDate = request.StartDate;
             campaign.EndDate = request.EndDate;
-            // Thêm các trường campaign khác nếu cần
+            // After successful update and round creation, change to Pending for Director approval
+            campaign.CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Pending;
+            // Add other campaign fields if needed
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
 
-            // Nếu có danh sách round thì xử lý chia số lượng tự động hoặc kiểm tra tổng số lượng
+            // If there is a list of rounds, handle automatic quantity division or check total quantity
             if (request.Rounds != null && request.Rounds.Count > 0)
             {
 
