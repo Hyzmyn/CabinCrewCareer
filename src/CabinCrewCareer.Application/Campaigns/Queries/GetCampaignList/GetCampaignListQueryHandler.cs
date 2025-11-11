@@ -26,7 +26,11 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
                     CampaignType = c.CampaignType.ToString(),
                     Status = c.CampaignStatus.ToString(),
                     StartDate = c.StartDate.HasValue ? c.StartDate.Value.GetFormatDateTime() : null,
-                    EndDate = c.EndDate.HasValue ? c.EndDate.Value.GetFormatDateTime() : null
+                    EndDate = c.EndDate.HasValue ? c.EndDate.Value.GetFormatDateTime() : null,
+                    ApprovedAt = c.ApprovedAt.HasValue ? c.ApprovedAt.Value.GetFormatDateTime() : null,
+                    RejectedAt = c.RejectedAt.HasValue ? c.RejectedAt.Value.GetFormatDateTime() : null,
+                    ReviewedBy = c.ReviewedBy,
+                    RejectedReason = c.RejectedReason
                 })
                 .ToListAsync(cancellationToken);
             return result;

@@ -10,5 +10,9 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
         public string Status { get; set; } = string.Empty;
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
+        public string? ApprovedAt { get; set; }
+        public string? RejectedAt { get; set; }
+        public string? ReviewedBy { get; set; }
+        public string? RejectedReason { get; set; }
     }
 }

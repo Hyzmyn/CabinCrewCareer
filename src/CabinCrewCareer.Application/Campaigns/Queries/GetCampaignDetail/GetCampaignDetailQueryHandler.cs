@@ -34,6 +34,10 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 Status = campaign.CampaignStatus.ToString(),
                 StartDate = campaign.StartDate.HasValue ? campaign.StartDate.Value.GetFormatDateTime() : null,
                 EndDate = campaign.EndDate.HasValue ? campaign.EndDate.Value.GetFormatDateTime() : null,
+                ApprovedAt = campaign.ApprovedAt.HasValue ? campaign.ApprovedAt.Value.GetFormatDateTime() : null,
+                RejectedAt = campaign.RejectedAt.HasValue ? campaign.RejectedAt.Value.GetFormatDateTime() : null,
+                ReviewedBy = campaign.ReviewedBy,
+                RejectedReason = campaign.RejectedReason,
                 Rounds = campaign.CampaignRounds.Select(r => new RoundDto
                 {
                     CampaignRoundId = r.CampaignRoundId,
