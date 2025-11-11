@@ -19,11 +19,13 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string JoinCode { get; set; } = string.Empty;
 
+        public int DurationInMinutes { get; set; }
+
         // Foreign Keys
 
         // Navigation Properties
         public virtual ICollection<TestQuestion> TestQuestions { get; set; } = [];
         public virtual ICollection<TestSession> TestSessions { get; set; } = [];
-        //public virtual ICollection<TestResult> TestResults { get; set; } = [];
+        public virtual ICollection<Round> Rounds { get; set; } = [];
     }
 }

@@ -18,6 +18,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int? CampaignRoundId { get; set; }
         public virtual CampaignRound CampaignRound { get; set; } = null!;
 
+        public int? TestId { get; set; }
+        public virtual Test Test { get; set; } = null!;
+
         // Navigation Properties
         public virtual ICollection<UserApplication> Applications { get; set; } = [];
     }

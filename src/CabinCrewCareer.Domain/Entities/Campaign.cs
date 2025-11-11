@@ -34,6 +34,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string? RejectedReason { get; set; } = string.Empty;
 
+        public int RejectedCount { get; set; } = 0;
+
         public bool IsActive { get; set; } = true;
 
         // Foreign Keys
