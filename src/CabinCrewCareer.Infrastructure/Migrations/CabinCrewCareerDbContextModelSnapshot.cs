@@ -158,6 +158,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("RejectedCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("RejectedReason")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -238,6 +241,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("RejectedCount")
+                        .HasColumnType("int");
 
                     b.Property<int>("RequestType")
                         .HasColumnType("int");
@@ -546,9 +552,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("TestId")
+                        .HasColumnType("int");
+
                     b.HasKey("RoundId");
 
                     b.HasIndex("CampaignRoundId");
+
+                    b.HasIndex("TestId");
 
                     b.ToTable("Round", (string)null);
                 });
@@ -571,6 +582,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("DurationInMinutes")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -1014,7 +1028,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasForeignKey("CampaignRoundId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Test", "Test")
+                        .WithMany("Rounds")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("CampaignRound");
+
+                    b.Navigation("Test");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
@@ -1176,6 +1197,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
                 {
+                    b.Navigation("Rounds");
+
                     b.Navigation("TestQuestions");
 
                     b.Navigation("TestSessions");

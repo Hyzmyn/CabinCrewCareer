@@ -23,6 +23,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string RejectReason { get; set; } = string.Empty;
 
+        public int RejectedCount { get; set; } = 0;
+
         public DateTime? ApprovedAt { get; set; }
 
         public DateTime? RejectedAt { get; set; }
