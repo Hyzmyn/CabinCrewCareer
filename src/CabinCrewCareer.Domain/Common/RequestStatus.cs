@@ -9,6 +9,8 @@ namespace CabinCrewCareer.Domain.Common
         [Description("Approved")]
         Approved,
         [Description("Rejected")]
-        Rejected
+        Rejected,
+        [Description("Canceled")]
+        Canceled
     }
 }

@@ -43,9 +43,9 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                 };
             }
 
-            // Get DirectorId from token
-            var currentUserId = _currentUserService.CurrentPrincipal;
-            if (string.IsNullOrEmpty(currentUserId))
+            // Get username from token
+            var currentUserName = _currentUserService.UserName;
+            if (string.IsNullOrEmpty(currentUserName))
             {
                 return new Response<bool>
                 {
@@ -58,7 +58,7 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
             if (request.Status == (int)CampaignStatus.Approved)
             {
                 campaign.CampaignStatus = CampaignStatus.Approved;
-                campaign.ReviewedBy = currentUserId; // Set reviewer ID
+                campaign.ReviewedBy = currentUserName; // Set reviewer username
                 campaign.ApprovedAt = _dateTimeProvider.UtcNow; // Set approval time
                 campaign.RejectedReason = string.Empty; // Clear reject reason if any
                 campaign.RejectedAt = null; // Clear reject time if any
@@ -86,21 +86,48 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                     };
                 }
 
-                campaign.CampaignStatus = CampaignStatus.Rejected;
-                campaign.ReviewedBy = currentUserId; // Set reviewer ID
-                campaign.RejectedAt = _dateTimeProvider.UtcNow; // Set rejection time
-                campaign.RejectedReason = request.RejectReason;
-                campaign.ApprovedAt = null; // Clear approval time if any
-                
-                await _unitOfWork.Campaigns.UpdateAsync(campaign);
-                await _unitOfWork.CompleteAsync();
-                
-                return new Response<bool>
+                // Increment rejected count
+                campaign.RejectedCount += 1;
+
+                // Check if reached rejection limit (3 times)
+                if (campaign.RejectedCount >= 3)
                 {
-                    Code = 200,
-                    Message = "Campaign rejected successfully",
-                    Data = true
-                };
+                    // Cancel the campaign after 3 rejections
+                    campaign.CampaignStatus = CampaignStatus.Canceled;
+                    campaign.ReviewedBy = currentUserName; // Set reviewer username
+                    campaign.RejectedAt = _dateTimeProvider.UtcNow;
+                    campaign.RejectedReason = $"{request.RejectReason} (Campaign canceled after 3 rejections)";
+                    campaign.ApprovedAt = null;
+                    
+                    await _unitOfWork.Campaigns.UpdateAsync(campaign);
+                    await _unitOfWork.CompleteAsync();
+                    
+                    return new Response<bool>
+                    {
+                        Code = 200,
+                        Message = "Campaign canceled after reaching rejection limit (3 times)",
+                        Data = true
+                    };
+                }
+                else
+                {
+                    // Regular rejection (count < 3)
+                    campaign.CampaignStatus = CampaignStatus.Rejected;
+                    campaign.ReviewedBy = currentUserName; // Set reviewer username
+                    campaign.RejectedAt = _dateTimeProvider.UtcNow;
+                    campaign.RejectedReason = request.RejectReason;
+                    campaign.ApprovedAt = null;
+                    
+                    await _unitOfWork.Campaigns.UpdateAsync(campaign);
+                    await _unitOfWork.CompleteAsync();
+                    
+                    return new Response<bool>
+                    {
+                        Code = 200,
+                        Message = $"Campaign rejected successfully ({campaign.RejectedCount}/3 rejections)",
+                        Data = true
+                    };
+                }
             }
             else
             {

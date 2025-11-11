@@ -58,14 +58,21 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
             // Verify ownership - user must be from the same partner
             if (campaignRequest.PartnerId != user.PartnerId)
             {
-                errorMessages.Add("Bạn không có quyền cập nhật request này");
+                errorMessages.Add("You do not have permission to update this request");
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
             // Check if request is in Rejected status
             if (campaignRequest.Status != RequestStatus.Rejected)
             {
-                errorMessages.Add("Chỉ có thể cập nhật request đã bị từ chối");
+                errorMessages.Add("Can only update rejected campaign requests");
+                throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
+            }
+
+            // Check if request is canceled (reached rejection limit)
+            if (campaignRequest.RejectedCount >= 3)
+            {
+                errorMessages.Add("Campaign request has been canceled after 3 rejections and cannot be resubmitted");
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
@@ -109,6 +116,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
                 RequestType = updatedRequest.RequestType.ToString(),
                 Status = updatedRequest.Status.ToString(),
                 RejectReason = updatedRequest.RejectReason,
+                RejectedCount = updatedRequest.RejectedCount,
                 ApprovedAt = updatedRequest.ApprovedAt?.GetFormatDateTime(),
                 RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,

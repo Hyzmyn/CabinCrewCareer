@@ -20,6 +20,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string? RejectReason { get; set; }
 
+        public int RejectedCount { get; set; }
+
         public string? ApprovedAt { get; set; }
 
         public string? RejectedAt { get; set; }
