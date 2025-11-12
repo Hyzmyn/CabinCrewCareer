@@ -15,5 +15,7 @@
         public int TargetQuantity { get; set; }
 
         public int ActualQuantiy { get; set; }
+
+        public List<GetRoundResponse> Rounds { get; set; } = [];
     }
 }

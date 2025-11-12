@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignRounds.Queries.GetCampaignRoundById
 {
@@ -20,6 +21,7 @@ namespace CabinCrewCareer.Application.CampaignRounds.Queries.GetCampaignRoundByI
             var campaignRoundQuery = await _unitOfWork.CampaignRounds.GetAsync(campaignRound => campaignRound.CampaignRoundId == request.CampaignRoundId);
 
             var campaignRound = campaignRoundQuery
+                .Include(r => r.Rounds)
             .FirstOrDefault() ?? throw new ApiException(ResponseCode.CAMPAIGN_ROUND_NOT_FOUND);
 
             return new Response<GetCampaignRoundResponse>(code: (int)ResponseCode.SUCCESS, data: _mapper.Map<GetCampaignRoundResponse>(campaignRound), message: ResponseCode.SUCCESS.ToString());

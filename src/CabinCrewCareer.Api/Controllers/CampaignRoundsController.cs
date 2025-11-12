@@ -64,7 +64,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet("{id}/rounds")]
-        [ProducesResponseType(typeof(Response<GetCampaignRoundResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Response<List<GetRoundResponse>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetRoundsByIdAsync(int id)
         {
