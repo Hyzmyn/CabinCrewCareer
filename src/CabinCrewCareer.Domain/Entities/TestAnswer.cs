@@ -10,6 +10,8 @@
 
         public string EssayAnswer { get; set; } = string.Empty;
 
+        public string AnswerAudioFileURL { get; set; } = string.Empty;
+
         // Foreign Keys
         public int? TestSessionId { get; set; }
         public virtual TestSession TestSession { get; set; } = null!;

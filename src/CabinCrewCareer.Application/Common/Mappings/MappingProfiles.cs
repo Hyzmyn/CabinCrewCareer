@@ -4,6 +4,7 @@ using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Entities;
 
@@ -27,6 +28,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.CityId, u => u.MapFrom(u => u.WardId != null ? u.Ward.CityId : 0))
                 .ForMember(u => u.WardId, u => u.MapFrom(u => u.WardId != null ? u.WardId : 0));
 
+            CreateMap<User, GetRoleResponse>();
             CreateMap<PaginatedList<User>, PaginatedList<GetUserResponse>>();
             #endregion
 
