@@ -66,5 +66,16 @@ namespace CabinCrewCareer.Infrastructure.Users
            //"dob" => user => user.DoB,
            _ => user => user.UserId
        };
+
+        public async Task<List<User>> GetUsersByRoleIdAsync(int? roleId)
+        {
+            return await _dbContext.Users
+                .Where(u => u.RoleId == roleId)
+                .Select(u => new User
+                {
+                    UserId = u.UserId,
+                    FullName = u.FullName
+                }).ToListAsync();
+        }
     }
 }

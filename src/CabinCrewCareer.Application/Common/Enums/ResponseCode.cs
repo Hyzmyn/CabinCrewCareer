@@ -66,6 +66,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Duplicate join code. Please try again")]
         DUPLICATE_JOIN_CODE = 19,
 
+        [Description("Campaign Round not found")]
+        CAMPAIGN_ROUND_NOT_FOUND = 20,
+
         #endregion
     }
 }

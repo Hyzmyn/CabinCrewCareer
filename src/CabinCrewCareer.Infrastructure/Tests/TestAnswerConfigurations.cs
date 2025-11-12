@@ -16,6 +16,9 @@ namespace CabinCrewCareer.Infrastructure.Tests
                 .HasMaxLength(250)
                 .IsRequired();
 
+            builder.Property(n => n.AnswerAudioFileURL)
+                .HasMaxLength(250);
+
             builder.HasOne(u => u.TestSession)
                 .WithMany(u => u.TestAnswers)
                 .HasForeignKey(u => u.TestSessionId)

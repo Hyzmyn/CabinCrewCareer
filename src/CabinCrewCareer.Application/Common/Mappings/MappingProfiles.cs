@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.CampaignRequests.Common;
+using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Entities;
 
@@ -26,6 +28,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.CityId, u => u.MapFrom(u => u.WardId != null ? u.Ward.CityId : 0))
                 .ForMember(u => u.WardId, u => u.MapFrom(u => u.WardId != null ? u.WardId : 0));
 
+            CreateMap<User, GetRoleResponse>();
             CreateMap<PaginatedList<User>, PaginatedList<GetUserResponse>>();
             #endregion
 
@@ -46,6 +49,15 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(cr => cr.CreatedAt, cr => cr.MapFrom(cr => cr.CreatedAt ?? DateTime.MinValue));
 
             CreateMap<PaginatedList<CampaignRequest>, PaginatedList<GetCampaignRequestResponse>>();
+            #endregion
+
+            #region CampaignRound
+            CreateMap<CampaignRound, GetCampaignRoundResponse>()
+                .ForMember(cr => cr.StartDate, cr => cr.MapFrom(cr => cr.StartDate.HasValue ? cr.StartDate.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.EndDate, cr => cr.MapFrom(cr => cr.EndDate.HasValue ? cr.EndDate.Value.GetFormatDateTime() : null));
+
+            CreateMap<Round, GetRoundResponse>()
+                .ForMember(cr => cr.RoundName, cr => cr.MapFrom(cr => cr.RoundType.GetDescription()));
             #endregion
         }
     }

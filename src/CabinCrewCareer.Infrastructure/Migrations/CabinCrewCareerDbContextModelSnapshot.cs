@@ -630,6 +630,11 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnswerId"));
 
+                    b.Property<string>("AnswerAudioFileURL")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("EssayAnswer")
                         .IsRequired()
                         .HasMaxLength(250)

@@ -15,5 +15,7 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             , int? partnerId
             , int page
             , int pageSize);
+
+        Task<List<User>> GetUsersByRoleIdAsync(int? roleId);
     }
 }
