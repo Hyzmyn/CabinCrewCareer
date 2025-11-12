@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.CampaignRequests.Common;
+using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
@@ -46,6 +47,15 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(cr => cr.CreatedAt, cr => cr.MapFrom(cr => cr.CreatedAt ?? DateTime.MinValue));
 
             CreateMap<PaginatedList<CampaignRequest>, PaginatedList<GetCampaignRequestResponse>>();
+            #endregion
+
+            #region CampaignRound
+            CreateMap<CampaignRound, GetCampaignRoundResponse>()
+                .ForMember(cr => cr.StartDate, cr => cr.MapFrom(cr => cr.StartDate.HasValue ? cr.StartDate.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.EndDate, cr => cr.MapFrom(cr => cr.EndDate.HasValue ? cr.EndDate.Value.GetFormatDateTime() : null));
+
+            CreateMap<Round, GetRoundResponse>()
+                .ForMember(cr => cr.RoundName, cr => cr.MapFrom(cr => cr.RoundType.GetDescription()));
             #endregion
         }
     }

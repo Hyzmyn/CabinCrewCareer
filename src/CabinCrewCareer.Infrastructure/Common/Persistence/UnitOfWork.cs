@@ -1,9 +1,10 @@
 ﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
+using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
-using CabinCrewCareer.Infrastructure.Users;
 using CabinCrewCareer.Infrastructure.Tests;
+using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
 
 namespace CabinCrewCareer.Infrastructure.Common.Persistence
@@ -28,6 +29,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public ITestRepository Tests { get; private set; }
 
+        public ICampaignRoundRepository CampaignRounds { get; private set; }
+
+        public IRoundRepository Rounds { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -46,7 +51,11 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
             CampaignRequests = new CampaignRequestRepository(_dbContext, _logger);
 
-            Campaigns = new CabinCrewCareer.Infrastructure.Campaigns.CampaignRepository(_dbContext, _logger);
+            Campaigns = new CampaignRepository(_dbContext, _logger);
+
+            CampaignRounds = new CampaignRoundRepository(_dbContext, _logger);
+
+            Rounds = new RoundRepository(_dbContext, _logger);
 
             Tests = new TestRepository(_dbContext, _logger);
         }

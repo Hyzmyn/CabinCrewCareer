@@ -15,6 +15,10 @@
 
         ICampaignRepository Campaigns { get; }
 
+        ICampaignRoundRepository CampaignRounds { get; }
+
+        IRoundRepository Rounds { get; }
+
         ITestRepository Tests { get; }
 
         Task CompleteAsync();

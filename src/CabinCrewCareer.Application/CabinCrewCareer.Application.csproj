@@ -22,6 +22,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Authentication\Queries\RequestToken\" />
+	  <Folder Include="CampaignRounds\Commands\" />
 	  <Folder Include="Common\Models\Responses\" />
 	  <Folder Include="Roles\Common\" />
 	  <Folder Include="Roles\Queries\" />
