@@ -4,9 +4,11 @@ namespace CabinCrewCareer.Domain.Common
 {
     public enum TestType
     {
-        [Description("English")]
-        English = 1,
+        [Description("English Listening")]
+        EnglishListening = 1,
+        [Description("English Speaking")]
+        EnglishSpeaking = 2,
         [Description("Practical")]
-        Practical,
+        Practical = 3,
     }
 }

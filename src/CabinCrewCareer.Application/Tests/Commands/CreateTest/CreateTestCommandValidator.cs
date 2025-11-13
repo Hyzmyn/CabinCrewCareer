@@ -26,11 +26,11 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
                 .GreaterThan(0).WithMessage("Duration must be greater than 0 minutes")
                 .LessThanOrEqualTo(480).WithMessage("Duration must not exceed 8 hours (480 minutes)");
 
-            // Nếu TestType là English thì AudioFile là bắt buộc
+            // Nếu TestType là EnglishListening thì AudioFile là bắt buộc
             RuleFor(x => x.AudioFile)
                 .NotNull()
-                .WithMessage("Audio file is required for English test type")
-                .When(x => x.TestType == TestType.English);
+                .WithMessage("Audio file is required for English Listening test type")
+                .When(x => x.TestType == TestType.EnglishListening);
 
             // Validate file extension và size nếu có AudioFile
             RuleFor(x => x.AudioFile)

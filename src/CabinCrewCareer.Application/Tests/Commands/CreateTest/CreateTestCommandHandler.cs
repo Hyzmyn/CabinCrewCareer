@@ -64,15 +64,21 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
             // Generate unique join code
             string joinCode = await GenerateUniqueJoinCode(cancellationToken);
 
-            // Upload audio file to Firebase if provided
+            // Upload audio file to Cloudinary if provided (only for EnglishListening)
             string? audioFileUrl = null;
-            if (request.TestType == TestType.English && request.AudioFile != null)
+            if (request.TestType == TestType.EnglishListening && request.AudioFile != null)
             {
                 using var stream = request.AudioFile.OpenReadStream();
                 audioFileUrl = await _firebaseStorageService.UploadAudioFileAsync(
                     stream,
                     request.AudioFile.FileName,
                     request.AudioFile.ContentType);
+            }
+
+            // For EnglishSpeaking and Practical tests, set audio to null by default
+            if (request.TestType == TestType.EnglishSpeaking || request.TestType == TestType.Practical)
+            {
+                audioFileUrl = null;
             }
 
             // Create test

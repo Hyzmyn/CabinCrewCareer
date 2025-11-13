@@ -32,6 +32,7 @@ public class FileUploadOperationFilter : IOperationFilter
                     {
                         Type = "object",
                         Properties = context.ApiDescription.ParameterDescriptions
+                            .Where(p => p.Source.Id != "Path") // Exclude path parameters like {id}
                             .ToDictionary(
                                 p => p.Name,
                                 p => IsFileParameter(p.Type, p.Name)
@@ -39,7 +40,7 @@ public class FileUploadOperationFilter : IOperationFilter
                                     : new OpenApiSchema { Type = GetSchemaType(p.Type) }
                             ),
                         Required = context.ApiDescription.ParameterDescriptions
-                            .Where(p => p.IsRequired)
+                            .Where(p => p.IsRequired && p.Source.Id != "Path") // Exclude path parameters
                             .Select(p => p.Name)
                             .ToHashSet()
                     }
@@ -47,8 +48,15 @@ public class FileUploadOperationFilter : IOperationFilter
             }
         };
 
-        // Remove all parameters since they're now in request body
-        operation.Parameters.Clear();
+        // Remove only form parameters, keep path parameters (like {id})
+        var parametersToRemove = operation.Parameters
+            .Where(p => p.In == ParameterLocation.Query || p.In == ParameterLocation.Header)
+            .ToList();
+        
+        foreach (var param in parametersToRemove)
+        {
+            operation.Parameters.Remove(param);
+        }
     }
 
     private static bool IsFileParameter(Type type, string name)

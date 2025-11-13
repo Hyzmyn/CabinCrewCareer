@@ -69,6 +69,15 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Campaign Round not found")]
         CAMPAIGN_ROUND_NOT_FOUND = 20,
 
+        [Description("Deleted successfully")]
+        DELETED_SUCCESS = 21,
+
+        [Description("Deleted unsuccessfully")]
+        DELETED_UNSUCC = 22,
+
+        [Description("Cannot delete item")]
+        FAILED_DELETE = 23,
+
         #endregion
     }
 }
