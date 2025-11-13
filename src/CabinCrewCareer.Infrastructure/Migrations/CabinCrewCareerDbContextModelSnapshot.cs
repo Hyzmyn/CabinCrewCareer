@@ -190,6 +190,55 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("Campaign", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignAssignment", b =>
+                {
+                    b.Property<int>("AssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentId"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AssignedBy")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("CampaignId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Task")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TaskDescription")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AssignmentId");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CampaignAssignment", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignRequest", b =>
                 {
                     b.Property<int>("RequestId")
@@ -941,6 +990,23 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("SeniorRecruiter");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignAssignment", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Campaign", "Campaign")
+                        .WithMany("Assignments")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
+                        .WithMany("Assignments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignRequest", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.User", "Director")
@@ -1162,6 +1228,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Campaign", b =>
                 {
+                    b.Navigation("Assignments");
+
                     b.Navigation("CampaignRounds");
                 });
 
@@ -1229,6 +1297,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
                 {
                     b.Navigation("Application");
+
+                    b.Navigation("Assignments");
 
                     b.Navigation("Blogs");
 

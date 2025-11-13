@@ -60,6 +60,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<EnquiryRequest> EnquiryRequests { get; set; }
 
+        public DbSet<CampaignAssignment> CampaignAssignments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);

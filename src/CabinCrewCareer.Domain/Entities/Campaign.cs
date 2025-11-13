@@ -47,5 +47,6 @@ namespace CabinCrewCareer.Domain.Entities
 
         // Navigation Properties
         public virtual ICollection<CampaignRound> CampaignRounds { get; set; } = [];
+        public virtual ICollection<CampaignAssignment> Assignments { get; set; } = [];
     }
 }
