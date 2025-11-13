@@ -57,6 +57,7 @@ namespace CabinCrewCareer.Infrastructure.Tests
                 "name" => test => test.TestName,
                 "testtype" => test => test.TestType,
                 "maxscore" => test => test.MaxScore,
+                "duration" => test => test.DurationInMinutes,
                 "createdat" => test => test.CreatedAt ?? DateTime.MinValue,
                 _ => test => test.TestId
             };

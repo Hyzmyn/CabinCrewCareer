@@ -22,6 +22,10 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
                 .GreaterThan(0).WithMessage("Max score must be greater than 0")
                 .LessThanOrEqualTo(1000).WithMessage("Max score must not exceed 1000");
 
+            RuleFor(x => x.DurationInMinutes)
+                .GreaterThan(0).WithMessage("Duration must be greater than 0 minutes")
+                .LessThanOrEqualTo(480).WithMessage("Duration must not exceed 8 hours (480 minutes)");
+
             // Nếu TestType là English thì AudioFile là bắt buộc
             RuleFor(x => x.AudioFile)
                 .NotNull()

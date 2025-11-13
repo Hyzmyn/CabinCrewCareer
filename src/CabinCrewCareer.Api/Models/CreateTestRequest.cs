@@ -8,5 +8,6 @@ public class CreateTestRequest
     public string Purpose { get; set; } = null!;
     public int TestType { get; set; }
     public int MaxScore { get; set; }
+    public int DurationInMinutes { get; set; }
     public IFormFile? AudioFile { get; set; }
 }

@@ -22,7 +22,7 @@ namespace CabinCrewCareer.Api.Controllers
     {
         #region Create Test
         /// <summary>
-        /// Examiner creates a new test with audio file upload to Firebase
+        /// Examiner creates a new test with audio file upload to Cloudinary
         /// </summary>
         /// <param name="request">Test creation request with audio file</param>
         /// <remarks>
@@ -35,13 +35,17 @@ namespace CabinCrewCareer.Api.Controllers
         /// Audio file requirements:
         /// - Format: .mp3 or .wav
         /// - Max size: 50 MB
-        /// - Will be uploaded to Firebase Storage
+        /// - Will be uploaded to Cloudinary Storage
+        /// 
+        /// DurationInMinutes:
+        /// - Must be between 1 and 480 minutes (8 hours)
+        /// - Recommended: 30-180 minutes for most tests
         /// 
         /// Note: Only Examiner role can create tests.
         /// System will auto-generate unique 10-character join code.
         ///         
         /// </remarks> 
-        /// <returns>Created test with Firebase Storage URL</returns>
+        /// <returns>Created test with Cloudinary Storage URL</returns>
         /// <response code="200">Ok - Test created successfully</response>
         /// <response code="400">Bad Request - Validation errors</response>
         /// <response code="401">Unauthorized</response>
@@ -60,6 +64,7 @@ namespace CabinCrewCareer.Api.Controllers
                     request.Purpose,
                     (CabinCrewCareer.Domain.Common.TestType)request.TestType,
                     request.MaxScore,
+                    request.DurationInMinutes,
                     request.AudioFile);
                     
                 return Ok(await mediator.Send(command));
@@ -90,7 +95,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// Get list of tests with pagination and filtering
         /// </summary>
         /// <param name="searchTerm">Search by test name or purpose</param>
-        /// <param name="sortColumn">Column to sort by (name, testtype, maxscore, createdat). Default: testid</param>
+        /// <param name="sortColumn">Column to sort by (name, testtype, maxscore, duration, createdat). Default: testid</param>
         /// <param name="sortOrder">Sort order (asc or desc). Default: desc</param>
         /// <param name="testType">Filter by test type (1=English, 2=Practical)</param>
         /// <param name="page">Page number (default: 1)</param>

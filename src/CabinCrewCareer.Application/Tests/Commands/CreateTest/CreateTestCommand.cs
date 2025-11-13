@@ -11,5 +11,6 @@ namespace CabinCrewCareer.Application.Tests.Commands.CreateTest
         string Purpose,
         TestType TestType,
         int MaxScore,
+        int DurationInMinutes,
         IFormFile? AudioFile) : IRequest<Response<GetTestResponse>>;
 }

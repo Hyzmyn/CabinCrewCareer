@@ -34,6 +34,7 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTests
                 Purpose = test.Purpose,
                 TestType = test.TestType.ToString(),
                 MaxScore = test.MaxScore,
+                DurationInMinutes = test.DurationInMinutes,
                 AudioFileURL = string.IsNullOrEmpty(test.AudioFileURL) ? null : test.AudioFileURL,
                 JoinCode = test.JoinCode,
                 CreatedAt = test.CreatedAt?.GetFormatDateTime(),
