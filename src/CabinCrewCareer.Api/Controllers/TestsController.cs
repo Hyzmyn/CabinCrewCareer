@@ -2,6 +2,7 @@ using CabinCrewCareer.Application.Tests.Commands.CreateTest;
 using CabinCrewCareer.Application.Tests.Commands.UpdateTest;
 using CabinCrewCareer.Application.Tests.Commands.DeleteTest;
 using CabinCrewCareer.Application.Tests.Queries.GetTests;
+using CabinCrewCareer.Application.Tests.Queries.GetTestById;
 using CabinCrewCareer.Application.Tests.Common;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
@@ -138,6 +139,59 @@ namespace CabinCrewCareer.Api.Controllers
             catch (ApiException e)
             {
                 return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test By Id
+        /// <summary>
+        /// Get test details by ID
+        /// </summary>
+        /// <param name="id">Test ID</param>
+        /// <remarks>
+        /// **Get detailed information of a test by ID**
+        /// 
+        /// Response behavior based on TestType:
+        /// - **EnglishListening (1)**: Returns AudioFileURL if available
+        /// - **EnglishSpeaking (2)**: AudioFileURL field is omitted from response
+        /// - **Practical (3)**: AudioFileURL field is omitted from response
+        /// 
+        /// Note: All authenticated users can view test details.
+        /// </remarks>
+        /// <returns>Test details</returns>
+        /// <response code="200">Ok - Returns test details</response>
+        /// <response code="400">Bad Request - Invalid test ID</response>
+        /// <response code="401">Unauthorized - User not authenticated</response>
+        /// <response code="404">Not Found - Test not found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Response<GetTestByIdResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetTestByIdAsync(int id)
+        {
+            try
+            {
+                var query = new GetTestByIdQuery(id);
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return NotFound(new
                 {
                     errorCode = e.ErrorCode,
                     error = e.Error,
