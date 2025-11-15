@@ -613,6 +613,29 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("Round", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundActivity", b =>
+                {
+                    b.Property<int>("ActivityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityId"));
+
+                    b.Property<int?>("RoundId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ActivityId");
+
+                    b.HasIndex("RoundId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RoundActivity", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
                 {
                     b.Property<int>("TestId")
@@ -903,9 +926,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("ApplicationStatus")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RoundId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("SubmissionDate")
                         .HasColumnType("datetime2");
 
@@ -913,8 +933,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ApplicationId");
-
-                    b.HasIndex("RoundId");
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -1109,6 +1127,23 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Test");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundActivity", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Round", "Round")
+                        .WithMany("RoundActivities")
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
+                        .WithMany("RoundActivities")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Round");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.TestOption", "SelectedOption")
@@ -1189,17 +1224,10 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>
                 {
-                    b.HasOne("CabinCrewCareer.Domain.Entities.Round", "Round")
-                        .WithMany("Applications")
-                        .HasForeignKey("RoundId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
                         .WithOne("Application")
                         .HasForeignKey("CabinCrewCareer.Domain.Entities.UserApplication", "UserId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Round");
 
                     b.Navigation("User");
                 });
@@ -1265,7 +1293,7 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Round", b =>
                 {
-                    b.Navigation("Applications");
+                    b.Navigation("RoundActivities");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
@@ -1311,6 +1339,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("EnquiryRequests");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("RoundActivities");
 
                     b.Navigation("TestSessions");
                 });

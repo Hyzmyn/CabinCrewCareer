@@ -22,6 +22,6 @@ namespace CabinCrewCareer.Domain.Entities
         public virtual Test Test { get; set; } = null!;
 
         // Navigation Properties
-        public virtual ICollection<UserApplication> Applications { get; set; } = [];
+        public virtual ICollection<RoundActivity> RoundActivities { get; set; } = [];
     }
 }
