@@ -21,6 +21,8 @@
 
         ITestRepository Tests { get; }
 
+        ICampaignAssignmentRepository CampaignAssignments { get; }
+
         Task CompleteAsync();
     }
 }

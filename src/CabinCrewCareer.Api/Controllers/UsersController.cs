@@ -5,6 +5,8 @@ using CabinCrewCareer.Application.Users.Commands.CreateUser;
 using CabinCrewCareer.Application.Users.Commands.DisableUser;
 using CabinCrewCareer.Application.Users.Commands.UpdateUser;
 using CabinCrewCareer.Application.Users.Commands.UploadProfileImg;
+using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns;
+using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Application.Users.Queries.GetUserById;
 using CabinCrewCareer.Application.Users.Queries.GetUsers;
@@ -269,6 +271,46 @@ namespace CabinCrewCareer.Api.Controllers
                     error = e.Error,
                     errorMessage = e.ErrorMessage
                 });
+            }
+        }
+        #endregion
+
+        #region My Tasks and Campaigns
+        /// <summary>
+        /// Get tasks assigned to the current user (auto-detect role from token)
+        /// </summary>
+        /// <returns>List of assigned tasks with detailed information</returns>
+        [HttpGet("my-tasks")]
+        public async Task<IActionResult> GetMyTasksAsync()
+        {
+            try
+            {
+                var result = await mediator.Send(new GetMyTasksQuery());
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in GetMyTasksAsync");
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get campaigns assigned to the current user (auto-detect role from token)
+        /// </summary>
+        /// <returns>List of assigned campaigns with simple information</returns>
+        [HttpGet("my-campaigns")]
+        public async Task<IActionResult> GetMyCampaignsAsync()
+        {
+            try
+            {
+                var result = await mediator.Send(new GetMyCampaignsQuery());
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in GetMyCampaignsAsync");
+                return StatusCode(500, new { error = ex.Message });
             }
         }
         #endregion

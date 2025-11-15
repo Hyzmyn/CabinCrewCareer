@@ -13,6 +13,14 @@ namespace CabinCrewCareer.Domain.Common
         [Description("Rejected")]
         Rejected = 3,
         [Description("Canceled")]
-        Canceled = 4
+        Canceled = 4,
+        [Description("Published")]
+        Published = 5,
+        [Description("Ongoing")]
+        Ongoing = 6,
+        [Description("Upcoming")]
+        Upcoming = 7,
+        [Description("Ended")]
+        Ended = 8
     }
 }
