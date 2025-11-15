@@ -14,9 +14,6 @@ namespace CabinCrewCareer.Domain.Entities
         public int? UserId { get; set; }
         public virtual User User { get; set; } = null!;
 
-        public int? RoundId { get; set; }
-        public virtual Round Round { get; set; } = null!;
-
         // Navigation Properties
         public virtual ICollection<Document> Documents { get; set; } = [];
     }

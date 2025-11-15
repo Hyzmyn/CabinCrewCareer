@@ -62,6 +62,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<CampaignAssignment> CampaignAssignments { get; set; }
 
+        public DbSet<RoundActivity> RoundActivities { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);

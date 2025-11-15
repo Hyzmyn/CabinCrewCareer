@@ -12,10 +12,10 @@ namespace CabinCrewCareer.Infrastructure.UserApplications
 
             builder.HasKey(n => n.ApplicationId);
 
-            builder.HasOne(n => n.Round)
-                .WithMany(n => n.Applications)
-                .HasForeignKey(n => n.RoundId)
-                .OnDelete(DeleteBehavior.SetNull);
+            //builder.HasOne(n => n.Round)
+            //    .WithMany(n => n.Applications)
+            //    .HasForeignKey(n => n.RoundId)
+            //    .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
