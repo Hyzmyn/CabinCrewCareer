@@ -1,4 +1,5 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -8,9 +9,12 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.CreateCampaignRound
     public class CreateCampaignRoundCommandHandler : IRequestHandler<CreateCampaignRoundCommand, Response<bool>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CreateCampaignRoundCommandHandler(IUnitOfWork unitOfWork)
+        private readonly ICampaignRoundStatusService _campaignRoundStatusService;
+        
+        public CreateCampaignRoundCommandHandler(IUnitOfWork unitOfWork, ICampaignRoundStatusService campaignRoundStatusService)
         {
             _unitOfWork = unitOfWork;
+            _campaignRoundStatusService = campaignRoundStatusService;
         }
 
         public async Task<Response<bool>> Handle(CreateCampaignRoundCommand request, CancellationToken cancellationToken)
@@ -35,6 +39,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.CreateCampaignRound
             campaign.CampaignRounds.Add(campaignRound);
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
             await _unitOfWork.CompleteAsync();
+
+            // Tự động cập nhật status dựa trên StartDate và EndDate
+            await _campaignRoundStatusService.UpdateCampaignRoundStatusByDateAsync(campaignRound.CampaignRoundId);
+
             return new Response<bool>(true, "Campaign round created successfully", 200);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Infrastructure.CampaignAssignments;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
@@ -33,6 +34,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IRoundRepository Rounds { get; private set; }
 
+        public ICampaignAssignmentRepository CampaignAssignments { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -58,6 +61,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Rounds = new RoundRepository(_dbContext, _logger);
 
             Tests = new TestRepository(_dbContext, _logger);
+
+            CampaignAssignments = new CampaignAssignmentRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

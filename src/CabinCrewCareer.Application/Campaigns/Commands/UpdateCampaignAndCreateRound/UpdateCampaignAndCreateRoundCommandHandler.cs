@@ -1,19 +1,22 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound
 {
-    using CabinCrewCareer.Application.Common.Interfaces.Services;
     public class UpdateCampaignAndCreateRoundCommandHandler : IRequestHandler<UpdateCampaignAndCreateRoundCommand, Response<bool>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        public UpdateCampaignAndCreateRoundCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        private readonly ICampaignRoundStatusService _campaignRoundStatusService;
+
+        public UpdateCampaignAndCreateRoundCommandHandler(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ICampaignRoundStatusService campaignRoundStatusService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _campaignRoundStatusService = campaignRoundStatusService;
         }
 
         public async Task<Response<bool>> Handle(UpdateCampaignAndCreateRoundCommand request, CancellationToken cancellationToken)
@@ -139,6 +142,12 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                     campaign.CampaignRounds.Add(campaignRound);
                 }
                 await _unitOfWork.Campaigns.UpdateAsync(campaign);
+
+                // Tự động cập nhật status cho tất cả campaign rounds vừa tạo
+                foreach (var round in campaign.CampaignRounds.Where(r => r.IsActive))
+                {
+                    await _campaignRoundStatusService.UpdateCampaignRoundStatusByDateAsync(round.CampaignRoundId);
+                }
             }
             await _unitOfWork.CompleteAsync();
             return new Response<bool>(true, "Updated campaign and created round if provided", 200);
