@@ -1,4 +1,6 @@
 using CabinCrewCareer.Application.CampaignAssignments.Common;
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Wrappers;
@@ -26,12 +28,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
             var currentUserIdString = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out var currentUserId))
             {
-                return new Response<List<SimpleCampaignDto>>
-                {
-                    Code = 401,
-                    Message = "Không xác định được người dùng hiện tại",
-                    Data = []
-                };
+                return new Response<List<SimpleCampaignDto>>(
+                    code: (int)ResponseCode.FAILED_AUTHENTICATION,
+                    data: [],
+                    message: "Không xác định được người dùng hiện tại");
             }
 
             // Lấy tất cả assignments của user (Recruiter hoặc Examiner)
@@ -40,12 +40,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
 
             if (!assignments.Any())
             {
-                return new Response<List<SimpleCampaignDto>>
-                {
-                    Code = 200,
-                    Message = "Bạn chưa được giao việc nào",
-                    Data = []
-                };
+                return new Response<List<SimpleCampaignDto>>(
+                    code: (int)ResponseCode.SUCCESS,
+                    data: [],
+                    message: "Bạn chưa được giao việc nào");
             }
 
             // Group assignments theo campaign và chỉ lấy thông tin campaign
@@ -72,12 +70,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
                 result.Add(campaignDto);
             }
 
-            return new Response<List<SimpleCampaignDto>>
-            {
-                Code = 200,
-                Message = "Lấy danh sách campaign thành công",
-                Data = result
-            };
+            return new Response<List<SimpleCampaignDto>>(
+                code: (int)ResponseCode.SUCCESS,
+                data: result,
+                message: "Lấy danh sách campaign thành công");
         }
     }
 }

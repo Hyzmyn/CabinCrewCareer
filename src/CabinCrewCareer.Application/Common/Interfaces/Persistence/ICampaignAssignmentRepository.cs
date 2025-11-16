@@ -9,5 +9,6 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
         Task<List<CampaignAssignment>> GetAssignmentsByCampaignIdAsync(int campaignId);
         Task<bool> HasAssignmentsForCampaignAsync(int campaignId);
         Task<int> GetOngoingCampaignsCountByUserIdAsync(int userId);
+        Task<bool> HasOverlappingCampaignAsync(int userId, int campaignId);
     }
 }

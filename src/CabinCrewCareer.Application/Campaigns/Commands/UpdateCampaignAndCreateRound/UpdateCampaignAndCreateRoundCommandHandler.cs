@@ -1,3 +1,5 @@
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities;
@@ -24,24 +26,20 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
             if (campaign == null)
             {
-                return new Response<bool>
-                {
-                    Code = 404,
-                    Message = "Campaign not found",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_NOT_FOUND,
+                    data: false,
+                    message: ResponseCode.CAMPAIGN_NOT_FOUND.GetDescription());
             }
 
             // Chỉ cho phép cập nhật campaign ở trạng thái Draft hoặc Rejected
             if (campaign.CampaignStatus != CabinCrewCareer.Domain.Common.CampaignStatus.Draft && 
                 campaign.CampaignStatus != CabinCrewCareer.Domain.Common.CampaignStatus.Rejected)
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Can only update campaigns in Draft or Rejected status",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAIL,
+                    data: false,
+                    message: "Can only update campaigns in Draft or Rejected status");
             }
             // Get SeniorId from token
             var currentUserId = _currentUserService.CurrentPrincipal;
@@ -68,12 +66,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                 // Require targetQuantity for all rounds
                 if (rounds.Any(r => r.TargetQuantity <= 0))
                 {
-                    return new Response<bool>
-                    {
-                        Code = 400,
-                        Message = "Each round must have a positive targetQuantity",
-                        Data = false
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.FAIL,
+                        data: false,
+                        message: "Each round must have a positive targetQuantity");
                 }
 
                 int remain = campaignTarget;
@@ -85,12 +81,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         int maxQty = (int)Math.Round(campaignTarget * 0.7);
                         if (rounds[i].TargetQuantity < minQty || rounds[i].TargetQuantity > maxQty)
                         {
-                            return new Response<bool>
-                            {
-                                Code = 400,
-                                Message = $"Round 1 targetQuantity must be between 60% and 70% of campaign target ({minQty} - {maxQty})",
-                                Data = false
-                            };
+                            return new Response<bool>(
+                                code: (int)ResponseCode.FAIL,
+                                data: false,
+                                message: $"Round 1 targetQuantity must be between 60% and 70% of campaign target ({minQty} - {maxQty})");
                         }
                         remain -= rounds[i].TargetQuantity;
                     }
@@ -99,12 +93,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         int minQty = (int)Math.Round(remain * 0.8);
                         if (rounds[i].TargetQuantity < minQty)
                         {
-                            return new Response<bool>
-                            {
-                                Code = 400,
-                                Message = $"Last round targetQuantity must be at least 80% of remaining ({minQty})",
-                                Data = false
-                            };
+                            return new Response<bool>(
+                                code: (int)ResponseCode.FAIL,
+                                data: false,
+                                message: $"Last round targetQuantity must be at least 80% of remaining ({minQty})");
                         }
                         remain -= rounds[i].TargetQuantity;
                     }
@@ -114,12 +106,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         int maxQty = (int)Math.Round(remain * 0.7);
                         if (rounds[i].TargetQuantity < minQty || rounds[i].TargetQuantity > maxQty)
                         {
-                            return new Response<bool>
-                            {
-                                Code = 400,
-                                Message = $"Round {i+1} targetQuantity must be between 60% and 70% of remaining ({minQty} - {maxQty})",
-                                Data = false
-                            };
+                            return new Response<bool>(
+                                code: (int)ResponseCode.FAIL,
+                                data: false,
+                                message: $"Round {i+1} targetQuantity must be between 60% and 70% of remaining ({minQty} - {maxQty})");
                         }
                         remain -= rounds[i].TargetQuantity;
                     }
@@ -150,7 +140,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                 }
             }
             await _unitOfWork.CompleteAsync();
-            return new Response<bool>(true, "Updated campaign and created round if provided", 200);
+            return new Response<bool>(
+                code: (int)ResponseCode.UPDATED_SUCCESS,
+                data: true,
+                message: "Updated campaign and created round if provided");
         }
     }
 }

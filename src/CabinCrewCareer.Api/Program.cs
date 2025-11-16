@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddPresentation()
         .AddInfrastructure(builder.Configuration)
         .AddApplication();
+    builder.Services.AddSignalR();
 }
 
 var app = builder.Build();
@@ -24,6 +25,9 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.MapControllers();
+
+    // Register SignalR endpoints
+    app.MapHub<CabinCrewCareer.Infrastructure.Hubs.NotificationHub>("/notificationHub");
 
     app.Run();
 }

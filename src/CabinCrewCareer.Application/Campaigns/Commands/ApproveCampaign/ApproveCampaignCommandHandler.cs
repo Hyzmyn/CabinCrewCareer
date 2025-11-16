@@ -1,3 +1,5 @@
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
@@ -22,35 +24,29 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.ApproveCampaign
             var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
             if (campaign == null)
             {
-                return new Response<bool>
-                {
-                    Code = 404,
-                    Message = "Không tìm thấy chiến dịch",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_NOT_FOUND,
+                    data: false,
+                    message: "Không tìm thấy chiến dịch");
             }
 
             // Kiểm tra trạng thái campaign
             if (campaign.CampaignStatus != CampaignStatus.Pending)
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Chỉ có thể duyệt chiến dịch có trạng thái Pending",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAIL,
+                    data: false,
+                    message: "Chỉ có thể duyệt chiến dịch có trạng thái Pending");
             }
 
             // Lấy DirectorId từ token
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId))
             {
-                return new Response<bool>
-                {
-                    Code = 401,
-                    Message = "Không xác định được người duyệt",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAILED_AUTHENTICATION,
+                    data: false,
+                    message: "Không xác định được người duyệt");
             }
 
             // Cập nhật trạng thái campaign
@@ -61,12 +57,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.ApproveCampaign
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
             await _unitOfWork.CompleteAsync();
 
-            return new Response<bool>
-            {
-                Code = 200,
-                Message = "Duyệt chiến dịch thành công",
-                Data = true
-            };
+            return new Response<bool>(
+                code: (int)ResponseCode.SUCCESS,
+                data: true,
+                message: "Duyệt chiến dịch thành công");
         }
     }
 }

@@ -1,3 +1,5 @@
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
@@ -24,35 +26,29 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
             var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
             if (campaign == null)
             {
-                return new Response<bool>
-                {
-                    Code = 404,
-                    Message = "Campaign not found",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_NOT_FOUND,
+                    data: false,
+                    message: ResponseCode.CAMPAIGN_NOT_FOUND.GetDescription());
             }
 
             // Kiểm tra trạng thái campaign
             if (campaign.CampaignStatus != CampaignStatus.Pending)
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Can only update status for campaigns with Pending status",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAIL,
+                    data: false,
+                    message: "Can only update status for campaigns with Pending status");
             }
 
             // Get username from token
             var currentUserName = _currentUserService.UserName;
             if (string.IsNullOrEmpty(currentUserName))
             {
-                return new Response<bool>
-                {
-                    Code = 401,
-                    Message = "Unable to identify the approver",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAILED_AUTHENTICATION,
+                    data: false,
+                    message: "Unable to identify the approver");
             }
 
             if (request.Status == (int)CampaignStatus.Approved)
@@ -66,24 +62,20 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                 await _unitOfWork.Campaigns.UpdateAsync(campaign);
                 await _unitOfWork.CompleteAsync();
                 
-                return new Response<bool>
-                {
-                    Code = 200,
-                    Message = "Campaign approved successfully",
-                    Data = true
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.SUCCESS,
+                    data: true,
+                    message: "Campaign approved successfully");
             }
             else if (request.Status == (int)CampaignStatus.Rejected)
             {
                 // Check RejectReason
                 if (string.IsNullOrWhiteSpace(request.RejectReason))
                 {
-                    return new Response<bool>
-                    {
-                        Code = 400,
-                        Message = "Reject reason cannot be empty",
-                        Data = false
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.FAIL,
+                        data: false,
+                        message: "Reject reason cannot be empty");
                 }
 
                 // Increment rejected count
@@ -102,12 +94,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                     await _unitOfWork.Campaigns.UpdateAsync(campaign);
                     await _unitOfWork.CompleteAsync();
                     
-                    return new Response<bool>
-                    {
-                        Code = 200,
-                        Message = "Campaign canceled after reaching rejection limit (3 times)",
-                        Data = true
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.SUCCESS,
+                        data: true,
+                        message: "Campaign canceled after reaching rejection limit (3 times)");
                 }
                 else
                 {
@@ -121,22 +111,18 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                     await _unitOfWork.Campaigns.UpdateAsync(campaign);
                     await _unitOfWork.CompleteAsync();
                     
-                    return new Response<bool>
-                    {
-                        Code = 200,
-                        Message = $"Campaign rejected successfully ({campaign.RejectedCount}/3 rejections)",
-                        Data = true
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.SUCCESS,
+                        data: true,
+                        message: $"Campaign rejected successfully ({campaign.RejectedCount}/3 rejections)");
                 }
             }
             else
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Invalid status. Can only approve (2) or reject (3)",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAIL,
+                    data: false,
+                    message: "Invalid status. Can only approve (2) or reject (3)");
             }
         }
     }

@@ -1,4 +1,6 @@
 using CabinCrewCareer.Application.CampaignAssignments.Common;
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
@@ -27,12 +29,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks
             var currentUserIdString = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out var currentUserId))
             {
-                return new Response<List<AssignedCampaignDto>>
-                {
-                    Code = 401,
-                    Message = "Không xác định được người dùng hiện tại",
-                    Data = []
-                };
+                return new Response<List<AssignedCampaignDto>>(
+                    code: (int)ResponseCode.FAILED_AUTHENTICATION,
+                    data: [],
+                    message: "Không xác định được người dùng hiện tại");
             }
 
             // Lấy tất cả assignments của user (Recruiter hoặc Examiner)
@@ -41,12 +41,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks
 
             if (!assignments.Any())
             {
-                return new Response<List<AssignedCampaignDto>>
-                {
-                    Code = 200,
-                    Message = "Bạn chưa được giao việc nào",
-                    Data = []
-                };
+                return new Response<List<AssignedCampaignDto>>(
+                    code: (int)ResponseCode.SUCCESS,
+                    data: [],
+                    message: "Bạn chưa được giao việc nào");
             }
 
             // Group assignments theo campaign
@@ -64,7 +62,7 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks
                 var assignmentDtos = group.Select(a => new AssignmentDto
                 {
                     AssignmentId = a.AssignmentId,
-                    Task = a.Task,
+                    Task = GetTaskText(a.Task),
                     TaskDescription = a.TaskDescription,
                     Status = GetStatusText(a.Status),
                     AssignedAt = a.AssignedAt,
@@ -86,12 +84,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks
                 result.Add(campaignDto);
             }
 
-            return new Response<List<AssignedCampaignDto>>
-            {
-                Code = 200,
-                Message = "Lấy danh sách task thành công",
-                Data = result
-            };
+            return new Response<List<AssignedCampaignDto>>(
+                code: (int)ResponseCode.SUCCESS,
+                data: result,
+                message: "Lấy danh sách task thành công");
         }
 
         private static string GetStatusText(AssignmentStatus status)
@@ -102,6 +98,18 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks
                 AssignmentStatus.InProgress => "In Progress", 
                 AssignmentStatus.Completed => "Completed",
                 AssignmentStatus.Cancelled => "Cancelled",
+                _ => "Unknown"
+            };
+        }
+
+        private static string GetTaskText(TaskType task)
+        {
+            return task switch
+            {
+                TaskType.Screening => "Screening",
+                TaskType.Interview => "Interview",
+                TaskType.TestCreation => "Test Creation",
+                TaskType.AppearanceCheck => "Appearance Check",
                 _ => "Unknown"
             };
         }

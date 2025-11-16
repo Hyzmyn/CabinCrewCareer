@@ -1,0 +1,10 @@
+using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Domain.Entities;
+
+namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
+{
+    public interface INotificationRepository : IRepository<Notification>
+    {
+        // Add custom methods if needed
+    }
+}
