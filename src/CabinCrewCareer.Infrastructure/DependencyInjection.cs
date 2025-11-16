@@ -38,6 +38,8 @@ namespace CabinCrewCareer.Infrastructure
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ICampaignStatusService, CampaignStatusService>();
             services.AddScoped<ICampaignRoundStatusService, CampaignRoundStatusService>();
+            services.AddScoped<IAssignmentStatusService, AssignmentStatusService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddHostedService<CampaignStatusBackgroundService>();
             services.AddHostedService<CampaignRoundStatusBackgroundService>();
             // Use Cloudinary instead of Firebase Storage (free tier)

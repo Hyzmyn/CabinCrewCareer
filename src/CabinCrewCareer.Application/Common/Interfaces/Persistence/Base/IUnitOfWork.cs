@@ -23,6 +23,8 @@
 
         ICampaignAssignmentRepository CampaignAssignments { get; }
 
+        INotificationRepository Notifications { get; }
+
         Task CompleteAsync();
     }
 }

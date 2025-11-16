@@ -1,3 +1,5 @@
+using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
@@ -13,15 +15,18 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly ICampaignStatusService _campaignStatusService;
+        private readonly INotificationService _notificationService;
 
         public AssignRecruitersAndExaminersCommandHandler(
             IUnitOfWork unitOfWork, 
             ICurrentUserService currentUserService,
-            ICampaignStatusService campaignStatusService)
+            ICampaignStatusService campaignStatusService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _campaignStatusService = campaignStatusService;
+            _notificationService = notificationService;
         }
 
         public async Task<Response<bool>> Handle(
@@ -32,47 +37,40 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
             var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
             if (campaign == null)
             {
-                return new Response<bool>
-                {
-                    Code = 404,
-                    Message = "Không tìm thấy chiến dịch",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_NOT_FOUND,
+                    data: false,
+                    message: ResponseCode.CAMPAIGN_NOT_FOUND.GetDescription());
             }
 
             // Kiểm tra trạng thái campaign (chỉ campaign Approved mới có thể giao việc)
+            // Sau khi giao việc sẽ tự động chuyển sang Published
             if (campaign.CampaignStatus != CampaignStatus.Approved)
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Chỉ có thể giao việc cho chiến dịch đã được duyệt",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_NOT_APPROVED,
+                    data: false,
+                    message: "Chỉ có thể giao việc cho campaign ở trạng thái Approved");
             }
 
             // Kiểm tra quyền và lấy thông tin Senior đăng nhập
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId) || !int.TryParse(currentUserId, out var seniorUserId))
             {
-                return new Response<bool>
-                {
-                    Code = 401,
-                    Message = "Không xác định được người giao việc",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAILED_AUTHENTICATION,
+                    data: false,
+                    message: ResponseCode.FAILED_AUTHENTICATION.GetDescription());
             }
 
             // Lấy thông tin Senior để có username
             var seniorUser = await _unitOfWork.Users.GetByIdAsync(seniorUserId);
             if (seniorUser == null)
             {
-                return new Response<bool>
-                {
-                    Code = 401,
-                    Message = "Không tìm thấy thông tin Senior",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.USER_NOT_FOUND,
+                    data: false,
+                    message: ResponseCode.USER_NOT_FOUND.GetDescription());
             }
 
             // Kiểm tra đã giao việc cho campaign này chưa
@@ -81,12 +79,10 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
             
             if (existingAssignments.Any())
             {
-                return new Response<bool>
-                {
-                    Code = 400,
-                    Message = "Chiến dịch này đã được giao việc",
-                    Data = false
-                };
+                return new Response<bool>(
+                    code: (int)ResponseCode.CAMPAIGN_ALREADY_ASSIGNED,
+                    data: false,
+                    message: ResponseCode.CAMPAIGN_ALREADY_ASSIGNED.GetDescription());
             }
 
             // Kiểm tra tất cả users trong assignments có tồn tại không
@@ -95,26 +91,39 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
                 var user = await _unitOfWork.Users.GetByIdAsync(assignment.UserId);
                 if (user == null)
                 {
-                    return new Response<bool>
-                    {
-                        Code = 404,
-                        Message = $"Không tìm thấy user với ID {assignment.UserId}",
-                        Data = false
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.USER_NOT_FOUND,
+                        data: false,
+                        message: $"{ResponseCode.USER_NOT_FOUND.GetDescription()} (ID: {assignment.UserId})");
                 }
 
-                // Kiểm tra workload - Recruiter/Examiner không được có quá 3 campaigns "Ongoing"
+                // ========== VALIDATION LOGIC MỚI ==========
+                // 1. Chỉ được 1 campaign ongoing tại một thời điểm
+                // 2. Không được overlap thời gian với campaigns khác
+                // 3. Cho phép nhiều campaigns nhưng ở các khoảng thời gian khác nhau
+                
+                // Kiểm tra chỉ được 1 campaign ongoing tại một thời điểm
                 var ongoingCampaignsCount = await _unitOfWork.CampaignAssignments
                     .GetOngoingCampaignsCountByUserIdAsync(assignment.UserId);
                 
-                if (ongoingCampaignsCount >= 3)
+                if (ongoingCampaignsCount > 0)
                 {
-                    return new Response<bool>
-                    {
-                        Code = 400,
-                        Message = $"{user.UserName} đã có {ongoingCampaignsCount} campaigns đang diễn ra. Không thể giao thêm nhiệm vụ.",
-                        Data = false
-                    };
+                    return new Response<bool>(
+                        code: (int)ResponseCode.USER_HAS_ONGOING_CAMPAIGN,
+                        data: false,
+                        message: $"{user.UserName}: {ResponseCode.USER_HAS_ONGOING_CAMPAIGN.GetDescription()}");
+                }
+                
+                // Kiểm tra overlap thời gian với các campaigns khác
+                var hasOverlap = await _unitOfWork.CampaignAssignments
+                    .HasOverlappingCampaignAsync(assignment.UserId, request.CampaignId);
+                    
+                if (hasOverlap)
+                {
+                    return new Response<bool>(
+                        code: (int)ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN,
+                        data: false,
+                        message: $"{user.UserName}: {ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN.GetDescription()}");
                 }
             }
 
@@ -141,15 +150,47 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
 
             await _unitOfWork.CompleteAsync();
 
-            // Cập nhật status dựa trên StartDate và EndDate
-            await _campaignStatusService.UpdateCampaignStatusByDateAsync(request.CampaignId);
-
-            return new Response<bool>
+            // Gửi notification cho tất cả user được giao việc
+            try
             {
-                Code = 200,
-                Message = "Giao việc thành công. Trạng thái chiến dịch được cập nhật tự động.",
-                Data = true
-            };
+                foreach (var assignment in request.Assignments)
+                {
+                    var user = await _unitOfWork.Users.GetByIdAsync(assignment.UserId);
+                    if (user != null)
+                    {
+                        await _notificationService.SendTaskAssignmentNotificationAsync(
+                            userId: assignment.UserId,
+                            campaignName: campaign.CampaignName,
+                            taskDescription: assignment.TaskType.ToString(),
+                            assignedBy: seniorUser.UserName
+                        );
+                    }
+                }
+                
+                // Lưu tất cả notifications vào DB
+                await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                // Notification failed but assignment already saved
+                // Continue without failing the whole request
+            }
+
+            // Cập nhật status dựa trên StartDate và EndDate
+            try
+            {
+                await _campaignStatusService.UpdateCampaignStatusByDateAsync(request.CampaignId);
+            }
+            catch (Exception)
+            {
+                // Status update failed but assignment already saved
+                // Background service will update it later
+            }
+
+            return new Response<bool>(
+                code: (int)ResponseCode.CREATED_SUCCESS,
+                data: true,
+                message: ResponseCode.CREATED_SUCCESS.GetDescription());
         }
 
 

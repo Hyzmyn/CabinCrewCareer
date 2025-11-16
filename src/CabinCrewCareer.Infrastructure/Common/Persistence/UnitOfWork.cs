@@ -4,6 +4,7 @@ using CabinCrewCareer.Infrastructure.CampaignAssignments;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
+using CabinCrewCareer.Infrastructure.Notifications;
 using CabinCrewCareer.Infrastructure.Tests;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
@@ -36,6 +37,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public ICampaignAssignmentRepository CampaignAssignments { get; private set; }
 
+        public INotificationRepository Notifications { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -63,6 +66,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Tests = new TestRepository(_dbContext, _logger);
 
             CampaignAssignments = new CampaignAssignmentRepository(_dbContext, _logger);
+
+            Notifications = new NotificationRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
