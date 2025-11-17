@@ -98,26 +98,9 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
                 }
 
                 // ========== VALIDATION LOGIC MỚI ==========
-                // 1. Chỉ được 1 campaign ongoing tại một thời điểm
-                // 2. Không được overlap thời gian với campaigns khác
-                // 3. Cho phép nhiều campaigns nhưng ở các khoảng thời gian khác nhau
-                
-                // Kiểm tra chỉ được 1 campaign ongoing tại một thời điểm
-                var ongoingCampaignsCount = await _unitOfWork.CampaignAssignments
-                    .GetOngoingCampaignsCountByUserIdAsync(assignment.UserId);
-                
-                if (ongoingCampaignsCount > 0)
-                {
-                    return new Response<bool>(
-                        code: (int)ResponseCode.USER_HAS_ONGOING_CAMPAIGN,
-                        data: false,
-                        message: $"{user.UserName}: {ResponseCode.USER_HAS_ONGOING_CAMPAIGN.GetDescription()}");
-                }
-                
-                // Kiểm tra overlap thời gian với các campaigns khác
+                // Chỉ kiểm tra overlap thời gian với các campaigns khác
                 var hasOverlap = await _unitOfWork.CampaignAssignments
                     .HasOverlappingCampaignAsync(assignment.UserId, request.CampaignId);
-                    
                 if (hasOverlap)
                 {
                     return new Response<bool>(
