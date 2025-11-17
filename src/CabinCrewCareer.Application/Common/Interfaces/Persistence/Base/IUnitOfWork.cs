@@ -25,6 +25,8 @@
 
         INotificationRepository Notifications { get; }
 
+        IRoundActivityRepository RoundActivites { get; }
+
         Task CompleteAsync();
     }
 }

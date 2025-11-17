@@ -5,6 +5,5 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
 {
     public interface ICampaignRepository : IRepository<Campaign>
     {
-        // Add custom methods if needed
     }
 }

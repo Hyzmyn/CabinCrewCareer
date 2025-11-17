@@ -39,6 +39,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public INotificationRepository Notifications { get; private set; }
 
+        public IRoundActivityRepository RoundActivites { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -68,6 +70,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             CampaignAssignments = new CampaignAssignmentRepository(_dbContext, _logger);
 
             Notifications = new NotificationRepository(_dbContext, _logger);
+
+            RoundActivites = new RoundActitityRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

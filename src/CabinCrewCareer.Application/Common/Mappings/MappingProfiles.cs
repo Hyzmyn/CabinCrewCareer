@@ -58,6 +58,18 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<Round, GetRoundResponse>()
                 .ForMember(cr => cr.RoundName, cr => cr.MapFrom(cr => cr.RoundType.GetDescription()));
+
+            CreateMap<CampaignRound, GetUserCampaignResponse>()
+                .ForMember(u => u.CampaignName, u => u.MapFrom(u => u.Campaign.CampaignName))
+                .ForMember(u => u.RoundStatus, u => u.MapFrom(u => u.RoundStatus.GetDescription()))
+                .ForMember(u => u.Description, u => u.MapFrom(u => u.Campaign.Description))
+                .ForMember(u => u.AirlinePartner, u => u.MapFrom(u => u.Campaign.CampaignRequest.AirlinePartner.PartnerName));
+
+            CreateMap<Round, GetRoundActivityResponse>()
+                .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundType.GetDescription()));
+
+            CreateMap<RoundActivity, GetRoundStatusResponse>()
+                .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()));
             #endregion
         }
     }

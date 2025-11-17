@@ -1,14 +1,16 @@
 ﻿using Asp.Versioning;
+using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns;
+using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Users.Commands.CreateUser;
 using CabinCrewCareer.Application.Users.Commands.DisableUser;
 using CabinCrewCareer.Application.Users.Commands.UpdateUser;
 using CabinCrewCareer.Application.Users.Commands.UploadProfileImg;
-using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns;
-using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Application.Users.Queries.GetUserById;
+using CabinCrewCareer.Application.Users.Queries.GetUserHistory;
+using CabinCrewCareer.Application.Users.Queries.GetUserOngoingCampaign;
 using CabinCrewCareer.Application.Users.Queries.GetUsers;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -311,6 +313,72 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 logger.LogError(ex, "Error in GetMyCampaignsAsync");
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        #endregion
+
+        #region Get User Campaign History
+        /// <summary>
+        /// Get user campaign history
+        /// </summary>
+        /// <returns>A list of all user campaign history</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("history")]
+        [ProducesResponseType(typeof(Response<List<GetUserCampaignResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetHistoryAsync()
+        {
+            try
+            {
+                return Ok(await mediator.Send(
+                    new GetUserHistoryQuery()));
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get User Ongoing Campaign
+        /// <summary>
+        /// Get user ongoing campaign
+        /// </summary>
+        /// <returns>User ongoing campaign</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("ongoing-campaign")]
+        [ProducesResponseType(typeof(Response<GetUserCampaignResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetOngoingAsync()
+        {
+            try
+            {
+                return Ok(await mediator.Send(
+                    new GetUserOngoingCampaignQuery()));
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
             }
         }
         #endregion
