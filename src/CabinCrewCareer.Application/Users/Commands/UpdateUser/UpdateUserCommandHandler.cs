@@ -26,6 +26,65 @@ namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
                 throw new ValidationException(ResponseCode.USER_NOT_FOUND, errorMessages);
             }
 
+            user.FullName = request.UpdateUserRequest.Fullname;
+            user.Address = request.UpdateUserRequest.Address;
+            user.DateOfBirth = request.UpdateUserRequest.DateOfBirth;
+            user.Gender = request.UpdateUserRequest.Gender;
+            user.WardId = request.UpdateUserRequest.WardId;
+
+            #region Same Email, Different PhoneNumber
+            if (request.UpdateUserRequest.Email.Equals(user.Email)
+                &&
+                !request.UpdateUserRequest.PhoneNumber.Equals(user.PhoneNumber))
+            {
+                if (await _unitOfWork.Users.CheckExistPhoneNumberAsync(request.UpdateUserRequest.PhoneNumber))
+                {
+                    errorMessages.Add(ResponseCode.PHONE_NUMBER_HAS_EXISTED.GetDescription());
+                    throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
+                }
+
+                user.PhoneNumber = request.UpdateUserRequest.PhoneNumber;
+
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+
+                return new Response<string>(code: (int)ResponseCode.UPDATED_SUCCESS, data: ResponseCode.UPDATED_SUCCESS.ToString(), message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            }
+            #endregion
+
+            #region Different Email, Same PhoneNumber
+            if (!request.UpdateUserRequest.Email.Equals(user.Email)
+                &&
+                request.UpdateUserRequest.PhoneNumber.Equals(user.PhoneNumber))
+            {
+                if (await _unitOfWork.Users.CheckExistEmailAsync(request.UpdateUserRequest.Email))
+                {
+                    errorMessages.Add(ResponseCode.EMAIL_HAS_EXISTED.GetDescription());
+                    throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
+                }
+
+                user.Email = request.UpdateUserRequest.Email;
+
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+
+                return new Response<string>(code: (int)ResponseCode.UPDATED_SUCCESS, data: ResponseCode.UPDATED_SUCCESS.ToString(), message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            }
+            #endregion
+
+            #region Same Email, Same PhoneNumber
+            if (request.UpdateUserRequest.Email.Equals(user.Email)
+                &&
+                request.UpdateUserRequest.PhoneNumber.Equals(user.PhoneNumber))
+            {
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+
+                return new Response<string>(code: (int)ResponseCode.UPDATED_SUCCESS, data: ResponseCode.UPDATED_SUCCESS.ToString(), message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            }
+            #endregion
+
+            #region Different Email, Different PhoneNumber
             var validator = new UpdateUserCommandValidator(_unitOfWork);
             var result = await validator.ValidateAsync(request.UpdateUserRequest, cancellationToken);
             if (!result.IsValid)
@@ -37,18 +96,14 @@ namespace CabinCrewCareer.Application.Users.Commands.UpdateUser
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
-            user.FullName = request.UpdateUserRequest.Fullname;
             user.Email = request.UpdateUserRequest.Email;
             user.PhoneNumber = request.UpdateUserRequest.PhoneNumber;
-            user.Address = request.UpdateUserRequest.Address;
-            user.DateOfBirth = request.UpdateUserRequest.DateOfBirth;
-            user.Gender = request.UpdateUserRequest.Gender;
-            user.WardId = request.UpdateUserRequest.WardId;
 
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
             return new Response<string>(code: (int)ResponseCode.UPDATED_SUCCESS, data: ResponseCode.UPDATED_SUCCESS.ToString(), message: ResponseCode.UPDATED_SUCCESS.GetDescription());
+            #endregion
         }
     }
 }

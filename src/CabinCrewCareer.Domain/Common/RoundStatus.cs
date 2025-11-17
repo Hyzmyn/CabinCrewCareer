@@ -9,6 +9,10 @@ namespace CabinCrewCareer.Domain.Common
         [Description("Upcoming")]
         Upcoming,
         [Description("Ended")]
-        Ended
+        Ended,
+        [Description("Failed")]
+        Failed,
+        [Description("Passed")]
+        Passed
     }
 }
