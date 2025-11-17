@@ -8,6 +8,8 @@ namespace CabinCrewCareer.Domain.Common
         Screening = 1,
         [Description("Appearance")]
         Appearance,
+        [Description("Flight Hours Confirmation")]
+        FlightHoursConfirmation,
         [Description("Test")]
         Test,
         [Description("Interview")]

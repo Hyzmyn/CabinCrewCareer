@@ -89,6 +89,74 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
             foreach (var assignment in request.Assignments)
             {
                 var user = await _unitOfWork.Users.GetByIdAsync(assignment.UserId);
+            // ======= TỰ ĐỘNG TẠO ROUNDS CHO ĐỢT ĐẦU TIÊN =======
+            try
+            {
+                var campaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(x => x.CampaignId == campaign.CampaignId);
+                var firstCampaignRound = campaignRounds
+                    .Where(x => x.StartDate.HasValue)
+                    .OrderBy(x => x.StartDate.Value)
+                    .FirstOrDefault();
+
+                if (firstCampaignRound != null)
+                {
+                    List<RoundType> roundTypes;
+                    if (campaign.CampaignType == CampaignType.Recruitment)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.Appearance,
+                            RoundType.Test,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else if (campaign.CampaignType == CampaignType.Promotion)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.FlightHoursConfirmation,
+                            RoundType.Test,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else
+                    {
+                        roundTypes = new List<RoundType>();
+                    }
+
+                    var existingRounds = await _unitOfWork.Rounds.GetAllAsync(r => r.CampaignRoundId == firstCampaignRound.CampaignRoundId);
+
+                    var newRounds = new List<Round>();
+                    foreach (var roundType in roundTypes)
+                    {
+                        if (!existingRounds.Any(r => r.RoundType == roundType))
+                        {
+                            newRounds.Add(new Round
+                            {
+                                CampaignRoundId = firstCampaignRound.CampaignRoundId,
+                                RoundType = roundType,
+                                StartDate = firstCampaignRound.StartDate,
+                                EndDate = firstCampaignRound.EndDate,
+                                TestId = null,
+                                Notes = string.Empty
+                            });
+                        }
+                    }
+                    if (newRounds.Count > 0)
+                    {
+                        await _unitOfWork.Rounds.AddRangeAsync(newRounds);
+                        await _unitOfWork.CompleteAsync();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Log lỗi tạo rounds nếu cần
+            }
                 if (user == null)
                 {
                     return new Response<bool>(
@@ -110,6 +178,79 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
                 }
             }
 
+            // ======= TỰ ĐỘNG TẠO ROUNDS CHO ĐỢT ĐẦU TIÊN =======
+            try
+            {
+                // Lấy tất cả campaign rounds của campaign, sắp xếp theo startDate tăng dần
+                var campaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(x => x.CampaignId == campaign.CampaignId);
+                var firstCampaignRound = campaignRounds
+                    .Where(x => x.StartDate.HasValue)
+                    .OrderBy(x => x.StartDate.Value)
+                    .FirstOrDefault();
+
+                if (firstCampaignRound != null)
+                {
+                    List<RoundType> roundTypes;
+                    if (campaign.CampaignType == CampaignType.Recruitment)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.Appearance,
+                            RoundType.Test,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else if (campaign.CampaignType == CampaignType.Promotion)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.FlightHoursConfirmation,
+                            RoundType.Test,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else
+                    {
+                        roundTypes = new List<RoundType>();
+                    }
+
+                    // Lấy các rounds đã tồn tại của đợt đầu tiên
+                    var existingRounds = await _unitOfWork.Rounds.GetAllAsync(r => r.CampaignRoundId == firstCampaignRound.CampaignRoundId);
+
+                    var newRounds = new List<Round>();
+                    foreach (var roundType in roundTypes)
+                    {
+                        // Nếu chưa tồn tại round này thì tạo mới
+                        if (!existingRounds.Any(r => r.RoundType == roundType))
+                        {
+                            newRounds.Add(new Round
+                            {
+                                CampaignRoundId = firstCampaignRound.CampaignRoundId,
+                                RoundType = roundType,
+                                StartDate = firstCampaignRound.StartDate,
+                                EndDate = firstCampaignRound.EndDate,
+                                TestId = null,
+                                Notes = string.Empty
+                            });
+                        }
+                    }
+                    if (newRounds.Count > 0)
+                    {
+                        await _unitOfWork.Rounds.AddRangeAsync(newRounds);
+                        await _unitOfWork.CompleteAsync();
+                    }
+                }
+                // else: không tìm thấy đợt đầu tiên, không tạo rounds
+            }
+            catch (Exception)
+            {
+                // Log lỗi tạo rounds
+                // TODO: Thêm logger nếu cần
+            }
             // Tạo assignments theo danh sách
             foreach (var assignment in request.Assignments)
             {
@@ -175,7 +316,5 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
                 data: true,
                 message: ResponseCode.CREATED_SUCCESS.GetDescription());
         }
-
-
     }
 }
