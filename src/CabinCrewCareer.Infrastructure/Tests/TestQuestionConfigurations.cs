@@ -13,7 +13,7 @@ namespace CabinCrewCareer.Infrastructure.Tests
             builder.HasKey(n => n.QuestionId);
 
             builder.Property(n => n.QuestionContent)
-                .HasMaxLength(50)
+                .HasMaxLength(1000)
                 .IsRequired();
 
             builder.HasOne(u => u.Test)

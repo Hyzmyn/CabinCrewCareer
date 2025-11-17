@@ -2,6 +2,7 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.TestQuestions.Commands.CreateTestQuestion;
 using CabinCrewCareer.Application.TestQuestions.Commands.CreateBulkTestQuestions;
 using CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFromExcel;
+using CabinCrewCareer.Application.TestQuestions.Queries.GetTestQuestions;
 using CabinCrewCareer.Application.TestQuestions.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using CabinCrewCareer.Api.Models;
@@ -214,6 +215,77 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 var command = new ImportQuestionsFromExcelCommand(testId, excelFile);
                 return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test Questions
+        /// <summary>
+        /// Get all questions for a specific test
+        /// </summary>
+        /// <param name="testId">Test ID to get questions for</param>
+        /// <remarks>
+        /// **Retrieve all questions and options for a test**
+        /// 
+        /// **Logic based on TestType:**
+        /// 
+        /// 1. **EnglishListening (1)** and **Practical (3)**:
+        ///    - Returns questions WITH options
+        ///    - Each question includes list of answer options
+        ///    - Options contain OptionId, OptionContent, and IsCorrect flag
+        /// 
+        /// 2. **EnglishSpeaking (2)**:
+        ///    - Returns questions WITHOUT options (Options = null)
+        ///    - These are open-ended questions that don't require multiple choice answers
+        /// 
+        /// **Response includes:**
+        /// - Test information (ID, Name, Type)
+        /// - Total number of questions
+        /// - List of questions ordered by OrderNumber
+        /// - For each question: QuestionId, QuestionContent, Score, OrderNumber
+        /// - Options (only for Listening/Practical tests)
+        /// 
+        /// **Use cases:**
+        /// - Display test questions to test takers
+        /// - Review test content for examiners
+        /// - Test preview before starting
+        /// 
+        /// Note: This endpoint can be accessed by all authenticated users.
+        /// </remarks>
+        /// <returns>List of questions with or without options based on test type</returns>
+        /// <response code="200">Ok - Questions retrieved successfully</response>
+        /// <response code="400">Bad Request - Invalid test ID</response>
+        /// <response code="401">Unauthorized - User not authenticated</response>
+        /// <response code="404">Not Found - Test not found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("test/{testId}")]
+        [ProducesResponseType(typeof(Response<GetTestQuestionsResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetTestQuestionsAsync(int testId)
+        {
+            try
+            {
+                var query = new GetTestQuestionsQuery(testId);
+                return Ok(await mediator.Send(query));
             }
             catch (ValidationException e)
             {

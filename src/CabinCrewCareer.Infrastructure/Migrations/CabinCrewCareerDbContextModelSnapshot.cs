@@ -777,8 +777,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<string>("QuestionContent")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");

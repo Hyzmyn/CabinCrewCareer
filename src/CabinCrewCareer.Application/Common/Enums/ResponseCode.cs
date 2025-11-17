@@ -123,6 +123,12 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Phone number has already been registered")]
         PHONE_NUMBER_HAS_EXISTED = 38,
 
+        [Description("Retrieved successfully")]
+        GET_SUCCESS = 39,
+
+        [Description("Retrieved unsuccessfully")]
+        GET_UNSUCC = 40,
+
         #endregion
     }
 }
