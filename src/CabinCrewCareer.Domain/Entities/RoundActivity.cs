@@ -1,8 +1,12 @@
-﻿namespace CabinCrewCareer.Domain.Entities
+﻿using CabinCrewCareer.Domain.Common;
+
+namespace CabinCrewCareer.Domain.Entities
 {
     public class RoundActivity
     {
         public int ActivityId { get; set; }
+
+        public ActivityStatus Status { get; set; }
 
         // Foreign Keys
         public int? RoundId { get; set; }

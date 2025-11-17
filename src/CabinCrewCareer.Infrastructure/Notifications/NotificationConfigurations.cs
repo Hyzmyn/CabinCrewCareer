@@ -14,11 +14,11 @@ namespace CabinCrewCareer.Infrastructure.Notifications
 
             builder.Property(n => n.Title)
                 .IsRequired()
-                .HasMaxLength(25);
+                .HasMaxLength(50);
 
             builder.Property(n => n.Body)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(250);
 
             builder.HasOne(n => n.NotificationType)
                 .WithMany(n => n.Notifications)
