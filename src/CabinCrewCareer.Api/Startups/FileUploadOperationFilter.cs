@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 
 namespace CabinCrewCareer.Api.Startups;
 
@@ -7,72 +8,127 @@ public class FileUploadOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var formFileParameters = context.ApiDescription.ParameterDescriptions
-            .Where(p => p.Type == typeof(IFormFile) || 
-                       (Nullable.GetUnderlyingType(p.Type) == null && 
-                        p.Type.IsGenericType && 
-                        p.Type.GetGenericTypeDefinition() == typeof(Nullable<>) == false &&
-                        p.Type == typeof(IFormFile)))
+        // Check if endpoint consumes multipart/form-data
+        var consumesFormData = context.ApiDescription.ActionDescriptor.EndpointMetadata
+            .OfType<Microsoft.AspNetCore.Mvc.ConsumesAttribute>()
+            .Any(attr => attr.ContentTypes.Contains("multipart/form-data"));
+
+        if (!consumesFormData)
+            return;
+
+        // Get all parameters from form
+        var formParameters = context.ApiDescription.ParameterDescriptions
+            .Where(p => p.Source.Id == "Form")
             .ToList();
 
-        // Check if any parameter is IFormFile by name convention or model property
-        var hasFileParameter = context.ApiDescription.ParameterDescriptions
-            .Any(p => p.Type == typeof(IFormFile) || p.Name.Contains("file", StringComparison.OrdinalIgnoreCase));
-
-        if (!hasFileParameter)
+        if (!formParameters.Any())
             return;
+
+        // Build request body schema
+        var properties = new Dictionary<string, OpenApiSchema>();
+        var requiredFields = new HashSet<string>();
+
+        foreach (var param in formParameters)
+        {
+            // Check if parameter type is IFormFile
+            if (param.Type == typeof(IFormFile))
+            {
+                properties[param.Name] = new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
+                };
+                
+                if (param.IsRequired)
+                    requiredFields.Add(param.Name);
+            }
+            // Check if parameter is a complex type that might contain IFormFile
+            else if (param.Type.IsClass && param.Type != typeof(string))
+            {
+                // Get all properties of the model
+                var modelProperties = param.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                
+                foreach (var prop in modelProperties)
+                {
+                    if (prop.PropertyType == typeof(IFormFile))
+                    {
+                        properties[prop.Name] = new OpenApiSchema
+                        {
+                            Type = "string",
+                            Format = "binary"
+                        };
+                    }
+                    else
+                    {
+                        properties[prop.Name] = new OpenApiSchema
+                        {
+                            Type = GetSchemaType(prop.PropertyType)
+                        };
+                    }
+                    
+                    // Check if property is required (not nullable)
+                    if (!IsNullable(prop.PropertyType))
+                        requiredFields.Add(prop.Name);
+                }
+            }
+            else
+            {
+                properties[param.Name] = new OpenApiSchema
+                {
+                    Type = GetSchemaType(param.Type)
+                };
+                
+                if (param.IsRequired)
+                    requiredFields.Add(param.Name);
+            }
+        }
 
         operation.RequestBody = new OpenApiRequestBody
         {
-            Content =
+            Content = new Dictionary<string, OpenApiMediaType>
             {
                 ["multipart/form-data"] = new OpenApiMediaType
                 {
                     Schema = new OpenApiSchema
                     {
                         Type = "object",
-                        Properties = context.ApiDescription.ParameterDescriptions
-                            .Where(p => p.Source.Id != "Path") // Exclude path parameters like {id}
-                            .ToDictionary(
-                                p => p.Name,
-                                p => IsFileParameter(p.Type, p.Name)
-                                    ? new OpenApiSchema { Type = "string", Format = "binary" }
-                                    : new OpenApiSchema { Type = GetSchemaType(p.Type) }
-                            ),
-                        Required = context.ApiDescription.ParameterDescriptions
-                            .Where(p => p.IsRequired && p.Source.Id != "Path") // Exclude path parameters
-                            .Select(p => p.Name)
-                            .ToHashSet()
+                        Properties = properties,
+                        Required = requiredFields
                     }
                 }
             }
         };
 
-        // Remove only form parameters, keep path parameters (like {id})
-        var parametersToRemove = operation.Parameters
-            .Where(p => p.In == ParameterLocation.Query || p.In == ParameterLocation.Header)
+        // Clear parameters (they're now in request body)
+        var paramsToRemove = operation.Parameters
+            .Where(p => formParameters.Any(fp => fp.Name == p.Name))
             .ToList();
-        
-        foreach (var param in parametersToRemove)
+
+        foreach (var param in paramsToRemove)
         {
             operation.Parameters.Remove(param);
         }
     }
 
-    private static bool IsFileParameter(Type type, string name)
+    private static bool IsNullable(Type type)
     {
-        return type == typeof(IFormFile) || 
-               name.Contains("file", StringComparison.OrdinalIgnoreCase);
+        return Nullable.GetUnderlyingType(type) != null || 
+               !type.IsValueType;
     }
 
     private static string GetSchemaType(Type type)
     {
-        if (type == typeof(int) || type == typeof(int?)) return "integer";
-        if (type == typeof(long) || type == typeof(long?)) return "integer";
-        if (type == typeof(bool) || type == typeof(bool?)) return "boolean";
-        if (type == typeof(double) || type == typeof(double?) || 
-            type == typeof(float) || type == typeof(float?) ||
-            type == typeof(decimal) || type == typeof(decimal?)) return "number";
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+        
+        if (underlyingType == typeof(int) || underlyingType == typeof(long))
+            return "integer";
+        
+        if (underlyingType == typeof(bool))
+            return "boolean";
+        
+        if (underlyingType == typeof(double) || underlyingType == typeof(float) || underlyingType == typeof(decimal))
+            return "number";
+        
         return "string";
     }
 }

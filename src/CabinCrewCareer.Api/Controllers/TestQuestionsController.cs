@@ -1,6 +1,7 @@
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.TestQuestions.Commands.CreateTestQuestion;
 using CabinCrewCareer.Application.TestQuestions.Commands.CreateBulkTestQuestions;
+using CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFromExcel;
 using CabinCrewCareer.Application.TestQuestions.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using CabinCrewCareer.Api.Models;
@@ -137,6 +138,81 @@ namespace CabinCrewCareer.Api.Controllers
                     request.TestId,
                     request.Questions);
 
+                return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Import Questions From Excel
+        /// <summary>
+        /// Examiner imports questions from Excel file
+        /// </summary>
+        /// <remarks>
+        /// **Import multiple questions from Excel file**
+        /// 
+        /// Excel file format (starting from row 2, row 1 is header):
+        /// - **Column A (1)**: OrderNumber - Question order number
+        /// - **Column B (2)**: QuestionContent - Question text content
+        /// - **Column C (3)**: Score - Points for this question (1-100)
+        /// - **Column D-I (4-9)**: Options - Answer options (leave empty if not needed)
+        /// - **Column J (10)**: CorrectAnswer - Text of correct answer (fallback if bold detection fails)
+        /// 
+        /// **Option detection:**
+        /// 1. **BOLD text** in columns D-I will be marked as correct answer (IsCorrect = true)
+        /// 2. If no bold option found, use Column J to match correct answer text
+        /// 3. Empty option columns will be skipped (supports 3-6 options)
+        /// 
+        /// **TestType requirements:**
+        /// - **EnglishListening/Practical**: 4-6 options required, exactly 1 must be correct
+        /// - **EnglishSpeaking**: No options allowed
+        /// 
+        /// **File constraints:**
+        /// - Format: .xlsx or .xls only
+        /// - Max size: 10 MB
+        /// - Processes all rows until empty OrderNumber found
+        /// 
+        /// **Example Excel structure:**
+        /// | OrderNumber | QuestionContent | Score | Option1 | Option2 | Option3 | Option4 | Option5 | Option6 | CorrectAnswer |
+        /// |-------------|-----------------|-------|---------|---------|---------|---------|---------|---------|---------------|
+        /// | 1           | What is 2+2?    | 10    | **4**   | 3       | 5       | 6       |         |         | 4             |
+        /// | 2           | Capital of VN?  | 10    | HCMC    | **Hanoi**| Danang  | Hue     |         |         | Hanoi         |
+        /// 
+        /// Note: Only Examiner role can import questions.
+        /// </remarks>
+        /// <param name="testId">Test ID to import questions for</param>
+        /// <param name="excelFile">Excel file to import (.xlsx or .xls)</param>
+        /// <response code="200">Ok - Questions imported successfully</response>
+        /// <response code="400">Bad Request - Validation errors or invalid file format</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden - Not an Examiner</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPost("import-excel")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(Response<CreateBulkTestQuestionsResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ImportQuestionsFromExcelAsync(int testId, IFormFile excelFile)
+        {
+            try
+            {
+                var command = new ImportQuestionsFromExcelCommand(testId, excelFile);
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)

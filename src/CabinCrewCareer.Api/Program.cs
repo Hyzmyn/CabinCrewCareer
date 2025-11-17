@@ -2,6 +2,10 @@ using CabinCrewCareer.Api;
 using CabinCrewCareer.Api.Startups;
 using CabinCrewCareer.Application;
 using CabinCrewCareer.Infrastructure;
+using OfficeOpenXml;
+
+// Set EPPlus License for version 8+ (NonCommercial use)
+ExcelPackage.License.SetNonCommercialOrganization("CabinCrewCareer");
 
 var builder = WebApplication.CreateBuilder(args);
 {
