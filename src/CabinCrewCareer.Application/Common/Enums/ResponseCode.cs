@@ -117,6 +117,12 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("You don't have permission to access this notification")]
         NOTIFICATION_ACCESS_DENIED = 36,
 
+        [Description("Email has already been registered")]
+        EMAIL_HAS_EXISTED = 37,
+
+        [Description("Phone number has already been registered")]
+        PHONE_NUMBER_HAS_EXISTED = 38,
+
         #endregion
     }
 }

@@ -17,5 +17,9 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             , int pageSize);
 
         Task<List<User>> GetUsersByRoleIdAsync(int? roleId);
+
+        Task<bool> CheckExistEmailAsync(string email);
+
+        Task<bool> CheckExistPhoneNumberAsync(string phoneNumber);
     }
 }

@@ -77,5 +77,23 @@ namespace CabinCrewCareer.Infrastructure.Users
                     FullName = u.FullName
                 }).ToListAsync();
         }
+
+        public async Task<bool> CheckExistEmailAsync(string email)
+        {
+            var user = await _dbContext.Users.Where(u => u.Email.Equals(email)).Select(u => new User { UserId = u.UserId }).FirstOrDefaultAsync();
+
+            if (user is null) return false;
+
+            return true;
+        }
+
+        public async Task<bool> CheckExistPhoneNumberAsync(string phoneNumber)
+        {
+            var user = await _dbContext.Users.Where(u => u.PhoneNumber.Equals(phoneNumber)).Select(u => new User { UserId = u.UserId }).FirstOrDefaultAsync();
+
+            if (user is null) return false;
+
+            return true;
+        }
     }
 }
