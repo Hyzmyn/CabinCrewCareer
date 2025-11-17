@@ -10,6 +10,7 @@ namespace CabinCrewCareer.Application.Tests.Common
         public string TestType { get; set; } = string.Empty;
         public int MaxScore { get; set; }
         public int DurationInMinutes { get; set; }
+        public int TotalQuestions { get; set; }
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? AudioFileURL { get; set; }

@@ -37,6 +37,10 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestById
                 throw new ApiException(ResponseCode.TEST_NOT_FOUND);
             }
 
+            // Count questions for this test
+            var questions = await _unitOfWork.TestQuestions.GetAsync(q => q.TestId == test.TestId);
+            var questionCount = questions.Count();
+
             // Create response
             var response = new GetTestByIdResponse
             {
@@ -46,6 +50,7 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestById
                 TestType = test.TestType.ToString(),
                 MaxScore = test.MaxScore,
                 DurationInMinutes = test.DurationInMinutes,
+                TotalQuestions = questionCount,
                 JoinCode = test.JoinCode,
                 CreatedAt = test.CreatedAt?.GetFormatDateTime(),
                 CreatedBy = test.CreatedBy,

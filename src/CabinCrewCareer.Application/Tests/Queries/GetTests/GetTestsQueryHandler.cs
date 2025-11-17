@@ -26,20 +26,29 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTests
                 request.Page,
                 request.PageSize);
 
-            // Map to response DTOs
-            var testResponses = tests.Items.Select(test => new GetTestResponse
+            // Map to response DTOs with question count
+            var testResponses = new List<GetTestResponse>();
+            foreach (var test in tests.Items)
             {
-                TestId = test.TestId,
-                TestName = test.TestName,
-                Purpose = test.Purpose,
-                TestType = test.TestType.ToString(),
-                MaxScore = test.MaxScore,
-                DurationInMinutes = test.DurationInMinutes,
-                AudioFileURL = string.IsNullOrEmpty(test.AudioFileURL) ? null : test.AudioFileURL,
-                JoinCode = test.JoinCode,
-                CreatedAt = test.CreatedAt?.GetFormatDateTime(),
-                CreatedBy = test.CreatedBy
-            }).ToList();
+                // Count questions for this test
+                var questions = await _unitOfWork.TestQuestions.GetAsync(q => q.TestId == test.TestId);
+                var questionCount = questions.Count();
+
+                testResponses.Add(new GetTestResponse
+                {
+                    TestId = test.TestId,
+                    TestName = test.TestName,
+                    Purpose = test.Purpose,
+                    TestType = test.TestType.ToString(),
+                    MaxScore = test.MaxScore,
+                    DurationInMinutes = test.DurationInMinutes,
+                    TotalQuestions = questionCount,
+                    AudioFileURL = string.IsNullOrEmpty(test.AudioFileURL) ? null : test.AudioFileURL,
+                    JoinCode = test.JoinCode,
+                    CreatedAt = test.CreatedAt?.GetFormatDateTime(),
+                    CreatedBy = test.CreatedBy
+                });
+            }
 
             var paginatedResponse = new PaginatedList<GetTestResponse>(
                 testResponses,
