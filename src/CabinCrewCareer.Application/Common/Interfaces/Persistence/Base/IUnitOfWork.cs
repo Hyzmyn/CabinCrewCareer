@@ -21,6 +21,10 @@
 
         ITestRepository Tests { get; }
 
+        ITestQuestionRepository TestQuestions { get; }
+
+        ITestOptionRepository TestOptions { get; }
+
         ICampaignAssignmentRepository CampaignAssignments { get; }
 
         INotificationRepository Notifications { get; }

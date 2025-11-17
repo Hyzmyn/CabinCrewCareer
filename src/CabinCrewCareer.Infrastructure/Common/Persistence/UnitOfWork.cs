@@ -6,6 +6,8 @@ using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
 using CabinCrewCareer.Infrastructure.Notifications;
 using CabinCrewCareer.Infrastructure.Tests;
+using CabinCrewCareer.Infrastructure.TestQuestions;
+using CabinCrewCareer.Infrastructure.TestOptions;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
 
@@ -30,6 +32,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
         public ICampaignRepository Campaigns { get; private set; }
 
         public ITestRepository Tests { get; private set; }
+
+        public ITestQuestionRepository TestQuestions { get; private set; }
+
+        public ITestOptionRepository TestOptions { get; private set; }
 
         public ICampaignRoundRepository CampaignRounds { get; private set; }
 
@@ -66,6 +72,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Rounds = new RoundRepository(_dbContext, _logger);
 
             Tests = new TestRepository(_dbContext, _logger);
+
+            TestQuestions = new TestQuestionRepository(_dbContext, _logger);
+
+            TestOptions = new TestOptionRepository(_dbContext, _logger);
 
             CampaignAssignments = new CampaignAssignmentRepository(_dbContext, _logger);
 
