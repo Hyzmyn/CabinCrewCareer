@@ -5,6 +5,8 @@ using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Roles.Common;
+using CabinCrewCareer.Application.RoundActivities.Common;
+using CabinCrewCareer.Application.ScoringCriterias.Common;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Entities;
 
@@ -70,6 +72,26 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<RoundActivity, GetRoundStatusResponse>()
                 .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()));
+
+            CreateMap<RoundActivity, GetActivityResponse>()
+                .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()))
+                .ForMember(u => u.ImgURL, u => u.MapFrom(u => u.User.ImgURL))
+                .ForMember(u => u.FullName, u => u.MapFrom(u => u.User.FullName))
+                .ForMember(u => u.Email, u => u.MapFrom(u => u.User.Email))
+                .ForMember(u => u.PhoneNumber, u => u.MapFrom(u => u.User.PhoneNumber))
+                .ForMember(u => u.RoundName, u => u.MapFrom(u => u.Round.RoundType.GetDescription()));
+
+            CreateMap<PaginatedList<RoundActivity>, PaginatedList<GetActivityResponse>>();
+            #endregion
+
+            #region Scoring Criterias
+            CreateMap<ScoringCriteria, GetScoringCriteriaResponse>()
+                .ForMember(u => u.Items, u => u.MapFrom(u => u.ScoringCriteriaItems));
+
+            CreateMap<ScoringCriteriaItem, GetScoringCriteriaItemResponse>()
+                .ForMember(u => u.Details, u => u.MapFrom(u => u.ScoringCriteriaDetails));
+
+            CreateMap<ScoringCriteriaDetail, GetScoringCriteriaDetailResponse>();
             #endregion
         }
     }

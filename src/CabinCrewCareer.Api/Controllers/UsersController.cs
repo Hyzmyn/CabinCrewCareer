@@ -102,8 +102,8 @@ namespace CabinCrewCareer.Api.Controllers
         int? isActive,
         int? roleId,
         int? partnerId,
-        int page,
-        int pageSize)
+        int page = 1,
+        int pageSize = 5)
         {
             try
             {
