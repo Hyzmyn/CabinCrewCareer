@@ -12,6 +12,12 @@ namespace CabinCrewCareer.Infrastructure.UserApplications
 
             builder.HasKey(n => n.ApplicationId);
 
+            builder.Property(n => n.Experience)
+                .HasMaxLength(20);
+
+            builder.Property(n => n.EnglishDegreeNumber)
+                .HasMaxLength(50);
+
             //builder.HasOne(n => n.Round)
             //    .WithMany(n => n.Applications)
             //    .HasForeignKey(n => n.RoundId)
