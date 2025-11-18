@@ -450,6 +450,15 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("UploadDate")
+                        .HasColumnType("date");
+
                     b.HasKey("DocumentId");
 
                     b.HasIndex("ApplicationId");
@@ -1044,10 +1053,29 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("ApplicationStatus")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EnglishDegreeNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Experience")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("SubmissionDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Weight")
                         .HasColumnType("int");
 
                     b.HasKey("ApplicationId");
