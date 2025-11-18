@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
 {
@@ -54,9 +55,22 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
             {
                 var campaignId = group.Key;
                 if (campaignId == null) continue;
-                
-                var campaign = await _unitOfWork.Campaigns.GetByIdAsync(campaignId.Value);
+
+                // Include CampaignRequest và AirlinePartner khi lấy campaign
+                var campaignQuery = await _unitOfWork.Campaigns.GetAsync(
+                    c => c.CampaignId == campaignId.Value,
+                    includeFunc: q => q
+                        .Include(c => c.CampaignRequest)
+                        .ThenInclude(cr => cr.AirlinePartner),
+                    disableTracking: true);
+                var campaign = await campaignQuery.FirstOrDefaultAsync(cancellationToken);
                 if (campaign == null) continue;
+
+                string partnerName = string.Empty;
+                if (campaign.CampaignRequest != null && campaign.CampaignRequest.AirlinePartner != null)
+                {
+                    partnerName = campaign.CampaignRequest.AirlinePartner.PartnerName;
+                }
 
                 var campaignDto = new SimpleCampaignDto
                 {
@@ -64,7 +78,9 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
                     CampaignName = campaign.CampaignName,
                     Description = campaign.Description,
                     StartDate = campaign.StartDate,
-                    EndDate = campaign.EndDate
+                    EndDate = campaign.EndDate,
+                    PartnerName = partnerName,
+                    CampaignType = campaign.CampaignType.ToString()
                 };
 
                 result.Add(campaignDto);
