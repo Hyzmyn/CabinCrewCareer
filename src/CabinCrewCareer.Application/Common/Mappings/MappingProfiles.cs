@@ -6,6 +6,7 @@ using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.RoundActivities.Common;
+using CabinCrewCareer.Application.ScoringCriterias.Common;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Entities;
 
@@ -81,6 +82,16 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.Round.RoundType.GetDescription()));
 
             CreateMap<PaginatedList<RoundActivity>, PaginatedList<GetActivityResponse>>();
+            #endregion
+
+            #region Scoring Criterias
+            CreateMap<ScoringCriteria, GetScoringCriteriaResponse>()
+                .ForMember(u => u.Items, u => u.MapFrom(u => u.ScoringCriteriaItems));
+
+            CreateMap<ScoringCriteriaItem, GetScoringCriteriaItemResponse>()
+                .ForMember(u => u.Details, u => u.MapFrom(u => u.ScoringCriteriaDetails));
+
+            CreateMap<ScoringCriteriaDetail, GetScoringCriteriaDetailResponse>();
             #endregion
         }
     }

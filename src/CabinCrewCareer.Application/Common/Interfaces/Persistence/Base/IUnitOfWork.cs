@@ -31,6 +31,8 @@
 
         IRoundActivityRepository RoundActivites { get; }
 
+        IScoringCriteriaRepository ScoringCriterias { get; }
+
         Task CompleteAsync();
     }
 }

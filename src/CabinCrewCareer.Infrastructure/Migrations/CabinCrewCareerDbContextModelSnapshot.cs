@@ -639,6 +639,80 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("RoundActivity", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteria", b =>
+                {
+                    b.Property<int>("ScoringCriteriaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoringCriteriaId"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ScoringCriteriaId");
+
+                    b.ToTable("ScoringCriteria", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", b =>
+                {
+                    b.Property<int>("ScoringCriteriaDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoringCriteriaDetailId"));
+
+                    b.Property<string>("DetailText")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ScoringCriteriaItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ScoringCriteriaDetailId");
+
+                    b.HasIndex("ScoringCriteriaItemId");
+
+                    b.ToTable("ScoringCriteriaDetail", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", b =>
+                {
+                    b.Property<int>("ScoringCriteriaItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoringCriteriaItemId"));
+
+                    b.Property<string>("EnglishText")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("ScoringCriteriaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("ScoringCriteriaItemId");
+
+                    b.HasIndex("ScoringCriteriaId");
+
+                    b.ToTable("ScoringCriteriaItem", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
                 {
                     b.Property<int>("TestId")
@@ -1147,6 +1221,26 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", "ScoringCriteriaItem")
+                        .WithMany("ScoringCriteriaDetails")
+                        .HasForeignKey("ScoringCriteriaItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ScoringCriteriaItem");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.ScoringCriteria", "ScoringCriteria")
+                        .WithMany("ScoringCriteriaItems")
+                        .HasForeignKey("ScoringCriteriaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ScoringCriteria");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.TestOption", "SelectedOption")
@@ -1297,6 +1391,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Round", b =>
                 {
                     b.Navigation("RoundActivities");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteria", b =>
+                {
+                    b.Navigation("ScoringCriteriaItems");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", b =>
+                {
+                    b.Navigation("ScoringCriteriaDetails");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>

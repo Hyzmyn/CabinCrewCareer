@@ -64,6 +64,12 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<RoundActivity> RoundActivities { get; set; }
 
+        public DbSet<ScoringCriteria> ScoringCriterias { get; set; }
+
+        public DbSet<ScoringCriteriaItem> ScoringCriteriaItems { get; set; }
+
+        public DbSet<ScoringCriteriaDetail> ScoringCriteriaDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);
