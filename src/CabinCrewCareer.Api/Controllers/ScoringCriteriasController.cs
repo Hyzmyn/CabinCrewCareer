@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.ScoringCriterias.Common;
-using CabinCrewCareer.Application.ScoringCriterias.Queries;
+using CabinCrewCareer.Application.ScoringCriterias.Queries.GetScoringCriterias;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +17,7 @@ namespace CabinCrewCareer.Api.Controllers
         IMediator mediator,
         ILogger<ScoringCriteriasController> logger) : ApiController(mediator, logger)
     {
-        #region Get Cities
+        #region Get Scoring Criterias
         /// <summary>
         /// Get scoring criterias for appearance checking
         /// </summary>

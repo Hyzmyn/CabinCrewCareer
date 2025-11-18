@@ -7,7 +7,7 @@ using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CabinCrewCareer.Application.ScoringCriterias.Queries
+namespace CabinCrewCareer.Application.ScoringCriterias.Queries.GetScoringCriterias
 {
     public class GetScoringCriteriasQueryHandler(
         IUnitOfWork unitOfWork,

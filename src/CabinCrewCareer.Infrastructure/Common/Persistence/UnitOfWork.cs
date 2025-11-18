@@ -4,6 +4,7 @@ using CabinCrewCareer.Infrastructure.CampaignAssignments;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
+using CabinCrewCareer.Infrastructure.InterviewCriterias;
 using CabinCrewCareer.Infrastructure.Notifications;
 using CabinCrewCareer.Infrastructure.ScoringCriterias;
 using CabinCrewCareer.Infrastructure.TestOptions;
@@ -50,6 +51,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IScoringCriteriaRepository ScoringCriterias { get; set; }
 
+        public IInterviewCriteriaRepository InterviewCriterias { get; set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -87,6 +90,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             RoundActivites = new RoundActitityRepository(_dbContext, _logger);
 
             ScoringCriterias = new ScoringCriteriaRepository(_dbContext, _logger);
+
+            InterviewCriterias = new InterviewCriteriaRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

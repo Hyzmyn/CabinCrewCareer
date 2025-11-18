@@ -2,7 +2,7 @@
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
-namespace CabinCrewCareer.Application.ScoringCriterias.Queries
+namespace CabinCrewCareer.Application.ScoringCriterias.Queries.GetScoringCriterias
 {
     public record GetScoringCriteriasQuery : IRequest<Response<List<GetScoringCriteriaResponse>>>;
 }

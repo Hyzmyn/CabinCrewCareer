@@ -33,6 +33,8 @@
 
         IScoringCriteriaRepository ScoringCriterias { get; }
 
+        IInterviewCriteriaRepository InterviewCriterias { get; }
+
         Task CompleteAsync();
     }
 }

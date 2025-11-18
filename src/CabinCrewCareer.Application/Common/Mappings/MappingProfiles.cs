@@ -4,6 +4,7 @@ using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.InterviewCriterias.Common;
 using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.ScoringCriterias.Common;
@@ -92,6 +93,11 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.Details, u => u.MapFrom(u => u.ScoringCriteriaDetails));
 
             CreateMap<ScoringCriteriaDetail, GetScoringCriteriaDetailResponse>();
+
+            CreateMap<InterviewCriteria, GetInterviewCriteriaResponse>()
+                .ForMember(u => u.Items, u => u.MapFrom(u => u.InterviewCriteriaItems));
+
+            CreateMap<InterviewCriteriaItem, GetInterviewCriteriaItemResponse>();
             #endregion
         }
     }
