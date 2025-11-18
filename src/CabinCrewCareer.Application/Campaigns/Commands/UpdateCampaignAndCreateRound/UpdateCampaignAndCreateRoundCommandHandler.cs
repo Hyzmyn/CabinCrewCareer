@@ -114,6 +114,15 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         remain -= rounds[i].TargetQuantity;
                     }
                 }
+                    // Kiểm tra tổng targetQuantity của các round
+                    int totalRoundTarget = rounds.Sum(r => r.TargetQuantity);
+                    if (totalRoundTarget > campaignTarget)
+                    {
+                        return new Response<bool>(
+                            code: (int)ResponseCode.FAIL,
+                            data: false,
+                            message: $"Total targetQuantity of all rounds ({totalRoundTarget}) must not exceed the campaign target ({campaignTarget})");
+                    }
 
                 foreach (var round in rounds)
                 {
