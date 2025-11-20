@@ -34,7 +34,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
                     ReviewedBy = c.ReviewedBy,
                     RejectedReason = c.RejectedReason,
                     RejectedCount = c.RejectedCount,
-                    PartnerName = c.CampaignRequest != null && c.CampaignRequest.AirlinePartner != null ? c.CampaignRequest.AirlinePartner.PartnerName : null
+                    PartnerName = c.CampaignRequest != null && c.CampaignRequest.AirlinePartner != null ? c.CampaignRequest.AirlinePartner.PartnerName : null,
+                    CreatedAt = c.CreatedAt.HasValue ? c.CreatedAt.Value.GetFormatDateTime() : null
                 })
                 .ToListAsync(cancellationToken);
             return result;

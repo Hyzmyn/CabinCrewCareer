@@ -69,6 +69,34 @@ namespace CabinCrewCareer.Api.Controllers
                 });
             }
         }
+                #region Update TestId for Round
+                /// <summary>
+                /// Update testId for a specific round
+                /// </summary>
+                /// <param name="request">UpdateRoundTestIdRequest</param>
+                /// <returns>True if updated successfully</returns>
+                [HttpPut("update-test-id")]
+                [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+                [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+                public async Task<IActionResult> UpdateTestIdAsync([FromBody] CabinCrewCareer.Application.Rounds.Commands.UpdateRoundTestIdRequest request)
+                {
+                    try
+                    {
+                        var command = new Application.Rounds.Commands.UpdateRoundTestIdCommand(request.RoundId, request.TestId);
+                        var result = await mediator.Send(command);
+                        return Ok(result);
+                    }
+                    catch (ApiException e)
+                    {
+                        return BadRequest(new
+                        {
+                            errorCode = e.ErrorCode,
+                            error = e.Error,
+                            errorMessage = e.ErrorMessage
+                        });
+                    }
+                }
+                #endregion
         #endregion
     }
 }

@@ -52,7 +52,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                     StartDate = r.StartDate.HasValue ? r.StartDate.Value.GetFormatDateTime() : null,
                     EndDate = r.EndDate.HasValue ? r.EndDate.Value.GetFormatDateTime() : null
                 }).ToList(),
-                PartnerName = campaign.CampaignRequest != null && campaign.CampaignRequest.AirlinePartner != null ? campaign.CampaignRequest.AirlinePartner.PartnerName : null
+                PartnerName = campaign.CampaignRequest != null && campaign.CampaignRequest.AirlinePartner != null ? campaign.CampaignRequest.AirlinePartner.PartnerName : null,
+                CreatedAt = campaign.CreatedAt.HasValue ? campaign.CreatedAt.Value.GetFormatDateTime() : null
             };
             return result;
         }
