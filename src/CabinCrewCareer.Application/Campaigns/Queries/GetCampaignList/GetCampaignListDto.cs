@@ -15,5 +15,6 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
         public string? ReviewedBy { get; set; }
         public string? RejectedReason { get; set; }
         public int RejectedCount { get; set; }
+        public string? PartnerName { get; set; }
     }
 }
