@@ -136,6 +136,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("CampaignType")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(50)

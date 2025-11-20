@@ -26,6 +26,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public DateTime? EndDate { get; set; }
 
+        public DateTime? CreatedAt { get; set; }
+
         public DateTime? ApprovedAt { get; set; }
 
         public DateTime? RejectedAt { get; set; }
