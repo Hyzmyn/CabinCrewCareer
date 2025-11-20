@@ -17,7 +17,9 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
         {
             var campaignQuery = await _unitOfWork.Campaigns.GetAsync(
                 c => c.CampaignId == request.CampaignId,
-                includeFunc: q => q.Include(c => c.CampaignRounds),
+                includeFunc: q => q.Include(c => c.CampaignRounds)
+                    .Include(c => c.CampaignRequest)
+                    .ThenInclude(cr => cr.AirlinePartner),
                 disableTracking: true);
             var campaign = await campaignQuery.FirstOrDefaultAsync(cancellationToken);
             if (campaign == null) return null;
@@ -49,7 +51,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                     Status = r.RoundStatus.ToString(),
                     StartDate = r.StartDate.HasValue ? r.StartDate.Value.GetFormatDateTime() : null,
                     EndDate = r.EndDate.HasValue ? r.EndDate.Value.GetFormatDateTime() : null
-                }).ToList()
+                }).ToList(),
+                PartnerName = campaign.CampaignRequest != null && campaign.CampaignRequest.AirlinePartner != null ? campaign.CampaignRequest.AirlinePartner.PartnerName : null
             };
             return result;
         }

@@ -17,6 +17,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
         {
             var campaigns = await _unitOfWork.Campaigns.GetAllAsync(disableTracking: true);
             var result = await campaigns
+                .Include(c => c.CampaignRequest)
+                .ThenInclude(cr => cr.AirlinePartner)
                 .Select(c => new GetCampaignListDto
                 {
                     CampaignId = c.CampaignId,
@@ -31,7 +33,8 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
                     RejectedAt = c.RejectedAt.HasValue ? c.RejectedAt.Value.GetFormatDateTime() : null,
                     ReviewedBy = c.ReviewedBy,
                     RejectedReason = c.RejectedReason,
-                    RejectedCount = c.RejectedCount
+                    RejectedCount = c.RejectedCount,
+                    PartnerName = c.CampaignRequest != null && c.CampaignRequest.AirlinePartner != null ? c.CampaignRequest.AirlinePartner.PartnerName : null
                 })
                 .ToListAsync(cancellationToken);
             return result;
