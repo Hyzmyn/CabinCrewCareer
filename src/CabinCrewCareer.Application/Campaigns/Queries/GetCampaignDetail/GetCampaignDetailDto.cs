@@ -18,6 +18,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
         public string? ReviewedBy { get; set; }
         public string? RejectedReason { get; set; }
         public int RejectedCount { get; set; }
+        public string? CreatedAt { get; set; }
         public List<RoundDto> Rounds { get; set; } = new();
     }
 

@@ -99,6 +99,14 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<InterviewCriteriaItem, GetInterviewCriteriaItemResponse>();
             #endregion
+
+            #region Campaign
+            CreateMap<Campaign, CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList.GetCampaignListDto>()
+                .ForMember(d => d.CreatedAt, o => o.MapFrom(s => s.CreatedAt.HasValue ? s.CreatedAt.Value.GetFormatDateTime() : null));
+
+            CreateMap<Campaign, CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail.GetCampaignDetailDto>()
+                .ForMember(d => d.CreatedAt, o => o.MapFrom(s => s.CreatedAt.HasValue ? s.CreatedAt.Value.GetFormatDateTime() : null));
+            #endregion
         }
     }
 }
