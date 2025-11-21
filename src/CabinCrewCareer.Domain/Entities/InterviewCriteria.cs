@@ -1,10 +1,14 @@
-﻿namespace CabinCrewCareer.Domain.Entities
+﻿using CabinCrewCareer.Domain.Common;
+
+namespace CabinCrewCareer.Domain.Entities
 {
     public class InterviewCriteria
     {
         public int InterviewCriteriaId { get; set; }
 
         public string Title { get; set; } = string.Empty;
+
+        public CampaignType Type { get; set; }
 
         // Foreign Keys
 

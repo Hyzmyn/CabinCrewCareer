@@ -39,7 +39,7 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTests
                     TestId = test.TestId,
                     TestName = test.TestName,
                     Purpose = test.Purpose,
-                    TestType = test.TestType.ToString(),
+                    TestType = test.TestType.GetDescription(),
                     MaxScore = test.MaxScore,
                     DurationInMinutes = test.DurationInMinutes,
                     TotalQuestions = questionCount,

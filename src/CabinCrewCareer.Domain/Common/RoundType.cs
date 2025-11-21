@@ -10,8 +10,12 @@ namespace CabinCrewCareer.Domain.Common
         Appearance,
         [Description("Flight Hours Confirmation")]
         FlightHoursConfirmation,
-        [Description("Test")]
-        Test,
+        [Description("English Listening Test")]
+        EnglishListeningTest,
+        [Description("English Speaking Test")]
+        EnglishSpeakingTest,
+        [Description("Practical Test")]
+        PracticalTest,
         [Description("Interview")]
         Interview,
         [Description("Final")]

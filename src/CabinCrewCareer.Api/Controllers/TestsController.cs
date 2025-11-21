@@ -1,15 +1,16 @@
-using CabinCrewCareer.Application.Tests.Commands.CreateTest;
-using CabinCrewCareer.Application.Tests.Commands.UpdateTest;
-using CabinCrewCareer.Application.Tests.Commands.DeleteTest;
-using CabinCrewCareer.Application.Tests.Queries.GetTests;
-using CabinCrewCareer.Application.Tests.Queries.GetTestById;
-using CabinCrewCareer.Application.Tests.Common;
+using Asp.Versioning;
+using CabinCrewCareer.Api.Models;
+using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
-using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Tests.Commands.CreateTest;
+using CabinCrewCareer.Application.Tests.Commands.DeleteTest;
+using CabinCrewCareer.Application.Tests.Commands.UpdateTest;
+using CabinCrewCareer.Application.Tests.Common;
+using CabinCrewCareer.Application.Tests.Queries.GetAvailableTests;
+using CabinCrewCareer.Application.Tests.Queries.GetTestById;
+using CabinCrewCareer.Application.Tests.Queries.GetTests;
 using CabinCrewCareer.Domain.Wrappers;
-using CabinCrewCareer.Api.Models;
-using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,7 +73,7 @@ namespace CabinCrewCareer.Api.Controllers
                     request.MaxScore,
                     request.DurationInMinutes,
                     request.AudioFile);
-                    
+
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)
@@ -104,8 +105,8 @@ namespace CabinCrewCareer.Api.Controllers
         /// <param name="sortColumn">Column to sort by (name, testtype, maxscore, duration, createdat). Default: testid</param>
         /// <param name="sortOrder">Sort order (asc or desc). Default: desc</param>
         /// <param name="testType">Filter by test type (1=EnglishListening, 2=EnglishSpeaking, 3=Practical)</param>
-        /// <param name="page">Page number (default: 1)</param>
-        /// <param name="pageSize">Page size (default: 10)</param>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
         /// <returns>Paginated list of tests</returns>
         /// <response code="200">Ok - Returns paginated list of tests</response>
         /// <response code="400">Bad Request</response>
@@ -133,6 +134,40 @@ namespace CabinCrewCareer.Api.Controllers
                     Page = page,
                     PageSize = pageSize
                 };
+
+                return Ok(await mediator.Send(query));
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Tests List for Round Selection
+        /// <summary>
+        /// Get list of tests for round selection
+        /// </summary>
+        /// <param name="testType">Filter by test type (1 = English Listening, 2 = English Speaking, 3 = Practical)</param>
+        /// <returns>Paginated list of tests</returns>
+        /// <response code="200">Ok - Returns paginated list of tests</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized - User not authenticated</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("for-rounds")]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetAvailableTestsAsync(
+            [FromQuery] int? testType)
+        {
+            try
+            {
+                var query = new GetAvailableTestsQuery(testType);
 
                 return Ok(await mediator.Send(query));
             }
@@ -247,7 +282,7 @@ namespace CabinCrewCareer.Api.Controllers
                     request.DurationInMinutes,
                     request.AudioFile,
                     request.RemoveAudio);
-                    
+
                 return Ok(await mediator.Send(command));
             }
             catch (ValidationException e)
@@ -270,7 +305,7 @@ namespace CabinCrewCareer.Api.Controllers
                         errorMessage = e.ErrorMessage
                     });
                 }
-                
+
                 return BadRequest(new
                 {
                     errorCode = e.ErrorCode,
@@ -324,7 +359,7 @@ namespace CabinCrewCareer.Api.Controllers
                         errorMessage = e.ErrorMessage
                     });
                 }
-                
+
                 return BadRequest(new
                 {
                     errorCode = e.ErrorCode,

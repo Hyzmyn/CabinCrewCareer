@@ -8,6 +8,7 @@ using CabinCrewCareer.Application.InterviewCriterias.Common;
 using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.ScoringCriterias.Common;
+using CabinCrewCareer.Application.Tests.Common;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Entities;
 
@@ -106,6 +107,12 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<Campaign, CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail.GetCampaignDetailDto>()
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(s => s.CreatedAt.HasValue ? s.CreatedAt.Value.GetFormatDateTime() : null));
+            #endregion
+
+            #region
+            CreateMap<Test, GetAvailableTestResponse>()
+                .ForMember(u => u.NumberOfQuestions, u => u.MapFrom(u => u.TestQuestions.Count))
+                .ForMember(u => u.TestType, u => u.MapFrom(u => u.TestType.GetDescription()));
             #endregion
         }
     }
