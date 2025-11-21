@@ -69,6 +69,33 @@ namespace CabinCrewCareer.Api.Controllers
                 });
             }
         }
+            #region Get Test Info by RoundId
+            /// <summary>
+            /// Get test info by roundId
+            /// </summary>
+            /// <param name="roundId">Id of the round</param>
+            /// <returns>Test info of the round</returns>
+            [HttpGet("{roundId}/test-info")]
+            [ProducesResponseType(typeof(CabinCrewCareer.Application.Rounds.Queries.RoundTestInfoResponse), (int)HttpStatusCode.OK)]
+            [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+            public async Task<IActionResult> GetTestInfoByRoundIdAsync(int roundId)
+            {
+                try
+                {
+                    var result = await mediator.Send(new CabinCrewCareer.Application.Rounds.Queries.GetRoundTestInfoQuery(roundId));
+                    return Ok(result);
+                }
+                catch (ApiException e)
+                {
+                    return BadRequest(new
+                    {
+                        errorCode = e.ErrorCode,
+                        error = e.Error,
+                        errorMessage = e.ErrorMessage
+                    });
+                }
+            }
+            #endregion
                 #region Update TestId for Round
                 /// <summary>
                 /// Update testId for a specific round
