@@ -521,6 +521,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("InterviewCriteriaId");
 
                     b.ToTable("InterviewCriteria", (string)null);

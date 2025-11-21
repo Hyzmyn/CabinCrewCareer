@@ -7,6 +7,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="InterviewCriterias\Queries\GetInterviewCriterias\GetInterviewCriteriasQuery.cs~RF45ef19b9.TMP" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="14.0.0" />
 		<PackageReference Include="EPPlus" Version="8.2.1" />
 		<PackageReference Include="FluentValidation" Version="11.11.0" />

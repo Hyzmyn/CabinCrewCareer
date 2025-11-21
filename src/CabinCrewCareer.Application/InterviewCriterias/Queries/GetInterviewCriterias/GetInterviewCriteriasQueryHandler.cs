@@ -20,6 +20,7 @@ namespace CabinCrewCareer.Application.InterviewCriterias.Queries.GetInterviewCri
         {
             var criteriasQuery = await _unitOfWork.InterviewCriterias
                 .GetAllAsync(
+                expression: s => s.Type == request.Type,
                 includeFunc: s => s
                 .Include(c => c.InterviewCriteriaItems));
 
