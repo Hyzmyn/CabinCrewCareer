@@ -9,7 +9,7 @@ using MediatR;
 
 namespace CabinCrewCareer.Application.Tests.Queries.GetTestById
 {
-    public class GetTestByIdQueryHandler(IUnitOfWork unitOfWork) 
+    public class GetTestByIdQueryHandler(IUnitOfWork unitOfWork)
         : IRequestHandler<GetTestByIdQuery, Response<GetTestByIdResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -47,7 +47,7 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestById
                 TestId = test.TestId,
                 TestName = test.TestName,
                 Purpose = test.Purpose,
-                TestType = test.TestType.ToString(),
+                TestType = test.TestType.GetDescription(),
                 MaxScore = test.MaxScore,
                 DurationInMinutes = test.DurationInMinutes,
                 TotalQuestions = questionCount,

@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Infrastructure.Common.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
@@ -61,5 +62,27 @@ namespace CabinCrewCareer.Infrastructure.Tests
                 "createdat" => test => test.CreatedAt ?? DateTime.MinValue,
                 _ => test => test.TestId
             };
+
+        public async Task<List<Test>> GetTestsAsync(int? testType)
+        {
+            IQueryable<Test> testsQuery = _dbContext.Tests
+                .Select(t => new Test
+                {
+                    TestId = t.TestId,
+                    TestName = t.TestName,
+                    TestType = t.TestType,
+                    TestQuestions = t.TestQuestions.Select(t => new TestQuestion
+                    {
+                        QuestionId = t.QuestionId
+                    }).ToList()
+                });
+
+            if (testType != null)
+            {
+                testsQuery = testsQuery.Where(t => t.TestType == (TestType)testType);
+            }
+
+            return await testsQuery.ToListAsync();
+        }
     }
 }

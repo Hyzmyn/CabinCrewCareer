@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.RoundActivities.Queries;
+using CabinCrewCareer.Application.Rounds.Queries;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -69,61 +70,63 @@ namespace CabinCrewCareer.Api.Controllers
                 });
             }
         }
-            #region Get Test Info by RoundId
-            /// <summary>
-            /// Get test info by roundId
-            /// </summary>
-            /// <param name="roundId">Id of the round</param>
-            /// <returns>Test info of the round</returns>
-            [HttpGet("{roundId}/test-info")]
-            [ProducesResponseType(typeof(CabinCrewCareer.Application.Rounds.Queries.RoundTestInfoResponse), (int)HttpStatusCode.OK)]
-            [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-            public async Task<IActionResult> GetTestInfoByRoundIdAsync(int roundId)
+        #endregion
+
+        #region Get Test Info by RoundId
+        /// <summary>
+        /// Get test info by roundId
+        /// </summary>
+        /// <param name="roundId">Id of the round</param>
+        /// <returns>Test info of the round</returns>
+        [HttpGet("{roundId}/test-info")]
+        [ProducesResponseType(typeof(RoundTestInfoResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetTestInfoByRoundIdAsync(int roundId)
+        {
+            try
             {
-                try
-                {
-                    var result = await mediator.Send(new CabinCrewCareer.Application.Rounds.Queries.GetRoundTestInfoQuery(roundId));
-                    return Ok(result);
-                }
-                catch (ApiException e)
-                {
-                    return BadRequest(new
-                    {
-                        errorCode = e.ErrorCode,
-                        error = e.Error,
-                        errorMessage = e.ErrorMessage
-                    });
-                }
+                var result = await mediator.Send(new GetRoundTestInfoQuery(roundId));
+                return Ok(result);
             }
-            #endregion
-                #region Update TestId for Round
-                /// <summary>
-                /// Update testId for a specific round
-                /// </summary>
-                /// <param name="request">UpdateRoundTestIdRequest</param>
-                /// <returns>True if updated successfully</returns>
-                [HttpPut("update-test-id")]
-                [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
-                [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-                public async Task<IActionResult> UpdateTestIdAsync([FromBody] CabinCrewCareer.Application.Rounds.Commands.UpdateRoundTestIdRequest request)
+            catch (ApiException e)
+            {
+                return BadRequest(new
                 {
-                    try
-                    {
-                        var command = new Application.Rounds.Commands.UpdateRoundTestIdCommand(request.RoundId, request.TestId);
-                        var result = await mediator.Send(command);
-                        return Ok(result);
-                    }
-                    catch (ApiException e)
-                    {
-                        return BadRequest(new
-                        {
-                            errorCode = e.ErrorCode,
-                            error = e.Error,
-                            errorMessage = e.ErrorMessage
-                        });
-                    }
-                }
-                #endregion
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Update TestId for Round
+        /// <summary>
+        /// Update testId for a specific round
+        /// </summary>
+        /// <param name="request">UpdateRoundTestIdRequest</param>
+        /// <returns>True if updated successfully</returns>
+        [HttpPut("update-test-id")]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateTestIdAsync([FromBody] CabinCrewCareer.Application.Rounds.Commands.UpdateRoundTestIdRequest request)
+        {
+            try
+            {
+                var command = new Application.Rounds.Commands.UpdateRoundTestIdCommand(request.RoundId, request.TestId);
+                var result = await mediator.Send(command);
+                return Ok(result);
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
         #endregion
     }
 }

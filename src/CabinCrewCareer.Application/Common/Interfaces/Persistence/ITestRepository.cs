@@ -13,5 +13,7 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             int? testType,
             int page,
             int pageSize);
+
+        Task<List<Test>> GetTestsAsync(int? testType);
     }
 }
