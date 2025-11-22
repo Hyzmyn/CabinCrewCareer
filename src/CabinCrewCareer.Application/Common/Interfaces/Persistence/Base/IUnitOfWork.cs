@@ -4,6 +4,7 @@
     public interface IUnitOfWork
     {
         IUserRepository Users { get; }
+        IUserApplicationRepository UserApplications { get; }
 
         IRoleRepository Roles { get; }
 

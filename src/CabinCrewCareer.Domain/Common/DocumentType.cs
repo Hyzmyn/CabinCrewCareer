@@ -2,5 +2,10 @@
 {
     public enum DocumentType
     {
+        ApplicationForm = 0,
+        ProfilePhoto = 1,
+        EducationDegree = 2,
+        EnglishCertificate = 3,
+        PassportOrID = 4
     }
 }
