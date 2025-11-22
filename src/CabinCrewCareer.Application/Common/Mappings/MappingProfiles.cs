@@ -72,9 +72,6 @@ namespace CabinCrewCareer.Application.Common.Mappings
             CreateMap<Round, GetRoundActivityResponse>()
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundType.GetDescription()));
 
-            CreateMap<RoundActivity, GetRoundStatusResponse>()
-                .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()));
-
             CreateMap<RoundActivity, GetActivityResponse>()
                 .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()))
                 .ForMember(u => u.ImgURL, u => u.MapFrom(u => u.User.ImgURL))
@@ -109,7 +106,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(s => s.CreatedAt.HasValue ? s.CreatedAt.Value.GetFormatDateTime() : null));
             #endregion
 
-            #region
+            #region Test
             CreateMap<Test, GetAvailableTestResponse>()
                 .ForMember(u => u.NumberOfQuestions, u => u.MapFrom(u => u.TestQuestions.Count))
                 .ForMember(u => u.TestType, u => u.MapFrom(u => u.TestType.GetDescription()));

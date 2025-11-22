@@ -28,7 +28,7 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUserHistory
 
             return new Response<List<GetUserCampaignResponse>>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<List<GetUserCampaignResponse>>(await _unitOfWork.CampaignRounds.GetUserHistoryAsync(userId)),
+                data: _mapper.Map<List<GetUserCampaignResponse>>(await _unitOfWork.CampaignRounds.GetUserHistoryAsync()),
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }
