@@ -26,9 +26,48 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUserHistory
 
             if (user is not null) userId = Int32.Parse(user);
 
+            var campaigns = await _unitOfWork.CampaignRounds.GetUserHistoryAsync();
+            List<GetUserCampaignResponse> list = [];
+
+            for (int i = 0; i < campaigns.Count; i++)
+            {
+                if (campaigns[i].Rounds != null && campaigns[i].Rounds.Count != 0)
+                {
+                    foreach (var round in campaigns[i].Rounds)
+                    {
+                        var rawActivity = await _unitOfWork.RoundActivites.GetAsync(r => r.UserId == userId && r.RoundId == round.RoundId);
+
+                        var activity = rawActivity.FirstOrDefault();
+
+                        if (activity != null)
+                        {
+                            list.Add(new GetUserCampaignResponse
+                            {
+                                CampaignRoundId = campaigns[i].CampaignRoundId,
+                                CampaignName = campaigns[i].Campaign.CampaignName,
+                                AirlinePartner = campaigns[i].Campaign.CampaignRequest.AirlinePartner.PartnerName,
+                                RoundStatus = campaigns[i].RoundStatus.GetDescription(),
+                                RoundName = campaigns[i].RoundName,
+                                Description = campaigns[i].Description,
+                            });
+
+                            foreach (var item in list)
+                            {
+                                item.Rounds.Add(new GetRoundActivityResponse
+                                {
+                                    RoundId = round.RoundId,
+                                    RoundName = round.RoundType.GetDescription(),
+                                    Status = activity.Status.GetDescription()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
             return new Response<List<GetUserCampaignResponse>>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<List<GetUserCampaignResponse>>(await _unitOfWork.CampaignRounds.GetUserHistoryAsync()),
+                data: list,
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }
