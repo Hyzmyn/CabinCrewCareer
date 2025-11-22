@@ -35,6 +35,10 @@
 
         IInterviewCriteriaRepository InterviewCriterias { get; }
 
+        ITestSessionRepository TestSessions { get; }
+
+        ITestAnswerRepository TestAnswers { get; }
+
         Task CompleteAsync();
     }
 }

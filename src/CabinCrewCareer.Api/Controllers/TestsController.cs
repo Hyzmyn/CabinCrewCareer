@@ -10,6 +10,7 @@ using CabinCrewCareer.Application.Tests.Common;
 using CabinCrewCareer.Application.Tests.Queries.GetAvailableTests;
 using CabinCrewCareer.Application.Tests.Queries.GetTestById;
 using CabinCrewCareer.Application.Tests.Queries.GetTests;
+using CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -299,6 +300,84 @@ namespace CabinCrewCareer.Api.Controllers
                 if (e.ErrorCode == (int)ResponseCode.TEST_NOT_FOUND)
                 {
                     return NotFound(new
+                    {
+                        errorCode = e.ErrorCode,
+                        error = e.Error,
+                        errorMessage = e.ErrorMessage
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Tests By UserId
+        /// <summary>
+        /// Get tests assigned to current user through rounds
+        /// </summary>
+        /// <remarks>
+        /// **Get list of tests assigned to the authenticated user through their round activities**
+        /// 
+        /// Logic:
+        /// - Automatically retrieves userId from authentication token
+        /// - Gets all rounds where the user is a participant (via RoundActivity)
+        /// - Filters tests based on RoundType to TestType mapping:
+        ///   - **EnglishListeningTest (RoundType 4)** → **EnglishListening (TestType 1)**
+        ///   - **EnglishSpeakingTest (RoundType 5)** → **EnglishSpeaking (TestType 2)**
+        ///   - **PracticalTest (RoundType 6)** → **Practical (TestType 3)**
+        /// - Only returns tests where RoundType matches TestType
+        /// - Orders tests by RoundStartDate
+        /// 
+        /// Response includes:
+        /// - Test details (ID, Name, Type, MaxScore, Duration, JoinCode)
+        /// - Round information (RoundId, RoundType, StartDate, EndDate)
+        /// 
+        /// Use cases:
+        /// - Display tests available to the current user
+        /// - Show user's test schedule
+        /// - Allow user to join their assigned tests
+        /// 
+        /// Security:
+        /// - User can only view their own tests (based on token)
+        /// - No ability to view other users' tests
+        /// </remarks>
+        /// <returns>List of tests assigned to the current user</returns>
+        /// <response code="200">Ok - Tests retrieved successfully</response>
+        /// <response code="401">Unauthorized - User not authenticated</response>
+        /// <response code="404">Not Found - User not found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("my-tests")]
+        [ProducesResponseType(typeof(Response<GetTestsByUserIdResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetMyTestsAsync()
+        {
+            try
+            {
+                var query = new GetTestsByUserIdQuery();
+                return Ok(await mediator.Send(query));
+            }
+            catch (ApiException e)
+            {
+                if (e.ErrorCode == (int)ResponseCode.USER_NOT_FOUND)
+                {
+                    return NotFound(new
+                    {
+                        errorCode = e.ErrorCode,
+                        error = e.Error,
+                        errorMessage = e.ErrorMessage
+                    });
+                }
+
+                if (e.ErrorCode == (int)ResponseCode.FAILED_AUTHENTICATION)
+                {
+                    return Unauthorized(new
                     {
                         errorCode = e.ErrorCode,
                         error = e.Error,

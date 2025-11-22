@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.TestQuestions.Commands.CreateTestQuestion;
 using CabinCrewCareer.Application.TestQuestions.Commands.CreateBulkTestQuestions;
 using CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFromExcel;
 using CabinCrewCareer.Application.TestQuestions.Queries.GetTestQuestions;
+using CabinCrewCareer.Application.TestQuestions.Queries.GetTestQuestionsForExam;
 using CabinCrewCareer.Application.TestQuestions.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using CabinCrewCareer.Api.Models;
@@ -285,6 +286,86 @@ namespace CabinCrewCareer.Api.Controllers
             try
             {
                 var query = new GetTestQuestionsQuery(testId);
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test Questions For Exam (Cabin Crew & Candidate Only)
+        /// <summary>
+        /// Get questions for taking an exam - Cabin Crew and Candidate only
+        /// </summary>
+        /// <param name="testId">Test ID to get questions for</param>
+        /// <param name="joinCode">10-character join code to authenticate access</param>
+        /// <remarks>
+        /// **Get exam questions for Cabin Crew and Candidate to take the test**
+        /// 
+        /// **Security:**
+        /// - Only accessible by CabinCrew and Candidate roles
+        /// - Requires valid 10-character JoinCode to access
+        /// - Uses JWT token authentication
+        /// 
+        /// **Logic based on TestType:**
+        /// 
+        /// 1. **EnglishListening (1)** and **Practical (3)**:
+        ///    - Returns questions WITH options
+        ///    - Each option includes OptionId and OptionContent
+        ///    - **IsCorrect flag is NOT included** (security - students shouldn't see correct answers during exam)
+        /// 
+        /// 2. **EnglishSpeaking (2)**:
+        ///    - Returns questions WITHOUT options (Options = null)
+        ///    - Open-ended questions for recording audio responses
+        /// 
+        /// **Response includes:**
+        /// - Test information (ID, Name, Type, MaxScore, Duration)
+        /// - AudioFileURL (for Listening tests only)
+        /// - Total number of questions
+        /// - Questions ordered by OrderNumber
+        /// - For each question: QuestionId, QuestionContent, Score, OrderNumber
+        /// - Options (without IsCorrect flag for security)
+        /// 
+        /// **Example usage:**
+        /// 1. User clicks "Take Test" after getting test list from /api/v1/tests/my-tests
+        /// 2. Frontend sends testId and joinCode from the test
+        /// 3. API validates user role and join code
+        /// 4. Returns questions without revealing correct answers
+        /// 5. User submits answers through separate submission endpoint
+        /// 
+        /// Note: This is specifically for taking exams, not for reviewing correct answers.
+        /// </remarks>
+        /// <returns>List of exam questions without correct answer indicators</returns>
+        /// <response code="200">Ok - Exam questions retrieved successfully</response>
+        /// <response code="400">Bad Request - Invalid testId, joinCode, or wrong user role</response>
+        /// <response code="401">Unauthorized - User not authenticated</response>
+        /// <response code="404">Not Found - Test not found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("exam")]
+        [ProducesResponseType(typeof(Response<GetTestQuestionsForExamResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetTestQuestionsForExamAsync([FromQuery] int testId, [FromQuery] string joinCode)
+        {
+            try
+            {
+                var query = new GetTestQuestionsForExamQuery(testId, joinCode);
                 return Ok(await mediator.Send(query));
             }
             catch (ValidationException e)

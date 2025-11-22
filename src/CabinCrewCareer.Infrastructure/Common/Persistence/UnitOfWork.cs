@@ -7,8 +7,10 @@ using CabinCrewCareer.Infrastructure.Cities;
 using CabinCrewCareer.Infrastructure.InterviewCriterias;
 using CabinCrewCareer.Infrastructure.Notifications;
 using CabinCrewCareer.Infrastructure.ScoringCriterias;
+using CabinCrewCareer.Infrastructure.TestAnswers;
 using CabinCrewCareer.Infrastructure.TestOptions;
 using CabinCrewCareer.Infrastructure.TestQuestions;
+using CabinCrewCareer.Infrastructure.TestSessions;
 using CabinCrewCareer.Infrastructure.Tests;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
@@ -53,6 +55,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IInterviewCriteriaRepository InterviewCriterias { get; set; }
 
+        public ITestSessionRepository TestSessions { get; set; }
+
+        public ITestAnswerRepository TestAnswers { get; set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -92,6 +98,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             ScoringCriterias = new ScoringCriteriaRepository(_dbContext, _logger);
 
             InterviewCriterias = new InterviewCriteriaRepository(_dbContext, _logger);
+
+            TestSessions = new TestSessionRepository(_dbContext, _logger);
+
+            TestAnswers = new TestAnswerRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
