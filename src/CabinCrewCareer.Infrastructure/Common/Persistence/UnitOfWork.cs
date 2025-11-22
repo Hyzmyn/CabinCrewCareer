@@ -12,6 +12,7 @@ using CabinCrewCareer.Infrastructure.TestOptions;
 using CabinCrewCareer.Infrastructure.TestQuestions;
 using CabinCrewCareer.Infrastructure.TestSessions;
 using CabinCrewCareer.Infrastructure.Tests;
+using CabinCrewCareer.Infrastructure.UserApplications;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
 
@@ -24,6 +25,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
         private readonly ILogger _logger;
 
         public IUserRepository Users { get; private set; }
+        public IUserApplicationRepository UserApplications { get; private set; }
 
         public IRoleRepository Roles { get; private set; }
 
@@ -68,6 +70,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             _logger = loggerFactory.CreateLogger("logs");
 
             Users = new UserRepository(_dbContext, _logger);
+            UserApplications = new UserApplicationRepository(_dbContext, _logger);
 
             Roles = new RoleRepository(_dbContext, _logger);
 
