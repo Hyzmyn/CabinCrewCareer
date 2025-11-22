@@ -58,10 +58,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                 campaign.ApprovedAt = _dateTimeProvider.UtcNow; // Set approval time
                 campaign.RejectedReason = string.Empty; // Clear reject reason if any
                 campaign.RejectedAt = null; // Clear reject time if any
-                
+
                 await _unitOfWork.Campaigns.UpdateAsync(campaign);
                 await _unitOfWork.CompleteAsync();
-                
+
                 return new Response<bool>(
                     code: (int)ResponseCode.SUCCESS,
                     data: true,
@@ -85,15 +85,15 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                 if (campaign.RejectedCount >= 3)
                 {
                     // Cancel the campaign after 3 rejections
-                    campaign.CampaignStatus = CampaignStatus.Canceled;
+                    campaign.CampaignStatus = CampaignStatus.Cancelled;
                     campaign.ReviewedBy = currentUserName; // Set reviewer username
                     campaign.RejectedAt = _dateTimeProvider.UtcNow;
                     campaign.RejectedReason = $"{request.RejectReason} (Campaign canceled after 3 rejections)";
                     campaign.ApprovedAt = null;
-                    
+
                     await _unitOfWork.Campaigns.UpdateAsync(campaign);
                     await _unitOfWork.CompleteAsync();
-                    
+
                     return new Response<bool>(
                         code: (int)ResponseCode.SUCCESS,
                         data: true,
@@ -107,10 +107,10 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignStatus
                     campaign.RejectedAt = _dateTimeProvider.UtcNow;
                     campaign.RejectedReason = request.RejectReason;
                     campaign.ApprovedAt = null;
-                    
+
                     await _unitOfWork.Campaigns.UpdateAsync(campaign);
                     await _unitOfWork.CompleteAsync();
-                    
+
                     return new Response<bool>(
                         code: (int)ResponseCode.SUCCESS,
                         data: true,

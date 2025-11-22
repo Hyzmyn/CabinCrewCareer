@@ -5,8 +5,8 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
 {
     public interface ICampaignRoundRepository : IRepository<CampaignRound>
     {
-        Task<List<CampaignRound>> GetUserHistoryAsync(int userId);
+        Task<List<CampaignRound>> GetUserHistoryAsync();
 
-        Task<CampaignRound> GetUserOngoingCampaignAsync(int userId);
+        Task<List<CampaignRound>> GetUserOngoingCampaignAsync();
     }
 }

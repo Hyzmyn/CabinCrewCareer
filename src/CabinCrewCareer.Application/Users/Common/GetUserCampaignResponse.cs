@@ -15,11 +15,6 @@
     {
         public int RoundId { get; set; }
         public string RoundName { get; set; } = string.Empty;
-        public List<GetRoundStatusResponse> Status { get; set; } = [];
-    }
-
-    public class GetRoundStatusResponse
-    {
         public string Status { get; set; } = string.Empty;
     }
 }

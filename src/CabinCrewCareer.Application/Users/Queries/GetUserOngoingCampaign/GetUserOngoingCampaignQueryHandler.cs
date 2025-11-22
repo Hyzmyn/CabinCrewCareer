@@ -26,9 +26,41 @@ namespace CabinCrewCareer.Application.Users.Queries.GetUserOngoingCampaign
 
             if (user is not null) userId = Int32.Parse(user);
 
+            var campaigns = await _unitOfWork.CampaignRounds.GetUserOngoingCampaignAsync();
+            var campaignResponse = new GetUserCampaignResponse();
+
+            for (int i = 0; i < campaigns.Count; i++)
+            {
+                if (campaigns[i].Rounds != null && campaigns[i].Rounds.Count != 0)
+                {
+                    foreach (var round in campaigns[i].Rounds)
+                    {
+                        var rawActivity = await _unitOfWork.RoundActivites.GetAsync(r => r.UserId == userId && r.RoundId == round.RoundId);
+
+                        var activity = rawActivity.FirstOrDefault();
+
+                        if (activity != null)
+                        {
+                            campaignResponse.CampaignRoundId = campaigns[i].CampaignRoundId;
+                            campaignResponse.CampaignName = campaigns[i].Campaign.CampaignName;
+                            campaignResponse.AirlinePartner = campaigns[i].Campaign.CampaignRequest.AirlinePartner.PartnerName;
+                            campaignResponse.RoundStatus = campaigns[i].RoundStatus.GetDescription();
+                            campaignResponse.RoundName = campaigns[i].RoundName;
+                            campaignResponse.Description = campaigns[i].Description;
+                            campaignResponse.Rounds.Add(new GetRoundActivityResponse
+                            {
+                                RoundId = round.RoundId,
+                                RoundName = round.RoundType.GetDescription(),
+                                Status = activity.Status.GetDescription()
+                            });
+                        }
+                    }
+                }
+            }
+
             return new Response<GetUserCampaignResponse>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<GetUserCampaignResponse>(await _unitOfWork.CampaignRounds.GetUserOngoingCampaignAsync(userId)),
+                data: campaignResponse,
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }

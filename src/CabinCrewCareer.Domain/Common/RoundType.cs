@@ -7,18 +7,18 @@ namespace CabinCrewCareer.Domain.Common
         [Description("Screening")]
         Screening = 1,
         [Description("Appearance")]
-        Appearance,
+        Appearance = 2,
         [Description("Flight Hours Confirmation")]
-        FlightHoursConfirmation,
+        FlightHoursConfirmation = 3,
         [Description("English Listening Test")]
-        EnglishListeningTest,
+        EnglishListeningTest = 4,
         [Description("English Speaking Test")]
-        EnglishSpeakingTest,
+        EnglishSpeakingTest = 5,
         [Description("Practical Test")]
-        PracticalTest,
+        PracticalTest = 6,
         [Description("Interview")]
-        Interview,
+        Interview = 7,
         [Description("Final")]
-        Final
+        Final = 8
     }
 }
