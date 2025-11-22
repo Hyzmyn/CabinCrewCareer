@@ -333,21 +333,24 @@ namespace CabinCrewCareer.Api.Controllers
         ///   - **PracticalTest (RoundType 6)** → **Practical (TestType 3)**
         /// - Only returns tests where RoundType matches TestType
         /// - Orders tests by RoundStartDate
+        /// - **Checks if user has completed each test** (HasCompleted field)
         /// 
         /// Response includes:
         /// - Test details (ID, Name, Type, MaxScore, Duration, JoinCode)
         /// - Round information (RoundId, RoundType, StartDate, EndDate)
+        /// - **HasCompleted**: `true` if user has at least one test session for this test, `false` otherwise
         /// 
         /// Use cases:
         /// - Display tests available to the current user
         /// - Show user's test schedule
         /// - Allow user to join their assigned tests
+        /// - **Show which tests have been completed** (e.g., disable "Take Test" button if HasCompleted = true)
         /// 
         /// Security:
         /// - User can only view their own tests (based on token)
         /// - No ability to view other users' tests
         /// </remarks>
-        /// <returns>List of tests assigned to the current user</returns>
+        /// <returns>List of tests assigned to the current user with completion status</returns>
         /// <response code="200">Ok - Tests retrieved successfully</response>
         /// <response code="401">Unauthorized - User not authenticated</response>
         /// <response code="404">Not Found - User not found</response>

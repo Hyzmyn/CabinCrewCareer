@@ -59,6 +59,12 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
 
             var roundActivitiesList = roundActivities.ToList();
 
+            // Get all test sessions for this user to check completion status
+            var testSessions = await _unitOfWork.TestSessions.GetAllAsync(
+                expression: ts => ts.UserId == userId
+            );
+            var testSessionsList = testSessions.ToList();
+
             // Map RoundType to TestType for filtering
             var userTests = new List<UserTestDto>();
 
@@ -80,6 +86,9 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
                 if (!isMatch)
                     continue;
 
+                // Check if user has completed this test (has at least one test session)
+                var hasCompleted = testSessionsList.Any(ts => ts.TestId == activity.Round.Test.TestId);
+
                 // Add test to list (avoid duplicates)
                 if (!userTests.Any(t => t.TestId == activity.Round.Test.TestId && t.RoundId == activity.Round.RoundId))
                 {
@@ -94,7 +103,8 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
                         RoundId = activity.Round.RoundId,
                         RoundType = activity.Round.RoundType.ToString(),
                         RoundStartDate = activity.Round.StartDate,
-                        RoundEndDate = activity.Round.EndDate
+                        RoundEndDate = activity.Round.EndDate,
+                        HasCompleted = hasCompleted
                     });
                 }
             }

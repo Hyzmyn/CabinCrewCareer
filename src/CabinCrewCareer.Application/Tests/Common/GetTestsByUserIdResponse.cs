@@ -19,5 +19,10 @@ namespace CabinCrewCareer.Application.Tests.Common
         public string RoundType { get; set; } = string.Empty;
         public DateTime? RoundStartDate { get; set; }
         public DateTime? RoundEndDate { get; set; }
+        
+        /// <summary>
+        /// Indicates whether the user has completed this test (has at least one test session)
+        /// </summary>
+        public bool HasCompleted { get; set; }
     }
 }
