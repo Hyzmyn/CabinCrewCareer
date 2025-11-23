@@ -161,6 +161,29 @@ namespace CabinCrewCareer.Api.Controllers
                 });
             }
         }
+        
+        /// <summary>
+        /// Get user's application with documents
+        /// </summary>
+        [HttpGet("{id}/application+document")]
+        [ProducesResponseType(typeof(Response<CabinCrewCareer.Application.UserApplications.Common.UserApplicationDetailResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetUserApplicationWithDocumentsAsync(int id)
+        {
+            try
+            {
+                return Ok(await mediator.Send(new CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicationByUserId.GetUserApplicationByUserIdQuery(id)));
+            }
+            catch (ApiException e)
+            {
+                return NotFound(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
         #endregion
 
         #region Update User
