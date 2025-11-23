@@ -34,6 +34,13 @@
                 .FirstOrDefaultAsync(x => x.ApplicationId == id);
         }
 
+        public async Task<UserApplication?> GetUserApplicationByUserIdAsync(int userId)
+        {
+            return await _dbContext.UserApplications
+                .Include(x => x.Documents)
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+        }
+
         public async Task<bool> UpdateApplicationStatusAsync(int id, ApplicationStatus status)
         {
             var application = await _dbContext.UserApplications.FirstOrDefaultAsync(x => x.ApplicationId == id);
