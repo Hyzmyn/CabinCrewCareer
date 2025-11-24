@@ -77,6 +77,17 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest
                 throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
             }
 
+            // Check if user already has a test session for this test
+            var existingTestSessions = await _unitOfWork.TestSessions.GetAllAsync(
+                expression: ts => ts.UserId == userId && ts.TestId == request.TestId
+            );
+
+            if (existingTestSessions.Any())
+            {
+                errorMessages.Add($"You have already submitted this test. Multiple submissions are not allowed.");
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+            }
+
             // Check if all question IDs exist in the test
             var testQuestionIds = testEntity.TestQuestions.Select(q => q.QuestionId).ToHashSet();
             var answerQuestionIds = request.Answers.Select(a => a.QuestionId).ToHashSet();
