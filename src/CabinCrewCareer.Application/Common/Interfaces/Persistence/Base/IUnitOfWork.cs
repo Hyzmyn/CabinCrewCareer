@@ -40,6 +40,8 @@
 
         ITestAnswerRepository TestAnswers { get; }
 
+        IDocumentRepository Documents { get; }
+
         Task CompleteAsync();
     }
 }

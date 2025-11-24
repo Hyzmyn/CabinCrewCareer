@@ -1,24 +1,22 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
-using CabinCrewCareer.Application.UserApplications.Commands.Requests;
+using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
-using CabinCrewCareer.Application.UserApplications.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
-    public class CreateUserApplicationDraftCommandHandler : IRequestHandler<CreateUserApplicationDraftCommand, Response<UserApplicationResponse>>
+    public class CreateUserApplicationDraftCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUploadFileService uploadFileService,
+        IHttpContextAccessor httpContextAccessor) : IRequestHandler<CreateUserApplicationDraftCommand, Response<UserApplicationResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUploadFileService _uploadFileService;
-        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor _httpContextAccessor;
-        public CreateUserApplicationDraftCommandHandler(IUnitOfWork unitOfWork, IUploadFileService uploadFileService, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor)
-        {
-            _unitOfWork = unitOfWork;
-            _uploadFileService = uploadFileService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUploadFileService _uploadFileService = uploadFileService;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
         public async Task<Response<UserApplicationResponse>> Handle(CreateUserApplicationDraftCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;

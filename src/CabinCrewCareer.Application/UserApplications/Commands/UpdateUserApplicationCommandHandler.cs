@@ -1,28 +1,26 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
-using CabinCrewCareer.Application.UserApplications.Commands.Requests;
+using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using CabinCrewCareer.Application.UserApplications.Common;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
-    public class UpdateUserApplicationCommandHandler : IRequestHandler<UpdateUserApplicationCommand, Response<UserApplicationResponse>>
+    public class UpdateUserApplicationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUploadFileService uploadFileService,
+        IFirebaseStorageService cloudinaryStorageService,
+        IHttpContextAccessor httpContextAccessor,
+        IDateTimeProvider dateTimeProvider) : IRequestHandler<UpdateUserApplicationCommand, Response<UserApplicationResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUploadFileService _uploadFileService;
-        private readonly IFirebaseStorageService _cloudinaryStorageService;
-        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor _httpContextAccessor;
-        public UpdateUserApplicationCommandHandler(IUnitOfWork unitOfWork, IUploadFileService uploadFileService, IFirebaseStorageService cloudinaryStorageService, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor)
-        {
-            _unitOfWork = unitOfWork;
-            _uploadFileService = uploadFileService;
-            _cloudinaryStorageService = cloudinaryStorageService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUploadFileService _uploadFileService = uploadFileService;
+        private readonly IFirebaseStorageService _cloudinaryStorageService = cloudinaryStorageService;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+
         public async Task<Response<UserApplicationResponse>> Handle(UpdateUserApplicationCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;

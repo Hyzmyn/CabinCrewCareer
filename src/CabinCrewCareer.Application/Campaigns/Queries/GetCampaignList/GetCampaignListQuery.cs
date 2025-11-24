@@ -1,8 +1,15 @@
+using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
 {
-    public class GetCampaignListQuery : IRequest<List<GetCampaignListDto>>
-    {
-    }
+    public record GetCampaignListQuery(
+        string? SearchTerm,
+        string? SortColumn,
+        string? SortOrder,
+        int? CampaignType,
+        int? CampaignStatus,
+        int Page,
+        int PageSize) : IRequest<Response<PaginatedList<GetCampaignListDto>>>;
 }

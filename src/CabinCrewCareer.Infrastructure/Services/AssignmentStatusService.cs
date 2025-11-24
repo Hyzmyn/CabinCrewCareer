@@ -59,7 +59,7 @@ namespace CabinCrewCareer.Infrastructure.Services
         public async Task UpdateAllAssignmentStatusesAsync(CancellationToken cancellationToken = default)
         {
             var campaigns = await _unitOfWork.Campaigns.GetAllAsync();
-            var activeCampaigns = campaigns.Where(c => c.CampaignStatus >= CampaignStatus.Published).ToList();
+            var activeCampaigns = campaigns.Where(c => c.CampaignStatus >= CampaignStatus.Ongoing).ToList();
 
             if (!activeCampaigns.Any()) return;
 
@@ -81,24 +81,24 @@ namespace CabinCrewCareer.Infrastructure.Services
 
             return campaignStatus switch
             {
-                // Campaign Published: giữ nguyên Assigned
-                CampaignStatus.Published => currentAssignmentStatus == AssignmentStatus.Assigned 
-                    ? AssignmentStatus.Assigned 
-                    : currentAssignmentStatus,
+                //// Campaign Published: giữ nguyên Assigned
+                //CampaignStatus.Published => currentAssignmentStatus == AssignmentStatus.Assigned 
+                //    ? AssignmentStatus.Assigned 
+                //    : currentAssignmentStatus,
 
                 // Campaign Upcoming: giữ nguyên Assigned
-                CampaignStatus.Upcoming => currentAssignmentStatus == AssignmentStatus.Assigned 
-                    ? AssignmentStatus.Assigned 
+                CampaignStatus.Upcoming => currentAssignmentStatus == AssignmentStatus.Assigned
+                    ? AssignmentStatus.Assigned
                     : currentAssignmentStatus,
 
                 // Campaign Ongoing: Assigned -> InProgress tự động
-                CampaignStatus.Ongoing => currentAssignmentStatus == AssignmentStatus.Assigned 
-                    ? AssignmentStatus.InProgress 
+                CampaignStatus.Ongoing => currentAssignmentStatus == AssignmentStatus.Assigned
+                    ? AssignmentStatus.InProgress
                     : currentAssignmentStatus,
 
                 // Campaign Ended: InProgress -> Completed tự động
-                CampaignStatus.Ended => currentAssignmentStatus == AssignmentStatus.InProgress 
-                    ? AssignmentStatus.Completed 
+                CampaignStatus.Ended => currentAssignmentStatus == AssignmentStatus.InProgress
+                    ? AssignmentStatus.Completed
                     : currentAssignmentStatus,
 
                 // Các trạng thái khác: giữ nguyên

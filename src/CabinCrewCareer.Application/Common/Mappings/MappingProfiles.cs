@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.CampaignRequests.Common;
 using CabinCrewCareer.Application.CampaignRounds.Common;
+using CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
@@ -110,6 +111,20 @@ namespace CabinCrewCareer.Application.Common.Mappings
             CreateMap<Test, GetAvailableTestResponse>()
                 .ForMember(u => u.NumberOfQuestions, u => u.MapFrom(u => u.TestQuestions.Count))
                 .ForMember(u => u.TestType, u => u.MapFrom(u => u.TestType.GetDescription()));
+            #endregion
+
+            #region Campaign
+            CreateMap<Campaign, GetCampaignListDto>()
+                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.CampaignType.ToString()))
+                .ForMember(u => u.Status, u => u.MapFrom(u => u.CampaignStatus.ToString()))
+                .ForMember(u => u.StartDate, u => u.MapFrom(u => u.StartDate.HasValue ? u.StartDate.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.EndDate, u => u.MapFrom(u => u.EndDate.HasValue ? u.EndDate.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.RejectedAt, u => u.MapFrom(u => u.RejectedAt.HasValue ? u.RejectedAt.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.ApprovedAt, u => u.MapFrom(u => u.ApprovedAt.HasValue ? u.ApprovedAt.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.CreatedAt, u => u.MapFrom(u => u.CreatedAt.HasValue ? u.CreatedAt.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.PartnerName, u => u.MapFrom(u => u.CampaignRequest != null && u.CampaignRequest.AirlinePartner != null ? u.CampaignRequest.AirlinePartner.PartnerName : null));
+
+            CreateMap<PaginatedList<Campaign>, PaginatedList<GetCampaignListDto>>();
             #endregion
         }
     }

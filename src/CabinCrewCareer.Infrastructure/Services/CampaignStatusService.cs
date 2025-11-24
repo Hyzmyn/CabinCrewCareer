@@ -11,7 +11,7 @@ namespace CabinCrewCareer.Infrastructure.Services
         private readonly IAssignmentStatusService _assignmentStatusService;
 
         public CampaignStatusService(
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
             IDateTimeProvider dateTimeProvider,
             IAssignmentStatusService assignmentStatusService)
         {
@@ -27,8 +27,8 @@ namespace CabinCrewCareer.Infrastructure.Services
 
             // CHỈ tự động cập nhật status cho campaigns từ Published trở lên
             // Approved PHẢI được assign tasks thủ công thì mới chuyển sang Published
-            if (campaign.CampaignStatus < CampaignStatus.Published) 
-                return;
+            //if (campaign.CampaignStatus < CampaignStatus.Published) 
+            //    return;
 
             var currentTime = _dateTimeProvider.UtcNow;
             var newStatus = DetermineStatusByDate(campaign.StartDate, campaign.EndDate, currentTime);
@@ -50,7 +50,7 @@ namespace CabinCrewCareer.Infrastructure.Services
             // CHỈ lấy campaigns có status >= Published (5, 6, 7, 8)
             // KHÔNG bao gồm Approved (2) - phải assign tasks thủ công mới chuyển Published
             var campaigns = await _unitOfWork.Campaigns.GetAllAsync();
-            var campaignsToUpdate = campaigns.Where(c => c.CampaignStatus >= CampaignStatus.Published).ToList();
+            var campaignsToUpdate = campaigns.Where(c => c.CampaignStatus >= CampaignStatus.Ongoing).ToList();
 
             if (!campaignsToUpdate.Any()) return;
 
@@ -60,7 +60,7 @@ namespace CabinCrewCareer.Infrastructure.Services
             foreach (var campaign in campaignsToUpdate)
             {
                 var newStatus = DetermineStatusByDate(campaign.StartDate, campaign.EndDate, currentTime);
-                
+
                 if (newStatus != campaign.CampaignStatus)
                 {
                     campaign.CampaignStatus = newStatus;
@@ -84,7 +84,7 @@ namespace CabinCrewCareer.Infrastructure.Services
         private static CampaignStatus DetermineStatusByDate(DateTime? startDate, DateTime? endDate, DateTime currentTime)
         {
             // Nếu không có StartDate thì giữ Published (chưa xác định thời gian)
-            if (!startDate.HasValue) return CampaignStatus.Published;
+            //if (!startDate.HasValue) return CampaignStatus.Published;
 
             // Nếu có EndDate và đã qua EndDate => Ended
             if (endDate.HasValue && currentTime > endDate.Value)
