@@ -11,5 +11,6 @@
         public virtual InterviewCriteria InterviewCriteria { get; set; } = null!;
 
         // Navigation Properties
+        public virtual ICollection<InterviewResult> InterviewResults { get; set; } = [];
     }
 }

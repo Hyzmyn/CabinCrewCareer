@@ -4,6 +4,7 @@ using CabinCrewCareer.Infrastructure.CampaignAssignments;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Campaigns;
 using CabinCrewCareer.Infrastructure.Cities;
+using CabinCrewCareer.Infrastructure.EvaluationForms;
 using CabinCrewCareer.Infrastructure.InterviewCriterias;
 using CabinCrewCareer.Infrastructure.Notifications;
 using CabinCrewCareer.Infrastructure.ScoringCriterias;
@@ -63,6 +64,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IDocumentRepository Documents { get; private set; }
 
+        public IEvaluationFormRepository EvaluationForms { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -109,6 +112,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             TestAnswers = new TestAnswerRepository(_dbContext, _logger);
 
             Documents = new DocumentRepository(_dbContext, _logger);
+
+            EvaluationForms = new EvaluationFormRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
