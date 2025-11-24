@@ -10,8 +10,8 @@ using CabinCrewCareer.Infrastructure.ScoringCriterias;
 using CabinCrewCareer.Infrastructure.TestAnswers;
 using CabinCrewCareer.Infrastructure.TestOptions;
 using CabinCrewCareer.Infrastructure.TestQuestions;
-using CabinCrewCareer.Infrastructure.TestSessions;
 using CabinCrewCareer.Infrastructure.Tests;
+using CabinCrewCareer.Infrastructure.TestSessions;
 using CabinCrewCareer.Infrastructure.UserApplications;
 using CabinCrewCareer.Infrastructure.Users;
 using Microsoft.Extensions.Logging;
@@ -53,13 +53,15 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IRoundActivityRepository RoundActivites { get; private set; }
 
-        public IScoringCriteriaRepository ScoringCriterias { get; set; }
+        public IScoringCriteriaRepository ScoringCriterias { get; private set; }
 
-        public IInterviewCriteriaRepository InterviewCriterias { get; set; }
+        public IInterviewCriteriaRepository InterviewCriterias { get; private set; }
 
-        public ITestSessionRepository TestSessions { get; set; }
+        public ITestSessionRepository TestSessions { get; private set; }
 
-        public ITestAnswerRepository TestAnswers { get; set; }
+        public ITestAnswerRepository TestAnswers { get; private set; }
+
+        public IDocumentRepository Documents { get; private set; }
 
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
@@ -105,6 +107,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             TestSessions = new TestSessionRepository(_dbContext, _logger);
 
             TestAnswers = new TestAnswerRepository(_dbContext, _logger);
+
+            Documents = new DocumentRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

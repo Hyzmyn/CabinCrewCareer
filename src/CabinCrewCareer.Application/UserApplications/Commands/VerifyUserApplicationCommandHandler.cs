@@ -1,19 +1,18 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using MediatR;
-using CabinCrewCareer.Application.UserApplications.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
-    public class VerifyUserApplicationCommandHandler : IRequestHandler<VerifyUserApplicationCommand, Response<UserApplicationResponse>>
+    public class VerifyUserApplicationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IHttpContextAccessor httpContextAccessor) : IRequestHandler<VerifyUserApplicationCommand, Response<UserApplicationResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor _httpContextAccessor;
-        public VerifyUserApplicationCommandHandler(IUnitOfWork unitOfWork, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor)
-        {
-            _unitOfWork = unitOfWork;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
         public async Task<Response<UserApplicationResponse>> Handle(VerifyUserApplicationCommand command, CancellationToken cancellationToken)
         {
             var application = await _unitOfWork.UserApplications.GetUserApplicationByIdAsync(command.ApplicationId);
