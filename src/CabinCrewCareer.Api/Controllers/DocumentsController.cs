@@ -9,7 +9,7 @@ using System.Net;
 
 namespace CabinCrewCareer.Api.Controllers
 {
-    [Route("api/v{version:apiVersion}/interview-criterias")]
+    [Route("api/v{version:apiVersion}/documents")]
     [ApiVersion(1)]
     [Authorize]
     public class DocumentsController(
