@@ -1,24 +1,25 @@
+using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
-using CabinCrewCareer.Application.UserApplications.Commands.Requests;
+using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
-using CabinCrewCareer.Application.UserApplications.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
-    public class SubmitUserApplicationCommandHandler : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
+    public class SubmitUserApplicationCommandHandler(
+        IUnitOfWork unitOfWork,
+        IUploadFileService uploadFileService,
+        IHttpContextAccessor httpContextAccessor,
+        IDateTimeProvider dateTimeProvider) : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUploadFileService _uploadFileService;
-        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor _httpContextAccessor;
-        public SubmitUserApplicationCommandHandler(IUnitOfWork unitOfWork, IUploadFileService uploadFileService, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor)
-        {
-            _unitOfWork = unitOfWork;
-            _uploadFileService = uploadFileService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUploadFileService _uploadFileService = uploadFileService;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+
         public async Task<Response<UserApplicationResponse>> Handle(SubmitUserApplicationCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;
@@ -53,7 +54,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 Weight = request.Weight,
                 EnglishDegreeNumber = request.EnglishDegreeNumber,
                 EndDate = request.EndDate,
-                SubmissionDate = DateTime.Now,
+                SubmissionDate = _dateTimeProvider.UtcNow,
                 UserId = userId
             };
 
@@ -70,6 +71,44 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 documents.Add(new Document { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
 
             var result = await _unitOfWork.UserApplications.CreateUserApplicationAsync(application, documents);
+
+            // --- Tạo RoundActivity trạng thái Ongoing cho user ---
+            // Nếu request có campaignRoundId, thực hiện logic tự động
+            int? campaignRoundId = null;
+            var campaignRoundIdProp = request.GetType().GetProperty("CampaignRoundId");
+            if (campaignRoundIdProp != null)
+            {
+                var value = campaignRoundIdProp.GetValue(request);
+                if (value != null && int.TryParse(value.ToString(), out int crId))
+                    campaignRoundId = crId;
+            }
+            if (campaignRoundId.HasValue)
+            {
+                // Tìm round sàng lọc (Screening) thuộc campaignRoundId
+                var screeningRounds = await _unitOfWork.Rounds.GetAsync(r => r.CampaignRoundId == campaignRoundId.Value && r.RoundType == RoundType.Screening);
+                var screeningRound = screeningRounds?.FirstOrDefault();
+                if (screeningRound != null)
+                {
+                    var roundActivity = new RoundActivity
+                    {
+                        RoundId = screeningRound.RoundId,
+                        UserId = userId,
+                        Status = ActivityStatus.Ongoing
+                    };
+                    await _unitOfWork.RoundActivites.AddAsync(roundActivity);
+                    await _unitOfWork.CompleteAsync();
+                }
+                else
+                {
+                    return new Response<UserApplicationResponse>
+                    {
+                        Code = (int)ResponseCode.FAIL,
+                        Message = "Không tìm thấy vòng sàng lọc (Screening) cho campaignRoundId này.",
+                        Data = null,
+                        Errors = "ROUND_SCREENING_NOT_FOUND"
+                    };
+                }
+            }
 
             var response = new UserApplicationResponse
             {

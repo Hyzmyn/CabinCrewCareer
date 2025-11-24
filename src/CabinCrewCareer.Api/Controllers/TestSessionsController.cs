@@ -1,14 +1,13 @@
+using Asp.Versioning;
+using CabinCrewCareer.Api.Models;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitMultipleChoiceTest;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest;
 using CabinCrewCareer.Application.TestSessions.Common;
 using CabinCrewCareer.Domain.Wrappers;
-using CabinCrewCareer.Api.Models;
-using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Cors;
 using System.Net;
 
 namespace CabinCrewCareer.Api.Controllers
@@ -16,7 +15,6 @@ namespace CabinCrewCareer.Api.Controllers
     [Route("api/v{version:apiVersion}/test-sessions")]
     [ApiVersion(1)]
     [Authorize]
-    [EnableCors("AllowOrigin")]
     public class TestSessionsController(
         IMediator mediator,
         ILogger<TestSessionsController> logger) : ApiController(mediator, logger)
@@ -199,7 +197,7 @@ namespace CabinCrewCareer.Api.Controllers
                 // Parse question IDs
                 var questionIdStrings = request.QuestionIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 var questionIds = new List<int>();
-                
+
                 foreach (var idStr in questionIdStrings)
                 {
                     if (!int.TryParse(idStr.Trim(), out int questionId))

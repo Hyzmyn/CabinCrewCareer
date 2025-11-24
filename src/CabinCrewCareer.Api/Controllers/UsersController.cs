@@ -161,11 +161,13 @@ namespace CabinCrewCareer.Api.Controllers
                 });
             }
         }
-        
+        #endregion
+
+        #region Get User Application
         /// <summary>
         /// Get user's application with documents
         /// </summary>
-        [HttpGet("{id}/application+document")]
+        [HttpGet("{id}/application")]
         [ProducesResponseType(typeof(Response<CabinCrewCareer.Application.UserApplications.Common.UserApplicationDetailResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetUserApplicationWithDocumentsAsync(int id)

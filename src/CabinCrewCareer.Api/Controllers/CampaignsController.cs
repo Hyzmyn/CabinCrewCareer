@@ -1,4 +1,7 @@
 using Asp.Versioning;
+using CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList;
+using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,32 +17,68 @@ namespace CabinCrewCareer.Api.Controllers
         IMediator mediator,
         ILogger<CampaignsController> logger) : ApiController(mediator, logger)
     {
-    /// <summary>
-    /// Get the list of campaigns.
-    /// </summary>
-    /// <returns>List of campaigns.</returns>
-    [HttpGet]
-    public async Task<IActionResult> GetListAsync()
+
+        #region Get Campaigns
+        /// <summary>
+        /// Get all campaigns
+        /// </summary>
+        /// <param name="searchTerm">Search by campaign's name</param>
+        /// <param name="sortColumn">Sort on a specifice column. Example: "name"</param>
+        /// <param name="sortOrder">"asc" or "desc"</param>
+        /// <param name="campaignType">1: Recruitment, 2: Promotion</param>
+        /// <param name="campaignStatus">0: Draft, 1: Pending, 2: Approved, 3: Rejected, 4: Cancelled, 5: Ongoing, 6: Upcoming, 7: Ended</param>
+        /// <param name="page">Current page</param>
+        /// <param name="pageSize">Number of records of a specific page</param>
+        /// <returns>A list of all campaigns</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetCampaignListDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetAllAsync([FromQuery]
+        string? searchTerm,
+        string? sortColumn,
+        string? sortOrder,
+        int? campaignType,
+        int? campaignStatus,
+        int page = 1,
+        int pageSize = 5)
         {
             try
             {
-                var result = await mediator.Send(new CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList.GetCampaignListQuery());
-                return Ok(result);
+                return Ok(await mediator.Send(
+                    new GetCampaignListQuery(
+                        searchTerm,
+                        sortColumn,
+                        sortOrder,
+                        campaignType,
+                        campaignStatus,
+                        page,
+                        pageSize)));
             }
-            catch (Exception ex)
+            catch (ApiException e)
             {
-                logger.LogError(ex, "Error in GetListAsync");
-                return StatusCode(500, new { error = ex.Message });
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
             }
         }
+        #endregion
 
-    /// <summary>
-    /// Get the detail of a campaign by id.
-    /// </summary>
-    /// <param name="id">Campaign id</param>
-    /// <returns>Campaign detail.</returns>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetDetailAsync(int id)
+        /// <summary>
+        /// Get the detail of a campaign by id.
+        /// </summary>
+        /// <param name="id">Campaign id</param>
+        /// <returns>Campaign detail.</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDetailAsync(int id)
         {
             try
             {
@@ -54,48 +93,48 @@ namespace CabinCrewCareer.Api.Controllers
             }
         }
 
-    /// <summary>
-    /// Update campaign information and create rounds for the campaign.
-    /// </summary>
-    /// <param name="id">Campaign id</param>
-    /// <param name="dto">Update and create round data</param>
-    /// <returns>Response with campaign detail or error information.</returns>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///     PUT /api/v1/campaigns/1/campaign-rounds
-    ///     {
-    ///         "startDate": "2025-01-01T00:00:00Z",
-    ///         "endDate": "2025-12-31T23:59:59Z",
-    ///         "rounds": [
-    ///             {
-    ///                 "roundName": "Round 1",
-    ///                 "description": "First recruitment round",
-    ///                 "targetQuantity": 60,
-    ///                 "roundStartDate": "2025-01-01T00:00:00Z",
-    ///                 "roundEndDate": "2025-06-30T23:59:59Z"
-    ///             },
-    ///             {
-    ///                 "roundName": "Round 2", 
-    ///                 "description": "Second recruitment round",
-    ///                 "targetQuantity": 40,
-    ///                 "roundStartDate": "2025-07-01T00:00:00Z",
-    ///                 "roundEndDate": "2025-12-31T23:59:59Z"
-    ///             }
-    ///         ]
-    ///     }
-    ///
-    /// Notes:
-    /// - Campaign must be in Draft or Rejected status
-    /// - Round 1: targetQuantity must be 60-70% of campaign target
-    /// - Middle rounds: targetQuantity must be 60-70% of remaining
-    /// - Last round: targetQuantity must be ≥80% of remaining
-    /// - After success, campaign status changes to Pending
-    /// </remarks>
-    [HttpPut("{id}/campaign-rounds")]
-    [ProducesResponseType(typeof(Response<bool>), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> UpdateAndCreateRoundAsync(int id, [FromBody] CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound.UpdateCampaignAndCreateRoundDto dto)
+        /// <summary>
+        /// Update campaign information and create rounds for the campaign.
+        /// </summary>
+        /// <param name="id">Campaign id</param>
+        /// <param name="dto">Update and create round data</param>
+        /// <returns>Response with campaign detail or error information.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /api/v1/campaigns/1/campaign-rounds
+        ///     {
+        ///         "startDate": "2025-01-01T00:00:00Z",
+        ///         "endDate": "2025-12-31T23:59:59Z",
+        ///         "rounds": [
+        ///             {
+        ///                 "roundName": "Round 1",
+        ///                 "description": "First recruitment round",
+        ///                 "targetQuantity": 60,
+        ///                 "roundStartDate": "2025-01-01T00:00:00Z",
+        ///                 "roundEndDate": "2025-06-30T23:59:59Z"
+        ///             },
+        ///             {
+        ///                 "roundName": "Round 2", 
+        ///                 "description": "Second recruitment round",
+        ///                 "targetQuantity": 40,
+        ///                 "roundStartDate": "2025-07-01T00:00:00Z",
+        ///                 "roundEndDate": "2025-12-31T23:59:59Z"
+        ///             }
+        ///         ]
+        ///     }
+        ///
+        /// Notes:
+        /// - Campaign must be in Draft or Rejected status
+        /// - Round 1: targetQuantity must be 60-70% of campaign target
+        /// - Middle rounds: targetQuantity must be 60-70% of remaining
+        /// - Last round: targetQuantity must be ≥80% of remaining
+        /// - After success, campaign status changes to Pending
+        /// </remarks>
+        [HttpPut("{id}/campaign-rounds")]
+        [ProducesResponseType(typeof(Response<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateAndCreateRoundAsync(int id, [FromBody] CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound.UpdateCampaignAndCreateRoundDto dto)
         {
             try
             {
