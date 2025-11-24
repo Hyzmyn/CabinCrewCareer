@@ -8,6 +8,7 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 using System.Net;
 
 namespace CabinCrewCareer.Api.Controllers
@@ -15,6 +16,7 @@ namespace CabinCrewCareer.Api.Controllers
     [Route("api/v{version:apiVersion}/test-sessions")]
     [ApiVersion(1)]
     [Authorize]
+    [EnableCors("AllowOrigin")]
     public class TestSessionsController(
         IMediator mediator,
         ILogger<TestSessionsController> logger) : ApiController(mediator, logger)
