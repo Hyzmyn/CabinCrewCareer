@@ -1,9 +1,11 @@
 using Asp.Versioning;
 using CabinCrewCareer.Api.Models;
 using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitMultipleChoiceTest;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest;
 using CabinCrewCareer.Application.TestSessions.Common;
+using CabinCrewCareer.Application.TestSessions.Queries.GetAllTestSessions;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +21,72 @@ namespace CabinCrewCareer.Api.Controllers
         IMediator mediator,
         ILogger<TestSessionsController> logger) : ApiController(mediator, logger)
     {
+        #region Get All Test Sessions
+        /// <summary>
+        /// Get all test sessions with pagination and filters
+        /// </summary>
+        /// <param name="searchTerm">Search by user name, email, or test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, userId, testId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="testId">Filter by test ID</param>
+        /// <param name="userId">Filter by user ID</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get all test sessions with flexible filtering and sorting**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// 
+        /// **Query Parameters:**
+        /// - `searchTerm`: Search in user full name, email, or test name
+        /// - `sortColumn`: Choose from testSessionId, userId, testId, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
+        /// - `testId`: Filter sessions by specific test
+        /// - `userId`: Filter sessions by specific user
+        /// - `page`: Page number for pagination
+        /// - `pageSize`: Number of items per page
+        /// 
+        /// **Response includes:**
+        /// - Paginated list of test sessions
+        /// - Each session contains user info, test info, scores, and timestamps
+        /// - Total records and page information
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions?testId=75&amp;page=1&amp;pageSize=20&amp;sortColumn=createdAt&amp;sortOrder=desc
+        /// ```
+        /// </remarks>
+        /// <returns>Paginated list of test sessions</returns>
+        /// <response code="200">Ok - Test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestSessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetAllTestSessionsAsync(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int? testId,
+            [FromQuery] int? userId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetAllTestSessionsQuery
+            {
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
+                TestId = testId,
+                UserId = userId,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
         #region Submit Multiple Choice Test (Listening/Practical)
         /// <summary>
         /// Submit multiple choice test - For English Listening and Practical tests only

@@ -42,6 +42,8 @@
 
         IDocumentRepository Documents { get; }
 
+        IEvaluationFormRepository EvaluationForms { get; }
+
         Task CompleteAsync();
     }
 }
