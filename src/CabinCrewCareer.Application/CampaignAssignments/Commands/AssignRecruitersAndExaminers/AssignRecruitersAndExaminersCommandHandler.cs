@@ -271,7 +271,7 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
             }
 
             // Cập nhật trạng thái campaign thành Published
-            campaign.CampaignStatus = CampaignStatus.Published;
+            campaign.CampaignStatus = CampaignStatus.Ongoing;
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
 
             await _unitOfWork.CompleteAsync();
