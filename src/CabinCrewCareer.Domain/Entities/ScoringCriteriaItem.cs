@@ -16,5 +16,6 @@
 
         // Navigation Properties
         public virtual ICollection<ScoringCriteriaDetail> ScoringCriteriaDetails { get; set; } = [];
+        public virtual ICollection<AppearanceResult> AppearanceResults { get; set; } = [];
     }
 }

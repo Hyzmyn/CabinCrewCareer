@@ -14,12 +14,12 @@
 
         public string Examiner { get; set; } = string.Empty;
 
-        public List<GetAppearanceResultResponse> Results { get; set; } = [];
+        public List<GetAppearanceResultResponse> AppearanceResults { get; set; } = [];
     }
 
     public class GetAppearanceResultResponse
     {
-        public int ScoringCriteriaDetailId { get; set; }
+        public int ScoringCriteriaItemId { get; set; }
 
         public bool IsPassed { get; set; }
     }

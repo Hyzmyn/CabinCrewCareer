@@ -141,7 +141,15 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.EvaluatedDate, u => u.MapFrom(u => u.EvaluatedDate.GetFormatDateTime()))
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
                 .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
-                .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName));
+                .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName))
+                .ForMember(u => u.FinalScore, u => u.MapFrom(u => u.InterviewResults.Sum(x => x.Score)));
+
+            CreateMap<EvaluationForm, GetInterviewEvaluationFormDetailResponse>()
+                .ForMember(u => u.EvaluatedDate, u => u.MapFrom(u => u.EvaluatedDate.GetFormatDateTime()))
+                .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
+                .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
+                .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName))
+                .ForMember(u => u.FinalScore, u => u.MapFrom(u => u.InterviewResults.Sum(x => x.Score)));
 
             CreateMap<InterviewResult, GetInterviewResultResponse>();
             #endregion

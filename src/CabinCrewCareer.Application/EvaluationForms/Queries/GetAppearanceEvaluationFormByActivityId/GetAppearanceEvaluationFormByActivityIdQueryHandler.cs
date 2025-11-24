@@ -3,7 +3,6 @@ using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.EvaluationForms.Common;
-using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
@@ -20,7 +19,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Queries.GetAppearanceEvalu
         {
             return new Response<GetAppearanceEvaluationFormResponse>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<GetAppearanceEvaluationFormResponse>(await _unitOfWork.EvaluationForms.GetEvaluationFormByIdAsync(EvaluationType.Appearance, request.ActivityId)),
+                data: _mapper.Map<GetAppearanceEvaluationFormResponse>(await _unitOfWork.EvaluationForms.GetEvaluationFormByIdAsync(request.ActivityId)),
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }
