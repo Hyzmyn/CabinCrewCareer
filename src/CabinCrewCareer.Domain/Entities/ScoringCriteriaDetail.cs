@@ -9,8 +9,5 @@
         // Foreign Keys
         public int? ScoringCriteriaItemId { get; set; }
         public virtual ScoringCriteriaItem ScoringCriteriaItem { get; set; } = null!;
-
-        // Navigation Property
-        public virtual ICollection<AppearanceResult> AppearanceResults { get; set; } = [];
     }
 }

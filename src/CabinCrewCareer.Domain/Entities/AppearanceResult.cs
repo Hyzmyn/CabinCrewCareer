@@ -10,7 +10,7 @@
         public int? EvaluationId { get; set; }
         public virtual EvaluationForm EvaluationForm { get; set; } = null!;
 
-        public int? ScoringCriteriaDetailId { get; set; }
-        public virtual ScoringCriteriaDetail ScoringCriteriaDetail { get; set; } = null!;
+        public int? ScoringCriteriaItemId { get; set; }
+        public virtual ScoringCriteriaItem ScoringCriteriaItem { get; set; } = null!;
     }
 }

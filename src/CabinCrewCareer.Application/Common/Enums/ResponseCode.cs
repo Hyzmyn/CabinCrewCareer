@@ -129,6 +129,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Retrieved unsuccessfully")]
         GET_UNSUCC = 40,
 
+        [Description("Candidate's appearance has been evaluated")]
+        CANDIDATE_HAS_BEEN_EVALUATED = 41,
+
         #endregion
     }
 }

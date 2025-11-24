@@ -69,14 +69,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<bool>("IsPassed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ScoringCriteriaDetailId")
+                    b.Property<int?>("ScoringCriteriaItemId")
                         .HasColumnType("int");
 
                     b.HasKey("AppearanceResultId");
 
                     b.HasIndex("EvaluationId");
 
-                    b.HasIndex("ScoringCriteriaDetailId");
+                    b.HasIndex("ScoringCriteriaItemId");
 
                     b.ToTable("AppearanceResult", (string)null);
                 });
@@ -1222,14 +1222,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasForeignKey("EvaluationId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", "ScoringCriteriaDetail")
+                    b.HasOne("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", "ScoringCriteriaItem")
                         .WithMany("AppearanceResults")
-                        .HasForeignKey("ScoringCriteriaDetailId")
+                        .HasForeignKey("ScoringCriteriaItemId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("EvaluationForm");
 
-                    b.Navigation("ScoringCriteriaDetail");
+                    b.Navigation("ScoringCriteriaItem");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Blog", b =>
@@ -1645,13 +1645,10 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("ScoringCriteriaItems");
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", b =>
-                {
-                    b.Navigation("AppearanceResults");
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaItem", b =>
                 {
+                    b.Navigation("AppearanceResults");
+
                     b.Navigation("ScoringCriteriaDetails");
                 });
 

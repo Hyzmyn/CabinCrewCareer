@@ -1,6 +1,11 @@
-﻿namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEvaluationForm
+﻿using CabinCrewCareer.Application.EvaluationForms.Common;
+using CabinCrewCareer.Domain.Wrappers;
+using MediatR;
+
+namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEvaluationForm
 {
-    public class CreateInterviewEvaluationFormCommand
-    {
-    }
+    public record CreateInterviewEvaluationFormCommand(
+        int ActivityId,
+        int Type,
+        List<CreateInterviewEvaluationRequest> Choices) : IRequest<Response<string>>;
 }
