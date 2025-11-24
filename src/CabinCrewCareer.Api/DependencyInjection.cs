@@ -93,17 +93,10 @@ namespace CabinCrewCareer.Api
                 options.AddPolicy("AllowOrigin",
                     builder =>
                     {
-                        services.AddCors(options =>
-                        {
-                            options.AddPolicy("AllowOrigin",
-                                builder =>
-                                {
-                                    builder.SetIsOriginAllowed(_ => true) // Allow any origin
-                                           .AllowAnyHeader()
-                                           .AllowAnyMethod()
-                                           .AllowCredentials();
-                                });
-                        });
+                        builder.SetIsOriginAllowed(_ => true) // Allow any origin
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                     });
             });
 
