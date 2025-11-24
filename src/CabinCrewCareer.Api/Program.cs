@@ -20,11 +20,12 @@ var app = builder.Build();
 {
     app.ConfigureSwagger();
 
+    // CORS must be before Authentication/Authorization
+    app.UseCors("AllowOrigin");
+
     app.UseHttpsRedirection();
 
     app.UseAuthentication();
-
-    app.UseCors("AllowOrigin");
 
     app.UseAuthorization();
 
