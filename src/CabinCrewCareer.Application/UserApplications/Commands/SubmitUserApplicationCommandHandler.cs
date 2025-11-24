@@ -5,6 +5,7 @@ using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
 using CabinCrewCareer.Application.UserApplications.Common;
+using CabinCrewCareer.Application.Common.Enums;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
@@ -70,6 +71,44 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 documents.Add(new Document { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
 
             var result = await _unitOfWork.UserApplications.CreateUserApplicationAsync(application, documents);
+
+            // --- Tạo RoundActivity trạng thái Ongoing cho user ---
+            // Nếu request có campaignRoundId, thực hiện logic tự động
+            int? campaignRoundId = null;
+            var campaignRoundIdProp = request.GetType().GetProperty("CampaignRoundId");
+            if (campaignRoundIdProp != null)
+            {
+                var value = campaignRoundIdProp.GetValue(request);
+                if (value != null && int.TryParse(value.ToString(), out int crId))
+                    campaignRoundId = crId;
+            }
+            if (campaignRoundId.HasValue)
+            {
+                // Tìm round sàng lọc (Screening) thuộc campaignRoundId
+                var screeningRounds = await _unitOfWork.Rounds.GetAsync(r => r.CampaignRoundId == campaignRoundId.Value && r.RoundType == RoundType.Screening);
+                var screeningRound = screeningRounds?.FirstOrDefault();
+                if (screeningRound != null)
+                {
+                    var roundActivity = new RoundActivity
+                    {
+                        RoundId = screeningRound.RoundId,
+                        UserId = userId,
+                        Status = ActivityStatus.Ongoing
+                    };
+                    await _unitOfWork.RoundActivites.AddAsync(roundActivity);
+                    await _unitOfWork.CompleteAsync();
+                }
+                else
+                {
+                    return new Response<UserApplicationResponse>
+                    {
+                        Code = (int)ResponseCode.FAIL,
+                        Message = "Không tìm thấy vòng sàng lọc (Screening) cho campaignRoundId này.",
+                        Data = null,
+                        Errors = "ROUND_SCREENING_NOT_FOUND"
+                    };
+                }
+            }
 
             var response = new UserApplicationResponse
             {

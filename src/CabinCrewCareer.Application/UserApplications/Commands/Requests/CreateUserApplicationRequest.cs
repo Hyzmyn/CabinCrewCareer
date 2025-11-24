@@ -18,6 +18,9 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
         public string EnglishDegreeNumber { get; set; } = string.Empty;
         public DateOnly? EndDate { get; set; }
 
+        // Thông tin đợt tuyển
+        public int? CampaignRoundId { get; set; }
+
         // 5 loại tài liệu
         public IFormFile ApplicationForm { get; set; }
         public IFormFile ProfilePhoto { get; set; }
