@@ -70,6 +70,12 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<ScoringCriteriaDetail> ScoringCriteriaDetails { get; set; }
 
+        public DbSet<EvaluationForm> EvaluationForms { get; set; }
+
+        public DbSet<AppearanceResult> AppearanceResults { get; set; }
+
+        public DbSet<InterviewResult> InterviewResults { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);
