@@ -1,6 +1,4 @@
 ﻿namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceEvaluationForm
 {
-    public class CreateAppearanceEvaluationFormCommand
-    {
-    }
+    public record CreateAppearanceEvaluationFormCommand(int ActivityId);
 }

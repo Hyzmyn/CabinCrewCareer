@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.EvaluationForms.Common;
 using CabinCrewCareer.Application.InterviewCriterias.Common;
 using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.RoundActivities.Common;
@@ -125,6 +126,24 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.PartnerName, u => u.MapFrom(u => u.CampaignRequest != null && u.CampaignRequest.AirlinePartner != null ? u.CampaignRequest.AirlinePartner.PartnerName : null));
 
             CreateMap<PaginatedList<Campaign>, PaginatedList<GetCampaignListDto>>();
+            #endregion
+
+            #region Evaluation Form
+            CreateMap<EvaluationForm, GetAppearanceEvaluationFormResponse>()
+                .ForMember(u => u.EvaluatedDate, u => u.MapFrom(u => u.EvaluatedDate.GetFormatDateTime()))
+                .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
+                .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
+                .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName));
+
+            CreateMap<AppearanceResult, GetAppearanceResultResponse>();
+
+            CreateMap<EvaluationForm, GetInterviewEvaluationFormResponse>()
+                .ForMember(u => u.EvaluatedDate, u => u.MapFrom(u => u.EvaluatedDate.GetFormatDateTime()))
+                .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
+                .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
+                .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName));
+
+            CreateMap<InterviewResult, GetInterviewResultResponse>();
             #endregion
         }
     }
