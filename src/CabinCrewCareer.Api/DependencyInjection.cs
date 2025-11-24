@@ -93,9 +93,16 @@ namespace CabinCrewCareer.Api
                 options.AddPolicy("AllowOrigin",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins(
+                                "http://localhost:5173",
+                                "http://localhost:3000",
+                                "http://localhost:4200",
+                                "https://localhost:5173",
+                                "https://localhost:3000",
+                                "https://localhost:4200")
                                .AllowAnyHeader()
-                               .AllowAnyMethod();
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                     });
             });
 
