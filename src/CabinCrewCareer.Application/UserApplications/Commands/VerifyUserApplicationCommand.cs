@@ -6,9 +6,11 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
     public class VerifyUserApplicationCommand : IRequest<Response<UserApplicationResponse>>
     {
         public int ApplicationId { get; set; }
-        public VerifyUserApplicationCommand(int applicationId)
+        public int CampaignRoundId { get; set; }
+        public VerifyUserApplicationCommand(int applicationId, int campaignRoundId)
         {
             ApplicationId = applicationId;
+            CampaignRoundId = campaignRoundId;
         }
     }
 }

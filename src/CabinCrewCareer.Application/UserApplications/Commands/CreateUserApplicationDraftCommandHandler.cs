@@ -20,18 +20,31 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
         public async Task<Response<UserApplicationResponse>> Handle(CreateUserApplicationDraftCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;
-            var applicationFormUrl = request.ApplicationForm != null ? await _uploadFileService.CloudinaryStorage(request.ApplicationForm) : null;
-            var profilePhotoUrl = request.ProfilePhoto != null ? await _uploadFileService.CloudinaryStorage(request.ProfilePhoto) : null;
-            var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
-            var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
-            var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
-
             // Lấy userId từ token
             var user = _httpContextAccessor.HttpContext?.User;
             var userIdClaim = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
             int userId = 0;
             if (userIdClaim != null)
                 int.TryParse(userIdClaim.Value, out userId);
+
+            // Kiểm tra hồ sơ đã tồn tại chưa
+            var existedApplication = await _unitOfWork.UserApplications.GetUserApplicationByUserIdAsync(userId);
+            if (existedApplication != null)
+            {
+                return new Response<UserApplicationResponse>
+                {
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAIL,
+                    Message = "You already have an application. Cannot create a new one.",
+                    Data = null,
+                    Errors = "APPLICATION_ALREADY_EXISTS"
+                };
+            }
+
+            var applicationFormUrl = request.ApplicationForm != null ? await _uploadFileService.CloudinaryStorage(request.ApplicationForm) : null;
+            var profilePhotoUrl = request.ProfilePhoto != null ? await _uploadFileService.CloudinaryStorage(request.ProfilePhoto) : null;
+            var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
+            var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
+            var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
 
             var application = new UserApplication
             {
@@ -69,7 +82,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             };
             return new Response<UserApplicationResponse>
             {
-                Code = 2, // 2 = CREATED_SUCCESS
+                Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.CREATED_SUCCESS,
                 Message = "Created draft application successfully.",
                 Data = response,
                 Errors = null

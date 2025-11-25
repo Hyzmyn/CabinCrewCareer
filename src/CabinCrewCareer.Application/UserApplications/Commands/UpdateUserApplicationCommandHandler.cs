@@ -28,7 +28,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (application == null || application.ApplicationStatus != ApplicationStatus.Draft)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 404,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.GET_UNSUCC,
                     Message = "Application not found or not in draft status.",
                     Data = null,
                     Errors = "Not found or invalid status"
@@ -44,7 +44,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (application.UserId != userId)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 401,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAILED_AUTHENTICATION,
                     Message = "Unauthorized: You do not own this application.",
                     Data = null,
                     Errors = "Unauthorized"
@@ -134,7 +134,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             };
             return new Response<UserApplicationResponse>
             {
-                Code = 4, // 4 = UPDATED_SUCCESS
+                Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.UPDATED_SUCCESS,
                 Message = "Draft application updated successfully.",
                 Data = response,
                 Errors = null

@@ -23,11 +23,32 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
         public async Task<Response<UserApplicationResponse>> Handle(SubmitUserApplicationCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;
+
+            // Get userId from token
+            var user = _httpContextAccessor.HttpContext?.User;
+            var userIdClaim = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            int userId = 0;
+            if (userIdClaim != null)
+                int.TryParse(userIdClaim.Value, out userId);
+
+            // Kiểm tra hồ sơ đã tồn tại chưa
+            var existedApplication = await _unitOfWork.UserApplications.GetUserApplicationByUserIdAsync(userId);
+            if (existedApplication != null)
+            {
+                return new Response<UserApplicationResponse>
+                {
+                    Code = (int)ResponseCode.FAIL,
+                    Message = "You already have an application. Cannot create a new one.",
+                    Data = null,
+                    Errors = "APPLICATION_ALREADY_EXISTS"
+                };
+            }
+
             // Check for all 5 required files
             if (request.ApplicationForm == null || request.ProfilePhoto == null || request.EducationDegree == null || request.EnglishCertificate == null || request.PassportOrID == null)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 400,
+                    Code = (int)ResponseCode.FAIL,
                     Message = "You must submit all 5 required documents to submit your application.",
                     Data = null,
                     Errors = "Missing required documents"
@@ -38,13 +59,6 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
             var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
             var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
-
-            // Get userId from token
-            var user = _httpContextAccessor.HttpContext?.User;
-            var userIdClaim = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            int userId = 0;
-            if (userIdClaim != null)
-                int.TryParse(userIdClaim.Value, out userId);
 
             var application = new UserApplication
             {
@@ -120,8 +134,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             };
             return new Response<UserApplicationResponse>
             {
-                Code = 2, // 2 = CREATED_SUCCESS
-                Message = "Submitted application successfully.",
+                Code = (int)ResponseCode.CREATED_SUCCESS,
+                Message = "Application submitted successfully.",
                 Data = response,
                 Errors = null
             };
