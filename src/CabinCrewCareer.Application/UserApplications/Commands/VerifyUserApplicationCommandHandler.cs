@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using CabinCrewCareer.Domain.Entities;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
@@ -19,7 +20,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (application == null || application.ApplicationStatus != ApplicationStatus.Draft)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 404,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.GET_UNSUCC,
                     Message = "Application not found or not in draft status.",
                     Data = null,
                     Errors = "Not found or invalid status"
@@ -35,7 +36,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (application.UserId != userId)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 401,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAILED_AUTHENTICATION,
                     Message = "Unauthorized: You do not own this application.",
                     Data = null,
                     Errors = "Unauthorized"
@@ -53,7 +54,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (!hasAllDocuments)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 400,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAIL,
                     Message = "Application does not have all required documents.",
                     Data = null,
                     Errors = "Missing documents"
@@ -63,11 +64,40 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (!updated)
                 return new Response<UserApplicationResponse>
                 {
-                    Code = 500,
+                    Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.UPDATED_UNSUCC,
                     Message = "Failed to update application status.",
                     Data = null,
                     Errors = "Update failed"
                 };
+
+            // --- Tạo RoundActivity trạng thái Ongoing cho user nếu có CampaignRoundId ---
+            int? campaignRoundId = command.CampaignRoundId;
+            if (campaignRoundId.HasValue)
+            {
+                var screeningRounds = await _unitOfWork.Rounds.GetAsync(r => r.CampaignRoundId == campaignRoundId.Value && r.RoundType == CabinCrewCareer.Domain.Common.RoundType.Screening);
+                var screeningRound = screeningRounds?.FirstOrDefault();
+                if (screeningRound != null)
+                {
+                    var roundActivity = new RoundActivity
+                    {
+                        RoundId = screeningRound.RoundId,
+                        UserId = userId,
+                        Status = ActivityStatus.Ongoing
+                    };
+                    await _unitOfWork.RoundActivites.AddAsync(roundActivity);
+                    await _unitOfWork.CompleteAsync();
+                }
+                else
+                {
+                    return new Response<UserApplicationResponse>
+                    {
+                        Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAIL,
+                        Message = "Screening round not found for this campaignRoundId.",
+                        Data = null,
+                        Errors = "ROUND_SCREENING_NOT_FOUND"
+                    };
+                }
+            }
 
             var response = new UserApplicationResponse
             {
@@ -79,7 +109,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             };
             return new Response<UserApplicationResponse>
             {
-                Code = 2, // 2 = CREATED_SUCCESS
+                Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.CREATED_SUCCESS,
                 Message = "Application submitted successfully.",
                 Data = response,
                 Errors = null

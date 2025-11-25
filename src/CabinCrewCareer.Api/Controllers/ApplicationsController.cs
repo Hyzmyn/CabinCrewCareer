@@ -45,9 +45,9 @@ namespace CabinCrewCareer.Api.Controllers
 
 
 		[HttpPut("{id}/submit")]
-		public async Task<IActionResult> VerifyApplication(int id)
+		public async Task<IActionResult> VerifyApplication(int id, [FromQuery] int? campaignRoundId = null)
 		{
-			var command = new VerifyUserApplicationCommand(id);
+			var command = new VerifyUserApplicationCommand(id, campaignRoundId ?? 0);
 			var result = await _mediator.Send(command);
 			if (result.Code == 2)
 				return Ok(result);
