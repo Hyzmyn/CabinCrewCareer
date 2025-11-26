@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CabinCrewCareer.Application.Common.Interfaces;
 
 namespace CabinCrewCareer.Infrastructure
 {
@@ -44,6 +45,8 @@ namespace CabinCrewCareer.Infrastructure
             services.AddHostedService<CampaignRoundStatusBackgroundService>();
             // Use Cloudinary instead of Firebase Storage (free tier)
             services.AddScoped<IFirebaseStorageService, CloudinaryStorageService>();
+            // Đăng ký dịch vụ AI OCR
+            services.AddScoped<IOcrService, AzureOcrService>();
 
             return services;
         }

@@ -19,6 +19,13 @@ namespace CabinCrewCareer.Domain.Entities
         public string EnglishDegreeNumber { get; set; } = string.Empty;
 
         public DateOnly? EndDate { get; set; }
+        
+            // Thông tin bổ sung từ chứng chỉ tiếng Anh
+            public string CitizenId { get; set; } = string.Empty; // Số Căn Cước công dân
+            public DateOnly? EnglishTestDate { get; set; } // Ngày thi lấy bằng tiếng Anh
+            public int ListeningScore { get; set; } = 0; // Điểm nghe
+            public int ReadingScore { get; set; } = 0; // Điểm đọc
+            public int TotalScore { get; set; } = 0; // Tổng điểm
 
         // Foreign Keys
         public int? UserId { get; set; }

@@ -1,3 +1,4 @@
+using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
@@ -13,7 +14,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
         IUnitOfWork unitOfWork,
         IUploadFileService uploadFileService,
         IHttpContextAccessor httpContextAccessor,
-        IDateTimeProvider dateTimeProvider) : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
+        IDateTimeProvider dateTimeProvider,
+        IOcrService ocrService) : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IUploadFileService _uploadFileService = uploadFileService;
@@ -58,7 +60,47 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             var profilePhotoUrl = request.ProfilePhoto != null ? await _uploadFileService.CloudinaryStorage(request.ProfilePhoto) : null;
             var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
             var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
+                string citizenId = string.Empty;
+                DateOnly? englishTestDate = null;
+                int listeningScore = 0;
+                int readingScore = 0;
+                int totalScore = 0;
             var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
+                if (request.PassportOrID != null)
+                {
+                    var ocrResult = await ocrService.ExtractTextFromImageAsync(request.PassportOrID);
+                    Console.WriteLine($"OCR TEXT: {ocrResult}");
+                    var match = System.Text.RegularExpressions.Regex.Match(ocrResult, @"\b\d{12}\b");
+                    if (match.Success)
+                    {
+                        citizenId = match.Value;
+                    }
+                }
+
+                // AI OCR cho chứng chỉ tiếng Anh
+                if (request.EnglishCertificate != null)
+                {
+                    var ocrText = await ocrService.ExtractTextFromImageAsync(request.EnglishCertificate);
+                    Console.WriteLine($"ENGLISH CERT OCR: {ocrText}");
+                    // Ngày thi: yyyy/MM/dd
+                    var dateMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})");
+                    if (dateMatch.Success)
+                    {
+                        if (DateOnly.TryParseExact(dateMatch.Value, "yyyy/MM/dd", out var testDate))
+                            englishTestDate = testDate;
+                    }
+                    // Tìm tất cả số sau 'Your score'
+                    // Điểm nghe
+                    var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTENING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (listenMatch.Success && int.TryParse(listenMatch.Groups[1].Value, out var listenScore))
+                        listeningScore = listenScore;
+                    // Điểm đọc
+                    var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
+                        readingScore = readScore;
+                    if (listeningScore > 0 && readingScore > 0)
+                        totalScore = listeningScore + readingScore;
+                }
 
             var application = new UserApplication
             {
@@ -69,7 +111,12 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 EnglishDegreeNumber = request.EnglishDegreeNumber,
                 EndDate = request.EndDate,
                 SubmissionDate = _dateTimeProvider.UtcNow,
-                UserId = userId
+                UserId = userId,
+                CitizenId = citizenId,
+                EnglishTestDate = englishTestDate,
+                ListeningScore = listeningScore,
+                ReadingScore = readingScore,
+                TotalScore = totalScore
             };
 
             var documents = new List<Document>();
