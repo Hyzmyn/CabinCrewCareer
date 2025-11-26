@@ -12,6 +12,9 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
 
             builder.HasKey(n => n.EvaluationId);
 
+            builder.Property(n => n.Comment)
+                .HasMaxLength(100);
+
             builder.HasOne(n => n.RoundActivity)
                 .WithMany(n => n.EvaluationForms)
                 .HasForeignKey(n => n.ActivityId)

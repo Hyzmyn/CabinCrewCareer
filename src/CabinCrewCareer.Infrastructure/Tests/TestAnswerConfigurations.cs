@@ -23,6 +23,11 @@ namespace CabinCrewCareer.Infrastructure.Tests
                 .WithMany(u => u.TestAnswers)
                 .HasForeignKey(u => u.TestSessionId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(u => u.SelectedOption)
+                .WithMany(u => u.TestAnswers)
+                .HasForeignKey(u => u.SelectedOptionId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

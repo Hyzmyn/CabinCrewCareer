@@ -4,6 +4,7 @@
     public interface IUnitOfWork
     {
         IUserRepository Users { get; }
+
         IUserApplicationRepository UserApplications { get; }
 
         IRoleRepository Roles { get; }
@@ -43,6 +44,8 @@
         IDocumentRepository Documents { get; }
 
         IEvaluationFormRepository EvaluationForms { get; }
+
+        IUserHistoryRepository UserHistories { get; }
 
         Task CompleteAsync();
     }

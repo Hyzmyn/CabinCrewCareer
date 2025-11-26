@@ -6,6 +6,8 @@
 
         public string EvaluatedDate { get; set; } = string.Empty;
 
+        public string Comment { get; set; } = string.Empty;
+
         public bool IsPassed { get; set; } = false;
 
         public string RoundName { get; set; } = string.Empty;

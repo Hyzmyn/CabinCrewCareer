@@ -39,6 +39,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
             EvaluationForm form = new()
             {
                 ActivityId = request.ActivityId,
+                Comment = request.Comment,
                 ExaminerId = Int32.Parse(currentUserId),
                 Type = EvaluationType.Appearance,
                 EvaluatedDate = _dateTimeProvider.UtcNow

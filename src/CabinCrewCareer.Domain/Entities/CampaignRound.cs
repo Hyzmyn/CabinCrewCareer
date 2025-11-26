@@ -28,5 +28,6 @@ namespace CabinCrewCareer.Domain.Entities
 
         // Navigation Properties
         public virtual ICollection<Round> Rounds { get; set; } = [];
+        public virtual ICollection<UserHistory> Histories { get; set; } = [];
     }
 }
