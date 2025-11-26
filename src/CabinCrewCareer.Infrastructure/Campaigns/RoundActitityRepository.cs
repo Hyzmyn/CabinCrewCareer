@@ -100,5 +100,20 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
 
             return users;
         }
+
+        public async Task<RoundActivity> GetRoundActivityAsync(int roundId, int userId)
+        {
+            var result = await _dbContext.RoundActivities
+                .Where(x => x.RoundId == roundId && x.UserId == userId)
+                .Select(x => new RoundActivity
+                {
+                    ActivityId = x.ActivityId,
+                    Status = x.Status
+                }).FirstOrDefaultAsync();
+
+            if (result is null) return new RoundActivity();
+
+            return result;
+        }
     }
 }

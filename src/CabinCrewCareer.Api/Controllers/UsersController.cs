@@ -3,14 +3,14 @@ using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns;
 using CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyTasks;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.UserHistories.Queries.GetUserCompletedCampaigns;
+using CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampaign;
 using CabinCrewCareer.Application.Users.Commands.CreateUser;
 using CabinCrewCareer.Application.Users.Commands.DisableUser;
 using CabinCrewCareer.Application.Users.Commands.UpdateUser;
 using CabinCrewCareer.Application.Users.Commands.UploadProfileImg;
 using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Application.Users.Queries.GetUserById;
-using CabinCrewCareer.Application.Users.Queries.GetUserHistory;
-using CabinCrewCareer.Application.Users.Queries.GetUserOngoingCampaign;
 using CabinCrewCareer.Application.Users.Queries.GetUsers;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -361,7 +361,7 @@ namespace CabinCrewCareer.Api.Controllers
             try
             {
                 return Ok(await mediator.Send(
-                    new GetUserHistoryQuery()));
+                    new GetUserCompletedCampaignsQuery()));
             }
             catch (ApiException e)
             {
