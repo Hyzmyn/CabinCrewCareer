@@ -6,5 +6,6 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
 {
     public record CreateAppearanceEvaluationFormCommand(
         int ActivityId,
+        string Comment,
         List<CreateAppearanceEvaluationRequest> Choices) : IRequest<Response<string>>;
 }

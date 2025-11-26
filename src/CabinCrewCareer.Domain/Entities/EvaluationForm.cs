@@ -10,6 +10,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public DateTime EvaluatedDate { get; set; }
 
+        public string Comment { get; set; } = string.Empty;
+
         public bool IsPassed { get; set; } = false;
 
         // Foreign Keys

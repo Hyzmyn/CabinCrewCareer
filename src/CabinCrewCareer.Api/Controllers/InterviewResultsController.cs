@@ -29,6 +29,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// 
         ///     {
         ///       "activityId": 5,
+        ///       "comment": "A very good person",
         ///       "type": 1,
         ///       "choices": [
         ///         {

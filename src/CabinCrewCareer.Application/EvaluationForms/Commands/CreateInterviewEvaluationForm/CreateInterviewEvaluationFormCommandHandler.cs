@@ -32,6 +32,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             EvaluationForm form = new()
             {
                 ActivityId = request.ActivityId,
+                Comment = request.Comment,
                 ExaminerId = Int32.Parse(currentUserId),
                 Type = EvaluationType.Interview,
                 EvaluatedDate = _dateTimeProvider.UtcNow

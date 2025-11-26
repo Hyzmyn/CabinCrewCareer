@@ -16,6 +16,7 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
             {
                 EvaluationId = x.EvaluationId,
                 EvaluatedDate = x.EvaluatedDate,
+                Comment = x.Comment,
                 IsPassed = x.IsPassed,
                 RoundActivity = new RoundActivity
                 {
@@ -93,6 +94,7 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
             {
                 EvaluationId = x.EvaluationId,
                 EvaluatedDate = x.EvaluatedDate,
+                Comment = x.Comment,
                 IsPassed = x.IsPassed,
                 RoundActivity = new RoundActivity
                 {

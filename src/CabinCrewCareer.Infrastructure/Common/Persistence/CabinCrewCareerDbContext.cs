@@ -24,11 +24,11 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<City> Cities { get; set; }
 
-        public DbSet<Blog> Blogs { get; set; }
+        //public DbSet<Blog> Blogs { get; set; }
 
-        public DbSet<Category> Categories { get; set; }
+        //public DbSet<Category> Categories { get; set; }
 
-        public DbSet<Comment> Comments { get; set; }
+        //public DbSet<Comment> Comments { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
 
@@ -75,6 +75,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
         public DbSet<AppearanceResult> AppearanceResults { get; set; }
 
         public DbSet<InterviewResult> InterviewResults { get; set; }
+
+        public DbSet<UserHistory> UserHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

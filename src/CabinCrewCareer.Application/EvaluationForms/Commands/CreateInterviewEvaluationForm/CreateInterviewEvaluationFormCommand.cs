@@ -6,6 +6,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
 {
     public record CreateInterviewEvaluationFormCommand(
         int ActivityId,
+        string Comment,
         int Type,
         List<CreateInterviewEvaluationRequest> Choices) : IRequest<Response<string>>;
 }

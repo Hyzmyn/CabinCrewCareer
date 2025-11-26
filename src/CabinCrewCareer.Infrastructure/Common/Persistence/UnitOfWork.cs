@@ -66,6 +66,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IEvaluationFormRepository EvaluationForms { get; private set; }
 
+        public IUserHistoryRepository UserHistories { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -114,6 +116,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             Documents = new DocumentRepository(_dbContext, _logger);
 
             EvaluationForms = new EvaluationFormRepository(_dbContext, _logger);
+
+            UserHistories = new UserHistoryRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

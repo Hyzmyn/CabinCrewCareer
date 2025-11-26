@@ -40,8 +40,8 @@ namespace CabinCrewCareer.Domain.Entities
         public virtual UserApplication? Application { get; set; } = null!;
 
         // Navigation Properties
-        public virtual ICollection<Blog> Blogs { get; set; } = [];
-        public virtual ICollection<Comment> Comments { get; set; } = [];
+        //public virtual ICollection<Blog> Blogs { get; set; } = [];
+        //public virtual ICollection<Comment> Comments { get; set; } = [];
         public virtual ICollection<Notification> Notifications { get; set; } = [];
         public virtual ICollection<CampaignRequest> CampaignRequests { get; set; } = [];
         public virtual ICollection<Campaign> Campaigns { get; set; } = [];
@@ -51,5 +51,6 @@ namespace CabinCrewCareer.Domain.Entities
         public virtual ICollection<CampaignAssignment> Assignments { get; set; } = [];
         public virtual ICollection<RoundActivity> RoundActivities { get; set; } = [];
         public virtual ICollection<EvaluationForm> EvaluationForms { get; set; } = [];
+        public virtual ICollection<UserHistory> Histories { get; set; } = [];
     }
 }

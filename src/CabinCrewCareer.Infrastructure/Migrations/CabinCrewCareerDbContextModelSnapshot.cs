@@ -81,62 +81,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("AppearanceResult", (string)null);
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Blog", b =>
-                {
-                    b.Property<int>("BlogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BlogId"));
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("PublicationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Tags")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("BlogId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Blog", (string)null);
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Campaign", b =>
                 {
                     b.Property<int>("CampaignId")
@@ -394,24 +338,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("CampaignRound", (string)null);
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Category", b =>
-                {
-                    b.Property<int>("CategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("CategoryId");
-
-                    b.ToTable("Category", (string)null);
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.City", b =>
                 {
                     b.Property<int>("CityId")
@@ -428,40 +354,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasKey("CityId");
 
                     b.ToTable("City", (string)null);
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Comment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
-
-                    b.Property<int?>("BlogId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CommentBody")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CommentId");
-
-                    b.HasIndex("BlogId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comment", (string)null);
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Document", b =>
@@ -544,6 +436,11 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<int?>("ActivityId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("EvaluatedDate")
                         .HasColumnType("datetime2");
@@ -948,9 +845,7 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.HasKey("AnswerId");
 
-                    b.HasIndex("SelectedOptionId")
-                        .IsUnique()
-                        .HasFilter("[SelectedOptionId] IS NOT NULL");
+                    b.HasIndex("SelectedOptionId");
 
                     b.HasIndex("TestSessionId");
 
@@ -1182,6 +1077,35 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("UserApplication", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserHistory", b =>
+                {
+                    b.Property<int>("HistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistoryId"));
+
+                    b.Property<int?>("CampaignRoundId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ParticipatedDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("HistoryId");
+
+                    b.HasIndex("CampaignRoundId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserHistory", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Ward", b =>
                 {
                     b.Property<int>("WardId")
@@ -1230,23 +1154,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("EvaluationForm");
 
                     b.Navigation("ScoringCriteriaItem");
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Blog", b =>
-                {
-                    b.HasOne("CabinCrewCareer.Domain.Entities.Category", "Category")
-                        .WithMany("Blogs")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
-                        .WithMany("Blogs")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Category");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Campaign", b =>
@@ -1308,23 +1215,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Campaign");
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Comment", b =>
-                {
-                    b.HasOne("CabinCrewCareer.Domain.Entities.Blog", "Blog")
-                        .WithMany("Comments")
-                        .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Blog");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Document", b =>
@@ -1469,8 +1359,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.TestOption", "SelectedOption")
-                        .WithOne("TestAnswer")
-                        .HasForeignKey("CabinCrewCareer.Domain.Entities.TestAnswer", "SelectedOptionId")
+                        .WithMany("TestAnswers")
+                        .HasForeignKey("SelectedOptionId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CabinCrewCareer.Domain.Entities.TestSession", "TestSession")
@@ -1554,6 +1444,23 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserHistory", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.CampaignRound", "CampaignRound")
+                        .WithMany("Histories")
+                        .HasForeignKey("CampaignRoundId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
+                        .WithMany("Histories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CampaignRound");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Ward", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.City", "City")
@@ -1571,11 +1478,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Blog", b =>
-                {
-                    b.Navigation("Comments");
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Campaign", b =>
                 {
                     b.Navigation("Assignments");
@@ -1590,12 +1492,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignRound", b =>
                 {
-                    b.Navigation("Rounds");
-                });
+                    b.Navigation("Histories");
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Category", b =>
-                {
-                    b.Navigation("Blogs");
+                    b.Navigation("Rounds");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.City", b =>
@@ -1663,7 +1562,7 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestOption", b =>
                 {
-                    b.Navigation("TestAnswer");
+                    b.Navigation("TestAnswers");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestQuestion", b =>
@@ -1684,17 +1583,15 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Navigation("Assignments");
 
-                    b.Navigation("Blogs");
-
                     b.Navigation("CampaignRequests");
 
                     b.Navigation("Campaigns");
 
-                    b.Navigation("Comments");
-
                     b.Navigation("EnquiryRequests");
 
                     b.Navigation("EvaluationForms");
+
+                    b.Navigation("Histories");
 
                     b.Navigation("Notifications");
 
