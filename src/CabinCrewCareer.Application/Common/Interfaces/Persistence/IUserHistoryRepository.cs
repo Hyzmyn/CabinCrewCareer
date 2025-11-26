@@ -5,5 +5,8 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
 {
     public interface IUserHistoryRepository : IRepository<UserHistory>
     {
+        Task<UserHistory> GetUserOngoingCampaignAsync(int userId);
+
+        Task<List<UserHistory>> GetUserCompletedCampaignsAsync(int userId);
     }
 }
