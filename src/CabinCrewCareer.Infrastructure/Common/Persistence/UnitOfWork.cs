@@ -26,6 +26,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
         private readonly ILogger _logger;
 
         public IUserRepository Users { get; private set; }
+
         public IUserApplicationRepository UserApplications { get; private set; }
 
         public IRoleRepository Roles { get; private set; }
@@ -77,6 +78,7 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             _logger = loggerFactory.CreateLogger("logs");
 
             Users = new UserRepository(_dbContext, _logger);
+
             UserApplications = new UserApplicationRepository(_dbContext, _logger);
 
             Roles = new RoleRepository(_dbContext, _logger);

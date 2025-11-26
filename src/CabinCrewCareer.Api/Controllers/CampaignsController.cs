@@ -37,6 +37,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(Response<PaginatedList<GetCampaignListDto>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAllAsync([FromQuery]
@@ -78,6 +79,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <param name="id">Campaign id</param>
         /// <returns>Campaign detail.</returns>
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDetailAsync(int id)
         {
             try

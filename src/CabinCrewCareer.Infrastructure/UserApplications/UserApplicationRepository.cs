@@ -1,23 +1,14 @@
 ﻿namespace CabinCrewCareer.Infrastructure.UserApplications
 {
     using CabinCrewCareer.Application.Common.Interfaces.Persistence;
-    using CabinCrewCareer.Domain.Entities;
     using CabinCrewCareer.Domain.Common;
+    using CabinCrewCareer.Domain.Entities;
     using CabinCrewCareer.Infrastructure.Common.Persistence;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class UserApplicationRepository : IUserApplicationRepository
+    public class UserApplicationRepository(CabinCrewCareerDbContext dbContext, ILogger logger) : Repository<UserApplication>(dbContext, logger), IUserApplicationRepository
     {
-        private readonly CabinCrewCareerDbContext _dbContext;
-        private readonly ILogger _logger;
-
-        public UserApplicationRepository(CabinCrewCareerDbContext dbContext, ILogger logger)
-        {
-            _dbContext = dbContext;
-            _logger = logger;
-        }
-
         public async Task<UserApplication> CreateUserApplicationAsync(UserApplication application, List<Document> documents)
         {
             // Gắn documents vào application

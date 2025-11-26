@@ -132,6 +132,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Candidate's appearance has been evaluated")]
         CANDIDATE_HAS_BEEN_EVALUATED = 41,
 
+        [Description("Document not found")]
+        DOCUMENT_NOT_FOUND = 42,
+
         #endregion
     }
 }
