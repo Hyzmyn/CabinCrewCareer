@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitMultipleChoiceTest;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest;
 using CabinCrewCareer.Application.TestSessions.Commands.ScoreSpeakingTestSession;
+using CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer;
 using CabinCrewCareer.Application.TestSessions.Common;
 using CabinCrewCareer.Application.TestSessions.Queries.GetAllTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSessions;
@@ -12,6 +13,7 @@ using CabinCrewCareer.Application.TestSessions.Queries.GetMySpeakingTestSessions
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByType;
 using CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById;
+using CabinCrewCareer.Application.TestSessions.Queries.GetTestAnswersBySessionId;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -700,6 +702,183 @@ namespace CabinCrewCareer.Api.Controllers
                 {
                     TestSessionId = id,
                     CriteriaScores = request.CriteriaScores ?? new Dictionary<string, int>()
+                };
+
+                return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test Answers By Session ID
+        /// <summary>
+        /// Get all test answers for a specific test session
+        /// </summary>
+        /// <param name="id">Test session ID</param>
+        /// <remarks>
+        /// **Get detailed answers submitted in a test session**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// 
+        /// **Response includes:**
+        /// - List of all answers submitted in the test session
+        /// - For multiple choice: selected option details and question content
+        /// - For speaking: audio file URL
+        /// - For essay: essay answer text
+        /// - Score and correctness for each answer
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/5/answers
+        /// ```
+        /// </remarks>
+        /// <returns>List of test answers</returns>
+        /// <response code="200">Ok - Test answers retrieved successfully</response>
+        /// <response code="400">Bad Request - Test session not found</response>
+        [HttpGet("{id}/answers")]
+        [ProducesResponseType(typeof(Response<List<TestAnswerDto>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetTestAnswersBySessionIdAsync(int id)
+        {
+            try
+            {
+                var query = new GetTestAnswersBySessionIdQuery
+                {
+                    TestSessionId = id
+                };
+
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Score Test Answer
+        /// <summary>
+        /// Score multiple test answers for a test session with multiple criteria per answer
+        /// </summary>
+        /// <param name="testSessionId">Test session ID</param>
+        /// <param name="request">Dictionary of answer IDs and their criteria scores</param>
+        /// <remarks>
+        /// **Score multiple test answers at once using multiple criteria and update test session total score**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// - Typically used by examiners/admin
+        /// 
+        /// **Request Body:**
+        /// - `answerScores`: Dictionary of answer IDs (key) and score information (value)
+        ///   - Key: Answer ID (integer)
+        ///   - Value: Object with `criteriaScores` (dictionary) and `isCorrect` (boolean)
+        ///     - `criteriaScores`: Dictionary of criteria names (key) and scores (value)
+        ///       - Key: Criteria name (e.g., "Pronunciation", "Grammar", "Content")
+        ///       - Value: Score for that criteria (non-negative integer)
+        ///     - `isCorrect`: Whether the answer is correct
+        /// 
+        /// **Validation:**
+        /// 1. Test session must exist
+        /// 2. All test answers must exist and belong to the test session
+        /// 3. Test answers must not have been scored yet (score = 0)
+        /// 4. All criteria scores must be non-negative
+        /// 5. Sum of criteria scores cannot exceed the maximum score of each question
+        /// 
+        /// **Process:**
+        /// 1. Validates all test answers
+        /// 2. For each answer, sums all criteria scores to get the answer's total score
+        /// 3. Validates total score doesn't exceed question's max score
+        /// 4. Updates score and correctness for each answer
+        /// 5. Calculates test session total score by summing all answer scores
+        /// 6. Updates test session's total score
+        /// 
+        /// **Example Request:**
+        /// ```json
+        /// {
+        ///   "answerScores": {
+        ///     "121": {
+        ///       "criteriaScores": {
+        ///         "Pronunciation": 3,
+        ///         "Fluency": 2,
+        ///         "Grammar": 3
+        ///       },
+        ///       "isCorrect": true
+        ///     },
+        ///     "122": {
+        ///       "criteriaScores": {
+        ///         "Pronunciation": 2,
+        ///         "Fluency": 3,
+        ///         "Grammar": 2
+        ///       },
+        ///       "isCorrect": true
+        ///     }
+        ///   }
+        /// }
+        /// ```
+        /// **Example Result:** 
+        /// - Answer 121 Score = 8 (3+2+3)
+        /// - Answer 122 Score = 7 (2+3+2)
+        /// - Total Score = 15
+        /// 
+        /// **Use Cases:**
+        /// - Scoring speaking test answers with detailed criteria (pronunciation, fluency, grammar, etc.)
+        /// - Scoring essay answers with multiple rubrics (content, organization, language use, etc.)
+        /// - Batch scoring multiple answers with granular feedback
+        /// </remarks>
+        /// <returns>Success message with total score details</returns>
+        /// <response code="200">Ok - Test answers scored successfully</response>
+        /// <response code="400">Bad Request - Invalid data or answers already scored</response>
+        [HttpPut("{testSessionId}/answers/score")]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ScoreTestAnswerAsync(int testSessionId, [FromBody] ScoreTestAnswerRequest request)
+        {
+            try
+            {
+                var command = new ScoreTestAnswerCommand
+                {
+                    TestSessionId = testSessionId,
+                    AnswerScores = request.AnswerScores.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => new Application.TestSessions.Commands.ScoreTestAnswer.AnswerScoreDto
+                        {
+                            CriteriaScores = kvp.Value.CriteriaScores,
+                            IsCorrect = kvp.Value.IsCorrect
+                        }
+                    )
                 };
 
                 return Ok(await mediator.Send(command));
