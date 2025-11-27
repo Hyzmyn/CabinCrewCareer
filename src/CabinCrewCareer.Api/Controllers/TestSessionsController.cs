@@ -4,12 +4,14 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitMultipleChoiceTest;
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest;
+using CabinCrewCareer.Application.TestSessions.Commands.ScoreSpeakingTestSession;
 using CabinCrewCareer.Application.TestSessions.Common;
 using CabinCrewCareer.Application.TestSessions.Queries.GetAllTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMySpeakingTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByType;
+using CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -561,6 +563,144 @@ namespace CabinCrewCareer.Api.Controllers
                     request.StartTime,
                     request.EndTime,
                     speakingAnswers);
+
+                return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test Session By ID
+        /// <summary>
+        /// Get test session by ID
+        /// </summary>
+        /// <param name="id">Test session ID</param>
+        /// <remarks>
+        /// **Get detailed information of a specific test session**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// 
+        /// **Response includes:**
+        /// - Complete test session information
+        /// - User details (full name, email)
+        /// - Test details (name, type, max score)
+        /// - Session scores and timestamps
+        /// - Total number of answers submitted
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/5
+        /// ```
+        /// </remarks>
+        /// <returns>Test session details</returns>
+        /// <response code="200">Ok - Test session retrieved successfully</response>
+        /// <response code="400">Bad Request - Test session not found</response>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Response<GetTestSessionResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetTestSessionByIdAsync(int id)
+        {
+            try
+            {
+                var query = new GetTestSessionByIdQuery
+                {
+                    TestSessionId = id
+                };
+
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Score Speaking Test Session
+        /// <summary>
+        /// Score a speaking test session by grading criteria
+        /// </summary>
+        /// <param name="id">Test session ID</param>
+        /// <param name="request">Scoring criteria with scores</param>
+        /// <remarks>
+        /// **Score a speaking test session based on multiple criteria**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// - Typically used by examiners/admin
+        /// 
+        /// **Request Body:**
+        /// - `criteriaScores`: Dictionary of criteria names and their scores
+        ///   - Key: Criteria name (e.g., "Pronunciation", "Fluency", "Grammar", "Vocabulary")
+        ///   - Value: Score for that criteria (must be non-negative)
+        /// 
+        /// **Process:**
+        /// 1. Validates test session exists
+        /// 2. Validates all scores are non-negative
+        /// 3. Calculates total score by summing all criteria scores
+        /// 4. Updates the test session's total score
+        /// 
+        /// **Example Request:**
+        /// ```json
+        /// {
+        ///   "criteriaScores": {
+        ///     "Pronunciation": 20,
+        ///     "Fluency": 18,
+        ///     "Grammar": 22,
+        ///     "Vocabulary": 19,
+        ///     "Comprehension": 21
+        ///   }
+        /// }
+        /// ```
+        /// **Example Result:** Total Score = 100
+        /// </remarks>
+        /// <returns>Success message with total score</returns>
+        /// <response code="200">Ok - Test session scored successfully</response>
+        /// <response code="400">Bad Request - Invalid data or test session not found</response>
+        [HttpPut("{id}/score")]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ScoreSpeakingTestSessionAsync(int id, [FromBody] ScoreSpeakingTestSessionRequest request)
+        {
+            try
+            {
+                var command = new ScoreSpeakingTestSessionCommand
+                {
+                    TestSessionId = id,
+                    CriteriaScores = request.CriteriaScores ?? new Dictionary<string, int>()
+                };
 
                 return Ok(await mediator.Send(command));
             }
