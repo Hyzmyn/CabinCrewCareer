@@ -44,6 +44,11 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
                 Weight = application.Weight,
                 EnglishDegreeNumber = application.EnglishDegreeNumber,
                 EndDate = application.EndDate.HasValue ? application.EndDate.Value.ToString("dd/MM/yyyy") : null,
+                CitizenId = application.CitizenId,
+                EnglishTestDate = application.EnglishTestDate.HasValue ?  application.EnglishTestDate.Value.ToString("dd/MM/yyyy") : null,
+                ListeningScore = application.ListeningScore,
+                ReadingScore = application.ReadingScore,
+                TotalScore = application.TotalScore,    
                 Documents = application.Documents?.Select(d => new DocumentResponse
                 {
                     DocumentId = d.DocumentId,

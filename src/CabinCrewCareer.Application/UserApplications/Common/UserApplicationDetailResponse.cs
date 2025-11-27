@@ -19,6 +19,11 @@ namespace CabinCrewCareer.Application.UserApplications.Common
         public int Weight { get; set; }
         public string? EnglishDegreeNumber { get; set; }
         public string? EndDate { get; set; }
+        public string? CitizenId { get; set; } 
+        public string? EnglishTestDate { get; set; } 
+        public int ListeningScore { get; set; } 
+        public int ReadingScore { get; set; } 
+        public int TotalScore { get; set; } 
         public List<DocumentResponse> Documents { get; set; } = new List<DocumentResponse>();
     }
 }

@@ -15,8 +15,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
         [Required]
         public int Weight { get; set; }
         [Required]
-        public string EnglishDegreeNumber { get; set; } = string.Empty;
-        public DateOnly? EndDate { get; set; }
+        // public string EnglishDegreeNumber { get; set; } = string.Empty;
+        // public DateOnly? EndDate { get; set; }
 
         // Thông tin đợt tuyển
         public int? CampaignRoundId { get; set; }
