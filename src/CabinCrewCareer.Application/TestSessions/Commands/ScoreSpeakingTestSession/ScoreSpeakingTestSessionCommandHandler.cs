@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreSpeakingTestSession
 {
@@ -15,11 +16,23 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreSpeakingTestSes
         {
             List<string> errorMessages = [];
 
-            // Validate test session exists
-            var testSession = await _unitOfWork.TestSessions.GetByIdAsync(request.TestSessionId);
+            // Validate test session exists and get test info
+            var testSessions = await _unitOfWork.TestSessions.GetAllAsync(
+                expression: ts => ts.TestSessionId == request.TestSessionId,
+                includeFunc: query => query.Include(ts => ts.Test)
+            );
+
+            var testSession = testSessions.FirstOrDefault();
             if (testSession == null)
             {
                 errorMessages.Add("Test session not found.");
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+            }
+
+            // Validate test session has not been scored yet
+            if (testSession.TotalScore > 0)
+            {
+                errorMessages.Add("This test session has already been scored. Cannot update score.");
                 throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
             }
 
@@ -42,6 +55,13 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreSpeakingTestSes
 
             // Calculate total score by summing all criteria scores
             var totalScore = request.CriteriaScores.Values.Sum();
+
+            // Validate total score does not exceed max score of the test
+            if (testSession.Test != null && totalScore > testSession.Test.MaxScore)
+            {
+                errorMessages.Add($"Total score ({totalScore}) cannot exceed the maximum score ({testSession.Test.MaxScore}) of the test.");
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+            }
 
             // Update test session total score
             testSession.TotalScore = totalScore;
