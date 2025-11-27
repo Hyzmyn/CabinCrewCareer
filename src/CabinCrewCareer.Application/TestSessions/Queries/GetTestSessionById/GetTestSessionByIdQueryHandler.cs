@@ -40,6 +40,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById
                 UserId = testSession.UserId ?? 0,
                 UserFullName = testSession.User?.FullName ?? string.Empty,
                 UserEmail = testSession.User?.Email ?? string.Empty,
+                ImgURL = testSession.User?.ImgURL,
                 TestId = testSession.TestId ?? 0,
                 TestName = testSession.Test?.TestName ?? string.Empty,
                 TestType = testSession.Test?.TestType.ToString() ?? string.Empty,

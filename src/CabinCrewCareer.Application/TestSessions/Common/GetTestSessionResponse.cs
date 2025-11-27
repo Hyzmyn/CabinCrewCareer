@@ -6,6 +6,7 @@ namespace CabinCrewCareer.Application.TestSessions.Common
         public int UserId { get; set; }
         public string UserFullName { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
+        public string? ImgURL { get; set; } = string.Empty;
         public int TestId { get; set; }
         public string TestName { get; set; } = string.Empty;
         public string TestType { get; set; } = string.Empty;

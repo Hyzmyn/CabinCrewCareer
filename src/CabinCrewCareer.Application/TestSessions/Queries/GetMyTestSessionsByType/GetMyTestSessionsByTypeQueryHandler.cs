@@ -30,15 +30,17 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByTy
 
             var testType = (TestType)request.TestType;
 
-            // Build query with filters for specified test type and optional user filter
+            // Build query with filters for specified test type, optional user filter, and optional round filter
             var query = await _unitOfWork.TestSessions.GetAllAsync(
                 expression: ts => 
                     ts.Test != null &&
                     ts.Test.TestType == testType &&
-                    (request.UserId == null || ts.UserId == request.UserId),
+                    (request.UserId == null || ts.UserId == request.UserId) &&
+                    (request.RoundId == null || ts.Test.Rounds.Any(r => r.RoundId == request.RoundId)),
                 includeFunc: q => q
                     .Include(ts => ts.User)
                     .Include(ts => ts.Test)
+                        .ThenInclude(t => t.Rounds)
                     .Include(ts => ts.TestAnswers)
             );
 
@@ -72,6 +74,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByTy
                 UserId = ts.UserId ?? 0,
                 UserFullName = ts.User?.FullName ?? string.Empty,
                 UserEmail = ts.User?.Email ?? string.Empty,
+                ImgURL = ts.User?.ImgURL,
                 TestId = ts.TestId ?? 0,
                 TestName = ts.Test?.TestName ?? string.Empty,
                 TestType = ts.Test?.TestType.ToString() ?? string.Empty,
