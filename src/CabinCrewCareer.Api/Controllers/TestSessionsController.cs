@@ -101,6 +101,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// </summary>
         /// <param name="testType">Test type: 1 (English Listening), 2 (English Speaking), 3 (Practical)</param>
         /// <param name="userId">Filter by specific user ID (optional)</param>
+        /// <param name="roundId">Filter by specific round ID (optional)</param>
         /// <param name="searchTerm">Search by test name, user name, or email</param>
         /// <param name="sortColumn">Column to sort by (testSessionId, testId, totalScore, startTime, endTime, createdAt)</param>
         /// <param name="sortOrder">Sort order (asc or desc)</param>
@@ -117,6 +118,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// **Query Parameters:**
         /// - `testType`: Required - Filter by test type (1, 2, or 3)
         /// - `userId`: Optional - Filter by specific user ID
+        /// - `roundId`: Optional - Filter by specific round ID (filters test sessions by tests assigned to that round)
         /// - `searchTerm`: Search in test name, user name, or email
         /// - `sortColumn`: Choose from testSessionId, testId, totalScore, startTime, endTime, createdAt
         /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
@@ -125,13 +127,15 @@ namespace CabinCrewCareer.Api.Controllers
         /// 
         /// **Response includes:**
         /// - Paginated list of all test sessions for the specified test type
-        /// - Each session contains test info, user info, scores, and timestamps
+        /// - Each session contains test info, user info (including profile image URL), scores, and timestamps
         /// - Total records and page information
         /// 
         /// **Example:**
         /// ```
         /// GET /api/v1/test-sessions/by-type?testType=1&amp;page=1&amp;pageSize=10
         /// GET /api/v1/test-sessions/by-type?testType=2&amp;userId=5
+        /// GET /api/v1/test-sessions/by-type?testType=2&amp;roundId=10
+        /// GET /api/v1/test-sessions/by-type?testType=1&amp;userId=5&amp;roundId=10
         /// ```
         /// </remarks>
         /// <returns>Paginated list of all test sessions</returns>
@@ -143,6 +147,7 @@ namespace CabinCrewCareer.Api.Controllers
         public async Task<IActionResult> GetMyTestSessionsByTypeAsync(
             [FromQuery] int testType,
             [FromQuery] int? userId,
+            [FromQuery] int? roundId,
             [FromQuery] string? searchTerm,
             [FromQuery] string? sortColumn,
             [FromQuery] string? sortOrder,
@@ -155,6 +160,7 @@ namespace CabinCrewCareer.Api.Controllers
                 {
                     TestType = testType,
                     UserId = userId,
+                    RoundId = roundId,
                     SearchTerm = searchTerm,
                     SortColumn = sortColumn,
                     SortOrder = sortOrder,

@@ -71,6 +71,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSes
                 UserId = ts.UserId ?? 0,
                 UserFullName = ts.User?.FullName ?? string.Empty,
                 UserEmail = ts.User?.Email ?? string.Empty,
+                ImgURL = ts.User?.ImgURL,
                 TestId = ts.TestId ?? 0,
                 TestName = ts.Test?.TestName ?? string.Empty,
                 TestType = ts.Test?.TestType.ToString() ?? string.Empty,
