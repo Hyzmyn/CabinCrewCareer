@@ -89,6 +89,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             await UpdateDocument(DocumentType.EducationDegree, request.EducationDegree);
             await UpdateDocument(DocumentType.EnglishCertificate, request.EnglishCertificate);
             await UpdateDocument(DocumentType.PassportOrID, request.PassportOrID);
+            await UpdateDocument(DocumentType.PassportOrIDBack, request.PassportOrIDBack);
 
             application.Documents = documents;
             await _unitOfWork.CompleteAsync();

@@ -48,7 +48,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 DocumentType.ProfilePhoto,
                 DocumentType.EducationDegree,
                 DocumentType.EnglishCertificate,
-                DocumentType.PassportOrID
+                DocumentType.PassportOrID,
+                DocumentType.PassportOrIDBack,
             };
             var hasAllDocuments = requiredTypes.All(type => application.Documents.Any(d => d.Type == type && !string.IsNullOrEmpty(d.DocumentURL)));
             if (!hasAllDocuments)

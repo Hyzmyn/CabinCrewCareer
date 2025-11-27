@@ -51,7 +51,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 return new Response<UserApplicationResponse>
                 {
                     Code = (int)ResponseCode.FAIL,
-                    Message = "You must submit all 5 required documents to submit your application.",
+                    Message = "You must submit all 6 required documents to submit your application.",
                     Data = null,
                     Errors = "Missing required documents"
                 };
@@ -68,6 +68,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 DateOnly? endDate = null;
                 string? englishDegreeNumber = null;
             var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
+            var passportOrIdBackUrl = request.PassportOrIDBack != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrIDBack) : null;
                 if (request.PassportOrID != null)
                 {
                     var ocrResult = await ocrService.ExtractTextFromImageAsync(request.PassportOrID);
@@ -180,6 +181,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 documents.Add(new Document { DocumentURL = englishCertificateUrl, Type = DocumentType.EnglishCertificate, IsVerified = true });
             if (passportOrIdUrl != null)
                 documents.Add(new Document { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
+            if (passportOrIdBackUrl != null)
+                documents.Add(new Document { DocumentURL = passportOrIdBackUrl, Type = DocumentType.PassportOrIDBack, IsVerified = true });
 
             var result = await _unitOfWork.UserApplications.CreateUserApplicationAsync(application, documents);
 

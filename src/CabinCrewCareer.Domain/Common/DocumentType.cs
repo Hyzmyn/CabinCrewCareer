@@ -6,6 +6,7 @@
         ProfilePhoto = 1,
         EducationDegree = 2,
         EnglishCertificate = 3,
-        PassportOrID = 4
+        PassportOrID = 4,
+        PassportOrIDBack = 5 // Mặt sau CCCD
     }
 }
