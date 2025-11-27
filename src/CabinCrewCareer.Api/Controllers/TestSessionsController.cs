@@ -6,6 +6,9 @@ using CabinCrewCareer.Application.TestSessions.Commands.SubmitMultipleChoiceTest
 using CabinCrewCareer.Application.TestSessions.Commands.SubmitSpeakingTest;
 using CabinCrewCareer.Application.TestSessions.Common;
 using CabinCrewCareer.Application.TestSessions.Queries.GetAllTestSessions;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSessions;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMySpeakingTestSessions;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessions;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -79,6 +82,172 @@ namespace CabinCrewCareer.Api.Controllers
                 SortOrder = sortOrder,
                 TestId = testId,
                 UserId = userId,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Listening Test Sessions
+        /// <summary>
+        /// Get my listening test sessions - Returns only the logged-in user's listening test sessions
+        /// </summary>
+        /// <param name="searchTerm">Search by test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, testId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get listening test sessions for the currently logged-in user**
+        /// 
+        /// **Security:**
+        /// - Requires authentication (JWT token)
+        /// - Returns only sessions belonging to the authenticated user
+        /// - Filters by English Listening test type
+        /// 
+        /// **Query Parameters:**
+        /// - `searchTerm`: Search in test name
+        /// - `sortColumn`: Choose from testSessionId, testId, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
+        /// - `page`: Page number for pagination
+        /// - `pageSize`: Number of items per page
+        /// 
+        /// **Response includes:**
+        /// - Paginated list of listening test sessions
+        /// - Each session contains test info, scores, and timestamps
+        /// - Total records and page information
+        /// </remarks>
+        /// <returns>Paginated list of listening test sessions</returns>
+        /// <response code="200">Ok - Listening test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("my-listening-sessions")]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestSessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetMyListeningTestSessionsAsync(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetMyListeningTestSessionsQuery
+            {
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Speaking Test Sessions
+        /// <summary>
+        /// Get my speaking test sessions - Returns only the logged-in user's speaking test sessions
+        /// </summary>
+        /// <param name="searchTerm">Search by test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, testId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get speaking test sessions for the currently logged-in user**
+        /// 
+        /// **Security:**
+        /// - Requires authentication (JWT token)
+        /// - Returns only sessions belonging to the authenticated user
+        /// - Filters by English Speaking test type
+        /// 
+        /// **Query Parameters:**
+        /// - `searchTerm`: Search in test name
+        /// - `sortColumn`: Choose from testSessionId, testId, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
+        /// - `page`: Page number for pagination
+        /// - `pageSize`: Number of items per page
+        /// 
+        /// **Response includes:**
+        /// - Paginated list of speaking test sessions
+        /// - Each session contains test info, scores, audio URLs, and timestamps
+        /// - Total records and page information
+        /// - Note: Speaking tests require manual grading, so scores may be 0 until graded
+        /// </remarks>
+        /// <returns>Paginated list of speaking test sessions</returns>
+        /// <response code="200">Ok - Speaking test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("my-speaking-sessions")]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestSessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetMySpeakingTestSessionsAsync(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetMySpeakingTestSessionsQuery
+            {
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Practical Test Sessions
+        /// <summary>
+        /// Get my practical test sessions - Returns only the logged-in user's practical test sessions
+        /// </summary>
+        /// <param name="searchTerm">Search by test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, testId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get practical test sessions for the currently logged-in user**
+        /// 
+        /// **Security:**
+        /// - Requires authentication (JWT token)
+        /// - Returns only sessions belonging to the authenticated user
+        /// - Filters by Practical test type
+        /// 
+        /// **Query Parameters:**
+        /// - `searchTerm`: Search in test name
+        /// - `sortColumn`: Choose from testSessionId, testId, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
+        /// - `page`: Page number for pagination
+        /// - `pageSize`: Number of items per page
+        /// 
+        /// **Response includes:**
+        /// - Paginated list of practical test sessions
+        /// - Each session contains test info, scores, and timestamps
+        /// - Total records and page information
+        /// </remarks>
+        /// <returns>Paginated list of practical test sessions</returns>
+        /// <response code="200">Ok - Practical test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("my-practical-sessions")]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestSessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetMyPracticalTestSessionsAsync(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetMyPracticalTestSessionsQuery
+            {
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
                 Page = page,
                 PageSize = pageSize
             };
