@@ -54,9 +54,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (request.Experience != null) application.Experience = request.Experience;
             if (request.Height.HasValue) application.Height = request.Height.Value;
             if (request.Weight.HasValue) application.Weight = request.Weight.Value;
-            if (request.EnglishDegreeNumber != null) application.EnglishDegreeNumber = request.EnglishDegreeNumber;
-            if (request.EndDate.HasValue) application.EndDate = request.EndDate.Value;
-
+            
             // Cập nhật từng file nếu có
             var documents = application.Documents.ToList();
             async Task UpdateDocument(DocumentType type, IFormFile? newFile)
