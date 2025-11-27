@@ -27,5 +27,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
         public IFormFile EducationDegree { get; set; }
         public IFormFile EnglishCertificate { get; set; }
         public IFormFile PassportOrID { get; set; }
+
+        public IFormFile? PassportOrIDBack { get; set; } // Mặt sau CCCD
     }
 }
