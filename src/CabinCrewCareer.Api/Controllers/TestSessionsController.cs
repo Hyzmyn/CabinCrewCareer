@@ -9,6 +9,7 @@ using CabinCrewCareer.Application.TestSessions.Queries.GetAllTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMySpeakingTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessions;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByType;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -87,6 +88,96 @@ namespace CabinCrewCareer.Api.Controllers
             };
 
             return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Test Sessions By Type
+        /// <summary>
+        /// Get all test sessions by test type
+        /// </summary>
+        /// <param name="testType">Test type: 1 (English Listening), 2 (English Speaking), 3 (Practical)</param>
+        /// <param name="userId">Filter by specific user ID (optional)</param>
+        /// <param name="searchTerm">Search by test name, user name, or email</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, testId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get all test sessions filtered by test type**
+        /// 
+        /// **Test Type Values:**
+        /// - `1`: English Listening
+        /// - `2`: English Speaking  
+        /// - `3`: Practical
+        /// 
+        /// **Query Parameters:**
+        /// - `testType`: Required - Filter by test type (1, 2, or 3)
+        /// - `userId`: Optional - Filter by specific user ID
+        /// - `searchTerm`: Search in test name, user name, or email
+        /// - `sortColumn`: Choose from testSessionId, testId, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" for ascending or "desc" for descending (default: desc by createdAt)
+        /// - `page`: Page number for pagination
+        /// - `pageSize`: Number of items per page
+        /// 
+        /// **Response includes:**
+        /// - Paginated list of all test sessions for the specified test type
+        /// - Each session contains test info, user info, scores, and timestamps
+        /// - Total records and page information
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/by-type?testType=1&amp;page=1&amp;pageSize=10
+        /// GET /api/v1/test-sessions/by-type?testType=2&amp;userId=5
+        /// ```
+        /// </remarks>
+        /// <returns>Paginated list of all test sessions</returns>
+        /// <response code="200">Ok - Test sessions retrieved successfully</response>
+        /// <response code="400">Bad Request - Invalid test type</response>
+        [HttpGet("by-type")]
+        [ProducesResponseType(typeof(Response<PaginatedList<GetTestSessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetMyTestSessionsByTypeAsync(
+            [FromQuery] int testType,
+            [FromQuery] int? userId,
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var query = new GetMyTestSessionsByTypeQuery
+                {
+                    TestType = testType,
+                    UserId = userId,
+                    SearchTerm = searchTerm,
+                    SortColumn = sortColumn,
+                    SortOrder = sortOrder,
+                    Page = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
         }
         #endregion
 
