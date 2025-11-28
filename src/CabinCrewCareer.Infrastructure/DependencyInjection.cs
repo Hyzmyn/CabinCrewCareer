@@ -1,4 +1,5 @@
-﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+﻿using CabinCrewCareer.Application.Common.Interfaces;
+using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Security;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Infrastructure.Common.Persistence;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using CabinCrewCareer.Application.Common.Interfaces;
 
 namespace CabinCrewCareer.Infrastructure
 {

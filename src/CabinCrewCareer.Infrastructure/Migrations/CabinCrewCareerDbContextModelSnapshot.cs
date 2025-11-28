@@ -921,6 +921,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool?>("IsPassed")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 

@@ -14,6 +14,8 @@
 
         public DateTime CreatedAt { get; set; }
 
+        public bool? IsPassed { get; set; } = null;
+
         // Foreign Keys
         public int? UserId { get; set; }
         public virtual User User { get; set; } = null!;
