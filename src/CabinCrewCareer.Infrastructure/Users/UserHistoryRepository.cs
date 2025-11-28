@@ -12,7 +12,7 @@ namespace CabinCrewCareer.Infrastructure.Users
         public async Task<List<UserHistory>> GetUserCompletedCampaignsAsync(int userId)
         {
             return await _dbContext.UserHistories
-                .Where(x => x.UserId == userId && x.Type == HistoryType.Completed)
+                .Where(x => x.UserId == userId && x.Type != HistoryType.Ongoing)
                 .Select(x => new UserHistory
                 {
                     CampaignRoundId = x.CampaignRoundId,
@@ -25,6 +25,7 @@ namespace CabinCrewCareer.Infrastructure.Users
                         Campaign = new Campaign
                         {
                             CampaignName = x.CampaignRound.Campaign.CampaignName,
+                            CampaignType = x.CampaignRound.Campaign.CampaignType,
                             CampaignRequest = new CampaignRequest
                             {
                                 AirlinePartner = new AirlinePartner
@@ -58,6 +59,7 @@ namespace CabinCrewCareer.Infrastructure.Users
                         Campaign = new Campaign
                         {
                             CampaignName = x.CampaignRound.Campaign.CampaignName,
+                            CampaignType = x.CampaignRound.Campaign.CampaignType,
                             CampaignRequest = new CampaignRequest
                             {
                                 AirlinePartner = new AirlinePartner

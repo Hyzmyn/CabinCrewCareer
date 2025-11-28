@@ -36,6 +36,7 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserCompletedCamp
                     RoundName = history.CampaignRound.RoundName,
                     RoundStatus = history.Type.ToString(),
                     Description = history.CampaignRound.Description,
+                    CampaignType = history.CampaignRound.Campaign.CampaignType.GetDescription(),
                     CampaignName = history.CampaignRound.Campaign.CampaignName,
                     AirlinePartner = history.CampaignRound.Campaign.CampaignRequest.AirlinePartner.PartnerName
                 };
