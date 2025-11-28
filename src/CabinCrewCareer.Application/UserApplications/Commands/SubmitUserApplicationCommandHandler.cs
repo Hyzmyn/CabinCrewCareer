@@ -66,7 +66,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             int readingScore = 0;
             int totalScore = 0;
             DateOnly? endDate = null;
-            string? englishDegreeNumber = null;
+            string englishDegreeNumber = string.Empty;
             var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
             var passportOrIdBackUrl = request.PassportOrIDBack != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrIDBack) : null;
             if (request.PassportOrID != null)
