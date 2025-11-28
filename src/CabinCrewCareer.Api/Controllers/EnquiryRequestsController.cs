@@ -2,6 +2,7 @@ using Asp.Versioning;
 using CabinCrewCareer.Api.Models;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.EnquiryRequests.Commands.CreateEnquiryRequest;
+using CabinCrewCareer.Application.EnquiryRequests.Commands.UpdateEnquiryRequestScore;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -75,6 +76,117 @@ namespace CabinCrewCareer.Api.Controllers
                     TestSessionId = request.TestSessionId,
                     Reason = request.Reason,
                     Status = request.Status
+                };
+
+                return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Update Enquiry Request Score
+        /// <summary>
+        /// Update scores for an enquiry request (examiner reviews and re-scores)
+        /// </summary>
+        /// <param name="id">Enquiry request ID</param>
+        /// <param name="request">Answer scores and optional new reason</param>
+        /// <remarks>
+        /// **Update scores after reviewing enquiry request**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// - Only examiners can access this endpoint
+        /// 
+        /// **Request Body:**
+        /// - `answerScores`: Dictionary of answer IDs and their new scores
+        ///   - Key: Answer ID (int)
+        ///   - Value: Object containing:
+        ///     - `criteriaScores`: Dictionary of criteria name and score
+        ///     - `isCorrect`: Boolean indicating correctness
+        /// - `newReason`: Optional comment/feedback from examiner
+        /// 
+        /// **Process:**
+        /// 1. Validates enquiry request exists
+        /// 2. Updates each answer's score based on criteria scores
+        /// 3. Calculates total new score
+        /// 4. Updates EnquiryRequest (NewScore, Status = true, Reason if provided)
+        /// 5. Updates TestSession (TotalScore = NewScore, Status = true)
+        /// 6. Sends notification to candidate with score comparison:
+        ///    - If score increased: "Điểm tăng từ X lên Y"
+        ///    - If score decreased: "Điểm giảm từ X xuống Y"
+        ///    - If score unchanged: "Điểm giữ nguyên"
+        ///    - Includes examiner's new reason if provided
+        /// 
+        /// **Example Request:**
+        /// ```json
+        /// {
+        ///   "answerScores": {
+        ///     "1": {
+        ///       "criteriaScores": {
+        ///         "Pronunciation": 8,
+        ///         "Fluency": 9,
+        ///         "Grammar": 7
+        ///       },
+        ///       "isCorrect": true
+        ///     },
+        ///     "2": {
+        ///       "criteriaScores": {
+        ///         "Pronunciation": 6,
+        ///         "Fluency": 7,
+        ///         "Grammar": 8
+        ///       },
+        ///       "isCorrect": true
+        ///     }
+        ///   },
+        ///   "newReason": "Sau khi xem xét lại, phần phát âm của bạn thực sự tốt hơn đánh giá ban đầu."
+        /// }
+        /// ```
+        /// 
+        /// **Response:**
+        /// - Success message with new total score
+        /// - Candidate receives notification immediately
+        /// </remarks>
+        /// <returns>Success message</returns>
+        /// <response code="200">Ok - Score updated successfully</response>
+        /// <response code="400">Bad Request - Validation failed</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpPut("{id}/score")]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> UpdateEnquiryRequestScoreAsync(int id, [FromBody] UpdateEnquiryRequestScoreRequest request)
+        {
+            try
+            {
+                var command = new UpdateEnquiryRequestScoreCommand
+                {
+                    EnquiryId = id,
+                    AnswerScores = request.AnswerScores.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => new Application.EnquiryRequests.Commands.UpdateEnquiryRequestScore.AnswerScoreInfo
+                        {
+                            CriteriaScores = kvp.Value.CriteriaScores,
+                            IsCorrect = kvp.Value.IsCorrect
+                        }
+                    ),
+                    NewReason = request.NewReason
                 };
 
                 return Ok(await mediator.Send(command));

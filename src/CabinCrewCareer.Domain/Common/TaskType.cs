@@ -4,7 +4,7 @@
     {
         Screening = 1,      // Recruiter - Vòng sàng lọc và Final Review
         Interview = 2,      // Examiner - Vòng phỏng vấn  
-        TestCreation = 3,   // Examiner - Tạo bài test
+        TestCreation = 3,   // Examiner - Tạo bài test, chấm điểm, phúc khảo
         AppearanceCheck = 4 // Examiner - Kiểm tra ngoại hình
     }
 }
