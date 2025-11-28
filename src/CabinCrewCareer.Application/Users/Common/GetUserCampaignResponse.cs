@@ -14,6 +14,8 @@
 
         public string Description { get; set; } = string.Empty;
 
+        public string CampaignType { get; set; } = string.Empty;
+
         public string AirlinePartner { get; set; } = string.Empty;
 
         public List<GetRoundActivityResponse> Rounds { get; set; } = [];

@@ -8,5 +8,7 @@ namespace CabinCrewCareer.Domain.Common
         Ongoing = 1,
         [Description("Completed")]
         Completed,
+        [Description("Not Completed")]
+        NotCompleted,
     }
 }
