@@ -34,7 +34,7 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserCompletedCamp
                     CampaignRoundId = history.CampaignRoundId,
                     ParticipatedDate = history.ParticipatedDate.GetFormatDate(),
                     RoundName = history.CampaignRound.RoundName,
-                    RoundStatus = history.Type.ToString(),
+                    RoundStatus = history.Type.GetDescription(),
                     Description = history.CampaignRound.Description,
                     CampaignType = history.CampaignRound.Campaign.CampaignType.GetDescription(),
                     CampaignName = history.CampaignRound.Campaign.CampaignName,
