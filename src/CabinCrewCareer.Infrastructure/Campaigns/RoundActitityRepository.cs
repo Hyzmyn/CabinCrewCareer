@@ -101,7 +101,7 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
             return users;
         }
 
-        public async Task<RoundActivity> GetRoundActivityAsync(int roundId, int userId)
+        public async Task<RoundActivity?> GetRoundActivityAsync(int roundId, int userId)
         {
             var result = await _dbContext.RoundActivities
                 .Where(x => x.RoundId == roundId && x.UserId == userId)
@@ -111,7 +111,7 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                     Status = x.Status
                 }).FirstOrDefaultAsync();
 
-            if (result is null) return new RoundActivity();
+            if (result is null) return null;
 
             return result;
         }

@@ -44,13 +44,16 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserCompletedCamp
                 {
                     var activity = await _unitOfWork.RoundActivites.GetRoundActivityAsync(item.RoundId, userId);
 
-                    temp.Rounds.Add(new GetRoundActivityResponse
+                    if (activity is not null)
                     {
-                        ActivityId = activity.ActivityId,
-                        RoundId = item.RoundId,
-                        RoundName = item.RoundType.GetDescription(),
-                        Status = activity.Status.GetDescription()
-                    });
+                        temp.Rounds.Add(new GetRoundActivityResponse
+                        {
+                            ActivityId = activity.ActivityId,
+                            RoundId = item.RoundId,
+                            RoundName = item.RoundType.GetDescription(),
+                            Status = activity.Status.GetDescription()
+                        });
+                    }
                 }
                 response.Add(temp);
             }

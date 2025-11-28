@@ -1,5 +1,5 @@
-using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.Common.Enums;
+using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.UserApplications.Common;
@@ -60,98 +60,98 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             var profilePhotoUrl = request.ProfilePhoto != null ? await _uploadFileService.CloudinaryStorage(request.ProfilePhoto) : null;
             var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
             var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
-                string citizenId = string.Empty;
-                DateOnly? englishTestDate = null;
-                int listeningScore = 0;
-                int readingScore = 0;
-                int totalScore = 0;
-                DateOnly? endDate = null;
-                string? englishDegreeNumber = null;
+            string citizenId = string.Empty;
+            DateOnly? englishTestDate = null;
+            int listeningScore = 0;
+            int readingScore = 0;
+            int totalScore = 0;
+            DateOnly? endDate = null;
+            string? englishDegreeNumber = null;
             var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
             var passportOrIdBackUrl = request.PassportOrIDBack != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrIDBack) : null;
-                if (request.PassportOrID != null)
+            if (request.PassportOrID != null)
+            {
+                var ocrResult = await ocrService.ExtractTextFromImageAsync(request.PassportOrID);
+                Console.WriteLine($"OCR TEXT: {ocrResult}");
+                var match = System.Text.RegularExpressions.Regex.Match(ocrResult, @"\b\d{12}\b");
+                if (match.Success)
                 {
-                    var ocrResult = await ocrService.ExtractTextFromImageAsync(request.PassportOrID);
-                    Console.WriteLine($"OCR TEXT: {ocrResult}");
-                    var match = System.Text.RegularExpressions.Regex.Match(ocrResult, @"\b\d{12}\b");
-                    if (match.Success)
-                    {
-                        citizenId = match.Value;
-                    }
-                    else
-                    {
-                        return new Response<UserApplicationResponse>
-                        {
-                            Code = (int)ResponseCode.FAIL,
-                            Message = "Không thể nhận diện số CCCD. Vui lòng kiểm tra lại ảnh (có thể số bị che hoặc ảnh bị mờ).",
-                            Data = null,
-                            Errors = "CCCD_FILE_INVALID"
-                        };
-                    }
+                    citizenId = match.Value;
                 }
+                else
+                {
+                    return new Response<UserApplicationResponse>
+                    {
+                        Code = (int)ResponseCode.FAIL,
+                        Message = "Không thể nhận diện số CCCD. Vui lòng kiểm tra lại ảnh (có thể số bị che hoặc ảnh bị mờ).",
+                        Data = null,
+                        Errors = "CCCD_FILE_INVALID"
+                    };
+                }
+            }
 
-                // AI OCR cho chứng chỉ tiếng Anh
-                if (request.EnglishCertificate != null)
+            // AI OCR cho chứng chỉ tiếng Anh
+            if (request.EnglishCertificate != null)
+            {
+                var ocrText = await ocrService.ExtractTextFromImageAsync(request.EnglishCertificate);
+                Console.WriteLine($"ENGLISH CERT OCR: {ocrText}");
+                // Check if OCR result contains TOEIC keyword
+                if (string.IsNullOrWhiteSpace(ocrText) || !ocrText.ToUpper().Contains("TOEIC"))
                 {
-                    var ocrText = await ocrService.ExtractTextFromImageAsync(request.EnglishCertificate);
-                    Console.WriteLine($"ENGLISH CERT OCR: {ocrText}");
-                    // Check if OCR result contains TOEIC keyword
-                    if (string.IsNullOrWhiteSpace(ocrText) || !ocrText.ToUpper().Contains("TOEIC"))
+                    return new Response<UserApplicationResponse>
                     {
-                        return new Response<UserApplicationResponse>
-                        {
-                            Code = (int)ResponseCode.FAIL,
-                            Message = "File upload không phải là chứng chỉ tiếng Anh TOEIC . Vui lòng upload đúng chứng chỉ TOEIC rõ nét.",
-                            Data = null,
-                            Errors = "ENGLISH_CERTIFICATE_INVALID"
-                        };
-                    }
-                    // Ngày thi: yyyy/MM/dd
-                    var dateMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})");
-                    if (dateMatch.Success)
-                    {
-                        if (DateOnly.TryParseExact(dateMatch.Value, "yyyy/MM/dd", out var testDate))
-                            englishTestDate = testDate;
-                    }
-                    // Valid Until: yyyy/MM/dd (date may appear before or after 'Valid Until')
-                    var validUntilMatchAfter = System.Text.RegularExpressions.Regex.Match(ocrText, @"Valid Until.*?(\d{4}/\d{2}/\d{2})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    var validUntilMatchBefore = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})\s*Valid Until", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    if (validUntilMatchAfter.Success)
-                    {
-                        if (DateOnly.TryParseExact(validUntilMatchAfter.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
-                            endDate = validUntilDate;
-                    }
-                    else if (validUntilMatchBefore.Success)
-                    {
-                        if (DateOnly.TryParseExact(validUntilMatchBefore.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
-                            endDate = validUntilDate;
-                    }
-                    // Tìm tất cả số sau 'Your score'
-                    // Điểm nghe
-                    var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTENING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    if (listenMatch.Success && int.TryParse(listenMatch.Groups[1].Value, out var listenScore))
-                        listeningScore = listenScore;
-                    // Điểm đọc
-                    var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
-                        readingScore = readScore;
-                    if (listeningScore > 0 && readingScore > 0)
-                        totalScore = listeningScore + readingScore;
-                    // EnglishDegreeNumber = TOEIC + totalScore
-                    if (totalScore > 0)
-                        englishDegreeNumber = $"TOEIC {totalScore}";
-                    // Nếu không lấy được ngày thi, ngày hết hạn, điểm nghe, điểm đọc thì báo lỗi
-                    if (englishTestDate == null || endDate == null || listeningScore == 0 || readingScore == 0)
-                    {
-                        return new Response<UserApplicationResponse>
-                        {
-                            Code = (int)ResponseCode.FAIL,
-                            Message = "Không thể nhận diện đủ thông tin từ ảnh chứng chỉ TOEIC hoặc ảnh có thể bị mờ. Vui lòng chụp lại ảnh rõ nét, không bị mờ hoặc thiếu thông tin.",
-                            Data = null,
-                            Errors = "ENGLISH_CERTIFICATE_UNREADABLE"
-                        };
-                    }
+                        Code = (int)ResponseCode.FAIL,
+                        Message = "File upload không phải là chứng chỉ tiếng Anh TOEIC . Vui lòng upload đúng chứng chỉ TOEIC rõ nét.",
+                        Data = null,
+                        Errors = "ENGLISH_CERTIFICATE_INVALID"
+                    };
                 }
+                // Ngày thi: yyyy/MM/dd
+                var dateMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})");
+                if (dateMatch.Success)
+                {
+                    if (DateOnly.TryParseExact(dateMatch.Value, "yyyy/MM/dd", out var testDate))
+                        englishTestDate = testDate;
+                }
+                // Valid Until: yyyy/MM/dd (date may appear before or after 'Valid Until')
+                var validUntilMatchAfter = System.Text.RegularExpressions.Regex.Match(ocrText, @"Valid Until.*?(\d{4}/\d{2}/\d{2})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                var validUntilMatchBefore = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})\s*Valid Until", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (validUntilMatchAfter.Success)
+                {
+                    if (DateOnly.TryParseExact(validUntilMatchAfter.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
+                        endDate = validUntilDate;
+                }
+                else if (validUntilMatchBefore.Success)
+                {
+                    if (DateOnly.TryParseExact(validUntilMatchBefore.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
+                        endDate = validUntilDate;
+                }
+                // Tìm tất cả số sau 'Your score'
+                // Điểm nghe
+                var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTENING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (listenMatch.Success && int.TryParse(listenMatch.Groups[1].Value, out var listenScore))
+                    listeningScore = listenScore;
+                // Điểm đọc
+                var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
+                    readingScore = readScore;
+                if (listeningScore > 0 && readingScore > 0)
+                    totalScore = listeningScore + readingScore;
+                // EnglishDegreeNumber = TOEIC + totalScore
+                if (totalScore > 0)
+                    englishDegreeNumber = $"TOEIC {totalScore}";
+                // Nếu không lấy được ngày thi, ngày hết hạn, điểm nghe, điểm đọc thì báo lỗi
+                if (englishTestDate == null || endDate == null || listeningScore == 0 || readingScore == 0)
+                {
+                    return new Response<UserApplicationResponse>
+                    {
+                        Code = (int)ResponseCode.FAIL,
+                        Message = "Không thể nhận diện đủ thông tin từ ảnh chứng chỉ TOEIC hoặc ảnh có thể bị mờ. Vui lòng chụp lại ảnh rõ nét, không bị mờ hoặc thiếu thông tin.",
+                        Data = null,
+                        Errors = "ENGLISH_CERTIFICATE_UNREADABLE"
+                    };
+                }
+            }
 
             var application = new UserApplication
             {
@@ -209,7 +209,17 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         UserId = userId,
                         Status = ActivityStatus.Ongoing
                     };
+
+                    UserHistory history = new()
+                    {
+                        UserId = userId,
+                        CampaignRoundId = campaignRoundId.Value,
+                        Type = HistoryType.Ongoing,
+                        ParticipatedDate = _dateTimeProvider.Today
+                    };
+
                     await _unitOfWork.RoundActivites.AddAsync(roundActivity);
+                    await _unitOfWork.UserHistories.AddAsync(history);
                     await _unitOfWork.CompleteAsync();
                 }
                 else

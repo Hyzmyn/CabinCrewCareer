@@ -135,6 +135,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Document not found")]
         DOCUMENT_NOT_FOUND = 42,
 
+        [Description("Candidate's interview has been evaluated 3 times")]
+        EXCEED_FORM_LIMIT = 43,
+
         #endregion
     }
 }

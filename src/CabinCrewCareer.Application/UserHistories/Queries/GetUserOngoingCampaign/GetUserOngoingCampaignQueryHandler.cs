@@ -40,13 +40,16 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampai
             {
                 var temp = await _unitOfWork.RoundActivites.GetRoundActivityAsync(item.RoundId, userId);
 
-                response.Rounds.Add(new GetRoundActivityResponse
+                if (temp is not null)
                 {
-                    ActivityId = temp.ActivityId,
-                    RoundId = item.RoundId,
-                    RoundName = item.RoundType.GetDescription(),
-                    Status = temp.Status.GetDescription()
-                });
+                    response.Rounds.Add(new GetRoundActivityResponse
+                    {
+                        ActivityId = temp.ActivityId,
+                        RoundId = item.RoundId,
+                        RoundName = item.RoundType.GetDescription(),
+                        Status = temp.Status.GetDescription()
+                    });
+                }
             }
 
             return new Response<GetUserCampaignResponse>(

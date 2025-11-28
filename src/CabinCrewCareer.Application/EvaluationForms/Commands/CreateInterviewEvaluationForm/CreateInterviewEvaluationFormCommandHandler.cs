@@ -7,6 +7,7 @@ using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEvaluationForm
 {
@@ -50,11 +51,45 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                 finalScore += item.Score;
             }
 
+            var roundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
+                expression: x => x.ActivityId == request.ActivityId,
+                includeFunc: x => x.Include(x => x.Round));
+
+            var roundActivity = await roundActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            var evaluationForms = await _unitOfWork.EvaluationForms.GetInterviewFormsAsync(request.ActivityId);
+
+            if (evaluationForms.Count == 3) throw new ApiException(ResponseCode.EXCEED_FORM_LIMIT);
+
             if (request.Type == (int)CampaignType.Recruitment)
             {
                 if (finalScore > 120)
                 {
                     form.IsPassed = true;
+                }
+
+                if (roundActivity is not null)
+                {
+                    if (form.IsPassed)
+                    {
+                        if (evaluationForms.Count(x => x.IsPassed) == 2)
+                        {
+                            roundActivity.Status = ActivityStatus.Passed;
+                        }
+
+                        var finalRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                                expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.Final);
+
+                        var finalRound = await finalRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                        if (finalRound is not null) await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                    }
+                    else
+                    {
+                        if (evaluationForms.Count == 2) roundActivity.Status = ActivityStatus.Failed;
+                    }
+
+                    await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
                 }
 
                 await _unitOfWork.EvaluationForms.AddAsync(form);
@@ -68,6 +103,30 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             }
 
             if (finalScore > 70) form.IsPassed = true;
+
+            if (roundActivity is not null)
+            {
+                if (form.IsPassed)
+                {
+                    if (evaluationForms.Count(x => x.IsPassed) == 2)
+                    {
+                        roundActivity.Status = ActivityStatus.Passed;
+                    }
+
+                    var finalRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                            expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.Final);
+
+                    var finalRound = await finalRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                    if (finalRound is not null) await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                }
+                else
+                {
+                    if (evaluationForms.Count == 2) roundActivity.Status = ActivityStatus.Failed;
+                }
+
+                await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+            }
 
             await _unitOfWork.EvaluationForms.AddAsync(form);
 

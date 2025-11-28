@@ -17,6 +17,6 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
 
         Task<List<RoundActivity>> GetRoundParticipantsAsync(int roundId);
 
-        Task<RoundActivity> GetRoundActivityAsync(int roundId, int userId);
+        Task<RoundActivity?> GetRoundActivityAsync(int roundId, int userId);
     }
 }
