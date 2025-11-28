@@ -16,6 +16,9 @@
         public int? TestSessionId { get; set; }
         public virtual TestSession TestSession { get; set; } = null!;
 
+        public int? UserId { get; set; }
+        public virtual User User { get; set; } = null!;
+
         //public virtual TestResult? TestResult { get; set; } = null!;
 
         // Navigation Properties

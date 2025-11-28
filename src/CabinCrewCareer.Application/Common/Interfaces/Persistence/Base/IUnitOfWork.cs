@@ -47,6 +47,8 @@
 
         IUserHistoryRepository UserHistories { get; }
 
+        IEnquiryRequestRepository EnquiryRequests { get; }
+
         Task CompleteAsync();
     }
 }
