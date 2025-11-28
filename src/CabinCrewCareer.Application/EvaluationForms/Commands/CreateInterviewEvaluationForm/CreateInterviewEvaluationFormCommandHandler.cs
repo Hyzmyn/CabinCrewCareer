@@ -86,7 +86,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                     }
                     else
                     {
-                        if (evaluationForms.Count == 2) roundActivity.Status = ActivityStatus.Failed;
+                        if (evaluationForms.Count(x => x.IsPassed == false) >= 1) roundActivity.Status = ActivityStatus.Failed;
                     }
 
                     await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
@@ -122,7 +122,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                 }
                 else
                 {
-                    if (evaluationForms.Count == 2) roundActivity.Status = ActivityStatus.Failed;
+                    if (evaluationForms.Count(x => x.IsPassed == false) >= 1) roundActivity.Status = ActivityStatus.Failed;
                 }
 
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
