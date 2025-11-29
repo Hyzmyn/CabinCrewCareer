@@ -14,6 +14,9 @@ using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSession
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByType;
 using CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById;
 using CabinCrewCareer.Application.TestSessions.Queries.GetTestAnswersBySessionId;
+using CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionsByRound;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMyEnglishTestSessions;
+using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessionsWithStatus;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -246,7 +249,291 @@ namespace CabinCrewCareer.Api.Controllers
         }
         #endregion
 
-        #region Get My Speaking Test Sessions
+        #region Get Test Sessions By Round
+        /// <summary>
+        /// Get all test sessions by round with RoundActivity status
+        /// </summary>
+        /// <param name="roundId">Round ID to get test sessions for</param>
+        /// <param name="testType">Optional test type filter: 1 (English Listening), 2 (English Speaking), 3 (Practical)</param>
+        /// <param name="searchTerm">Search by user name or email</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, username, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get all test sessions for a specific round with their RoundActivity status**
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// - Typically used by Admin/Examiner to review candidate progress
+        /// 
+        /// **Query Parameters:**
+        /// - `roundId`: Required - The round to get test sessions for
+        /// - `testType`: Optional filter by test type (1: Listening, 2: Speaking, 3: Practical)
+        /// - `searchTerm`: Search in user full name or email
+        /// - `sortColumn`: Choose from testSessionId, username, totalScore, startTime, endTime, createdAt
+        /// - `sortOrder`: Use "asc" or "desc" (default: desc by createdAt)
+        /// 
+        /// **Response includes:**
+        /// - Test session details (scores, timestamps, etc.)
+        /// - User information
+        /// - **ActivityStatus**: "Ongoing", "Passed", or "Failed" based on RoundActivity
+        /// - RoundId, RoundType, and ActivityId
+        /// 
+        /// **Activity Status Logic:**
+        /// - "Ongoing": User is still in this round (default state)
+        /// - "Passed": User has passed this round (score >= 80%)
+        /// - "Failed": User has failed this round (score less than 80%)
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/by-round?roundId=12&amp;testType=1&amp;page=1&amp;pageSize=20
+        /// ```
+        /// 
+        /// **Response Example:**
+        /// ```json
+        /// {
+        ///   "data": {
+        ///     "items": [
+        ///       {
+        ///         "testSessionId": 501,
+        ///         "userId": 301,
+        ///         "userFullName": "Nguyen Van A",
+        ///         "testId": 6,
+        ///         "testName": "Listening Test",
+        ///         "testType": "EnglishListening",
+        ///         "totalScore": 110,
+        ///         "maxScore": 120,
+        ///         "status": true,
+        ///         "activityStatus": "Passed",
+        ///         "roundId": 12,
+        ///         "roundType": "EnglishListeningTest",
+        ///         "activityId": 201
+        ///       }
+        ///     ],
+        ///     "page": 1,
+        ///     "pageSize": 20,
+        ///     "totalRecords": 1,
+        ///     "totalPages": 1
+        ///   }
+        /// }
+        /// ```
+        /// </remarks>
+        /// <returns>Paginated list of test sessions with RoundActivity status</returns>
+        /// <response code="200">Ok - Test sessions retrieved successfully</response>
+        /// <response code="400">Bad Request - Invalid round ID or test type</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("by-round")]
+        [ProducesResponseType(typeof(Response<PaginatedList<TestSessionWithStatusResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetTestSessionsByRoundAsync(
+            [FromQuery] int roundId,
+            [FromQuery] int? testType,
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var query = new GetTestSessionsByRoundQuery
+                {
+                    RoundId = roundId,
+                    TestType = testType.HasValue ? (Domain.Common.TestType)testType.Value : null,
+                    SearchTerm = searchTerm,
+                    SortColumn = sortColumn,
+                    SortOrder = sortOrder,
+                    Page = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(await mediator.Send(query));
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new Response<string>(code: (int)HttpStatusCode.BadRequest, message: ex.Message));
+            }
+        }
+        #endregion
+
+        #region Get My English Test Sessions (Candidate)
+        /// <summary>
+        /// Get my English test sessions (Listening + Speaking) with RoundActivity status - For Candidates
+        /// </summary>
+        /// <param name="roundId">Optional round ID filter</param>
+        /// <param name="searchTerm">Search by test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, testtype, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get my English test sessions (both Listening and Speaking) with pass/fail status**
+        /// 
+        /// **Security:**
+        /// - Only accessible by authenticated users (typically Candidates)
+        /// - Uses JWT token to identify the current user
+        /// 
+        /// **Returns:**
+        /// - All English Listening test sessions
+        /// - All English Speaking test sessions
+        /// - RoundActivity status for each session
+        /// 
+        /// **Activity Status:**
+        /// - "Ongoing": Test session exists but not yet evaluated
+        /// - "Passed": Score greater than or equal to 80% of MaxScore
+        /// - "Failed": Score less than 80% of MaxScore
+        /// 
+        /// **Use Case:**
+        /// Candidates can view their English test results and see if they passed/failed
+        /// each test round. Both Listening and Speaking tests are returned together.
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/my-english?page=1&amp;pageSize=10
+        /// ```
+        /// 
+        /// **Response Example:**
+        /// ```json
+        /// {
+        ///   "data": {
+        ///     "items": [
+        ///       {
+        ///         "testSessionId": 601,
+        ///         "testName": "Listening Test",
+        ///         "testType": "EnglishListening",
+        ///         "totalScore": 110,
+        ///         "maxScore": 120,
+        ///         "activityStatus": "Passed",
+        ///         "roundType": "EnglishListeningTest"
+        ///       },
+        ///       {
+        ///         "testSessionId": 701,
+        ///         "testName": "Speaking Test",
+        ///         "testType": "EnglishSpeaking",
+        ///         "totalScore": 85,
+        ///         "maxScore": 100,
+        ///         "activityStatus": "Passed",
+        ///         "roundType": "EnglishSpeakingTest"
+        ///       }
+        ///     ]
+        ///   }
+        /// }
+        /// ```
+        /// </remarks>
+        /// <returns>Paginated list of my English test sessions with status</returns>
+        /// <response code="200">Ok - Test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("my-english")]
+        [ProducesResponseType(typeof(Response<PaginatedList<TestSessionWithStatusResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetMyEnglishTestSessionsAsync(
+            [FromQuery] int? roundId,
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetMyEnglishTestSessionsQuery
+            {
+                RoundId = roundId,
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Practical Test Sessions (Cabin Crew)
+        /// <summary>
+        /// Get my Practical test sessions with RoundActivity status - For Cabin Crew
+        /// </summary>
+        /// <param name="roundId">Optional round ID filter</param>
+        /// <param name="searchTerm">Search by test name</param>
+        /// <param name="sortColumn">Column to sort by (testSessionId, totalScore, startTime, endTime, createdAt)</param>
+        /// <param name="sortOrder">Sort order (asc or desc)</param>
+        /// <param name="page">Page number (default: 1)</param>
+        /// <param name="pageSize">Items per page (default: 10)</param>
+        /// <remarks>
+        /// **Get my Practical test sessions with pass/fail status**
+        /// 
+        /// **Security:**
+        /// - Only accessible by authenticated users (typically Cabin Crew applicants)
+        /// - Uses JWT token to identify the current user
+        /// 
+        /// **Returns:**
+        /// - All Practical test sessions for the current user
+        /// - RoundActivity status for each session
+        /// 
+        /// **Activity Status:**
+        /// - "Ongoing": Test session exists but not yet evaluated
+        /// - "Passed": Score greater than or equal to 80% of MaxScore
+        /// - "Failed": Score less than 80% of MaxScore
+        /// 
+        /// **Use Case:**
+        /// Cabin crew applicants can view their practical test results and see if 
+        /// they passed or failed. Since practical tests only require one round to pass,
+        /// the status directly indicates if they can move to the interview round.
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/my-practical?page=1&amp;pageSize=10
+        /// ```
+        /// 
+        /// **Response Example:**
+        /// ```json
+        /// {
+        ///   "data": {
+        ///     "items": [
+        ///       {
+        ///         "testSessionId": 501,
+        ///         "testName": "Practical Exam",
+        ///         "testType": "Practical",
+        ///         "totalScore": 85,
+        ///         "maxScore": 100,
+        ///         "activityStatus": "Passed",
+        ///         "roundType": "PracticalTest"
+        ///       }
+        ///     ]
+        ///   }
+        /// }
+        /// ```
+        /// </remarks>
+        /// <returns>Paginated list of my practical test sessions with status</returns>
+        /// <response code="200">Ok - Test sessions retrieved successfully</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet("my-practical")]
+        [ProducesResponseType(typeof(Response<PaginatedList<TestSessionWithStatusResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> GetMyPracticalTestSessionsAsync(
+            [FromQuery] int? roundId,
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortColumn,
+            [FromQuery] string? sortOrder,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new GetMyPracticalTestSessionsWithStatusQuery
+            {
+                RoundId = roundId,
+                SearchTerm = searchTerm,
+                SortColumn = sortColumn,
+                SortOrder = sortOrder,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(await mediator.Send(query));
+        }
+        #endregion
+
+        #region Get My Listening Test Sessions
         /// <summary>
         /// Get my speaking test sessions - Returns only the logged-in user's speaking test sessions
         /// </summary>
