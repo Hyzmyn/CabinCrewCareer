@@ -105,7 +105,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <summary>
         /// Update scores for an enquiry request (examiner reviews and re-scores)
         /// </summary>
-        /// <param name="id">Enquiry request ID</param>
+        /// <param name="testSessionId">Test session ID</param>
         /// <param name="request">Answer scores and optional new reason</param>
         /// <remarks>
         /// **Update scores after reviewing enquiry request**
@@ -113,6 +113,9 @@ namespace CabinCrewCareer.Api.Controllers
         /// **Security:**
         /// - Requires authentication
         /// - Only examiners can access this endpoint
+        /// 
+        /// **URL Parameter:**
+        /// - `testSessionId`: The test session ID (not enquiry request ID)
         /// 
         /// **Request Body:**
         /// - `answerScores`: Dictionary of answer IDs and their new scores
@@ -123,7 +126,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// - `newReason`: Optional comment/feedback from examiner
         /// 
         /// **Process:**
-        /// 1. Validates enquiry request exists
+        /// 1. Finds enquiry request by test session ID
         /// 2. Updates each answer's score based on criteria scores
         /// 3. Calculates total new score
         /// 4. Updates EnquiryRequest (NewScore, Status = true, Reason if provided)
@@ -133,6 +136,12 @@ namespace CabinCrewCareer.Api.Controllers
         ///    - If score decreased: "Điểm giảm từ X xuống Y"
         ///    - If score unchanged: "Điểm giữ nguyên"
         ///    - Includes examiner's new reason if provided
+        /// 
+        /// **Example URL:**
+        /// ```
+        /// PUT /api/v1/enquiry-requests/109/score
+        /// ```
+        /// (where 109 is the test session ID)
         /// 
         /// **Example Request:**
         /// ```json
@@ -167,17 +176,17 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="200">Ok - Score updated successfully</response>
         /// <response code="400">Bad Request - Validation failed</response>
         /// <response code="401">Unauthorized</response>
-        [HttpPut("{id}/score")]
+        [HttpPut("{testSessionId}/score")]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> UpdateEnquiryRequestScoreAsync(int id, [FromBody] UpdateEnquiryRequestScoreRequest request)
+        public async Task<IActionResult> UpdateEnquiryRequestScoreAsync(int testSessionId, [FromBody] UpdateEnquiryRequestScoreRequest request)
         {
             try
             {
                 var command = new UpdateEnquiryRequestScoreCommand
                 {
-                    EnquiryId = id,
+                    TestSessionId = testSessionId,
                     AnswerScores = request.AnswerScores.ToDictionary(
                         kvp => kvp.Key,
                         kvp => new Application.EnquiryRequests.Commands.UpdateEnquiryRequestScore.AnswerScoreInfo

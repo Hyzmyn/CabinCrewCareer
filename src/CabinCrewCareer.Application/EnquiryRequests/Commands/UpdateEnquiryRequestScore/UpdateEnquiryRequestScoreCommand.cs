@@ -5,7 +5,7 @@ namespace CabinCrewCareer.Application.EnquiryRequests.Commands.UpdateEnquiryRequ
 {
     public class UpdateEnquiryRequestScoreCommand : IRequest<Response<string>>
     {
-        public int EnquiryId { get; set; }
+        public int TestSessionId { get; set; }
 
         public Dictionary<int, AnswerScoreInfo> AnswerScores { get; set; } = new();
 

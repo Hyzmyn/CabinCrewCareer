@@ -28,9 +28,9 @@ namespace CabinCrewCareer.Application.EnquiryRequests.Commands.UpdateEnquiryRequ
                 throw new ApiException(ResponseCode.FAILED_AUTHENTICATION);
             }
 
-            // 1. Validate EnquiryRequest exists and get related data
+            // 1. Validate EnquiryRequest exists by TestSessionId and get related data
             var enquiryRequests = await _unitOfWork.EnquiryRequests.GetAllAsync(
-                expression: er => er.EnquiryId == request.EnquiryId,
+                expression: er => er.TestSessionId == request.TestSessionId,
                 includeFunc: query => query
                     .Include(er => er.TestSession)
                         .ThenInclude(ts => ts.TestAnswers)
@@ -40,7 +40,7 @@ namespace CabinCrewCareer.Application.EnquiryRequests.Commands.UpdateEnquiryRequ
             var enquiryRequest = enquiryRequests.FirstOrDefault();
             if (enquiryRequest == null)
             {
-                errorMessages.Add("Enquiry request not found.");
+                errorMessages.Add($"Enquiry request not found for test session ID {request.TestSessionId}.");
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
