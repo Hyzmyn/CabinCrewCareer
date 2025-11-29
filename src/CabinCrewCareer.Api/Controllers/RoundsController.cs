@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.RoundActivities.Queries;
@@ -17,7 +18,7 @@ namespace CabinCrewCareer.Api.Controllers
     [Authorize]
     public class RoundsController(
         IMediator mediator,
-        ILogger<RoundsController> logger) : ApiController(mediator, logger)
+        ILogger<RoundsController> logger,IUserExportService userExportService) : ApiController(mediator, logger)
     {
         #region Get All Participants
         /// <summary>
@@ -128,5 +129,22 @@ namespace CabinCrewCareer.Api.Controllers
             }
         }
         #endregion
+         #region Export Users By Round
+                /// <summary>
+                /// Export danh sách user theo roundId, type Final, round activities status Ongoing
+                /// </summary>
+                /// <param name="roundId">Id của round</param>
+                /// <returns>File Excel danh sách user</returns>
+                [HttpGet("{roundId}/export-users")]
+                [ProducesResponseType(typeof(FileResult), (int)HttpStatusCode.OK)]
+                public async Task<IActionResult> ExportUsersByRoundAsync( int roundId)
+                {
+                    // Lấy tên người login từ context (có thể lấy từ claim hoặc User.Identity.Name)
+                    var representativeName = User?.Identity?.Name ?? "Ông/Bà";
+                    var fileBytes = await userExportService.ExportUsersByRoundAsync(roundId, representativeName);
+                    var fileName = $"FinalRound_CandidateList.xlsx";
+                    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+                #endregion
     }
 }
