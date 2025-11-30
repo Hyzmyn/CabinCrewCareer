@@ -20,6 +20,21 @@ namespace CabinCrewCareer.Infrastructure.Services
             var campaignRound = await _unitOfWork.CampaignRounds.GetByIdAsync(campaignRoundId);
             if (campaignRound == null) return;
 
+            var campaign = await _unitOfWork.Campaigns.GetByIdAsync(campaignRound.CampaignId);
+            if (campaign == null) return;
+
+            // Nếu campaign đang Pending, Approved hoặc Rejected, round luôn là Upcoming
+            if (campaign.CampaignStatus == CampaignStatus.Pending || campaign.CampaignStatus == CampaignStatus.Approved || campaign.CampaignStatus == CampaignStatus.Rejected)
+            {
+                if (campaignRound.RoundStatus != RoundStatus.Upcoming)
+                {
+                    campaignRound.RoundStatus = RoundStatus.Upcoming;
+                    await _unitOfWork.CampaignRounds.UpdateAsync(campaignRound);
+                    await _unitOfWork.CompleteAsync();
+                }
+                return;
+            }
+
             var currentTime = _dateTimeProvider.UtcNow;
             var newStatus = DetermineStatusByDate(campaignRound.StartDate, campaignRound.EndDate, currentTime);
 
@@ -34,24 +49,77 @@ namespace CabinCrewCareer.Infrastructure.Services
 
         public async Task UpdateAllCampaignRoundStatusesAsync(CancellationToken cancellationToken = default)
         {
-            // Lấy tất cả campaign rounds active
-            var campaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync();
-            var roundsToUpdate = campaignRounds.Where(r => r.IsActive).ToList();
-
-            if (!roundsToUpdate.Any()) return;
-
+            // Lấy tất cả campaign active
+            var campaigns = await _unitOfWork.Campaigns.GetAllAsync(c => c.IsActive);
             var currentTime = _dateTimeProvider.UtcNow;
             bool hasChanges = false;
 
-            foreach (var round in roundsToUpdate)
+            foreach (var campaign in campaigns)
             {
-                var newStatus = DetermineStatusByDate(round.StartDate, round.EndDate, currentTime);
-                
-                if (newStatus != round.RoundStatus)
+                var rounds = campaign.CampaignRounds.Where(r => r.IsActive).OrderBy(r => r.StartDate).ToList();
+                if (!rounds.Any()) continue;
+
+                // Nếu campaign đang Pending hoặc Approved, tất cả round phải là Upcoming
+                if (campaign.CampaignStatus == CampaignStatus.Pending || campaign.CampaignStatus == CampaignStatus.Approved)
                 {
-                    round.RoundStatus = newStatus;
-                    await _unitOfWork.CampaignRounds.UpdateAsync(round);
-                    hasChanges = true;
+                    foreach (var round in rounds)
+                    {
+                        if (round.RoundStatus != RoundStatus.Upcoming)
+                        {
+                            round.RoundStatus = RoundStatus.Upcoming;
+                            await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                            hasChanges = true;
+                        }
+                    }
+                    continue;
+                }
+
+                // Nếu campaign Ongoing
+                if (campaign.CampaignStatus == CampaignStatus.Ongoing)
+                {
+                    for (int i = 0; i < rounds.Count; i++)
+                    {
+                        var round = rounds[i];
+                        if (i == 0)
+                        {
+                            // Round đầu tiên: chuyển sang Ongoing nếu thời gian >= StartDate
+                            if (currentTime >= round.StartDate && round.RoundStatus != RoundStatus.Ongoing)
+                            {
+                                round.RoundStatus = RoundStatus.Ongoing;
+                                await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                                hasChanges = true;
+                            }
+                            else if (currentTime < round.StartDate && round.RoundStatus != RoundStatus.Upcoming)
+                            {
+                                round.RoundStatus = RoundStatus.Upcoming;
+                                await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                                hasChanges = true;
+                            }
+                        }
+                        else
+                        {
+                            // Các round còn lại: chỉ chuyển sang Ongoing nếu thời gian >= StartDate
+                            if (currentTime >= round.StartDate && (round.RoundStatus == RoundStatus.Upcoming || round.RoundStatus == RoundStatus.Ongoing))
+                            {
+                                round.RoundStatus = RoundStatus.Ongoing;
+                                await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                                hasChanges = true;
+                            }
+                            else if (currentTime < round.StartDate && round.RoundStatus != RoundStatus.Upcoming)
+                            {
+                                round.RoundStatus = RoundStatus.Upcoming;
+                                await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                                hasChanges = true;
+                            }
+                        }
+                        // Nếu đã qua EndDate thì chuyển sang Ended
+                        if (round.EndDate.HasValue && currentTime > round.EndDate.Value && round.RoundStatus != RoundStatus.Ended)
+                        {
+                            round.RoundStatus = RoundStatus.Ended;
+                            await _unitOfWork.CampaignRounds.UpdateAsync(round);
+                            hasChanges = true;
+                        }
+                    }
                 }
             }
 
