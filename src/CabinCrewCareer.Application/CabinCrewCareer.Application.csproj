@@ -16,6 +16,16 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
 	</ItemGroup>
+		<ItemGroup>
+			<None Update="Common\Templates\AppearanceResultTemplate.html">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</None>
+		</ItemGroup>
+		<ItemGroup>
+			<None Update="Common\Templates\EmailTemplate.html">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</None>
+		</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\CabinCrewCareer.Domain\CabinCrewCareer.Domain.csproj" />
