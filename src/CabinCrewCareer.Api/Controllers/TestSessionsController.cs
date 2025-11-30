@@ -17,6 +17,7 @@ using CabinCrewCareer.Application.TestSessions.Queries.GetTestAnswersBySessionId
 using CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionsByRound;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyEnglishTestSessions;
 using CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSessionsWithStatus;
+using CabinCrewCareer.Application.TestSessions.Queries.GetTestAnswersWithCriteria;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -1175,6 +1176,99 @@ namespace CabinCrewCareer.Api.Controllers
                 };
 
                 return Ok(await mediator.Send(command));
+            }
+            catch (ValidationException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    errorMessage = e.ErrorMessage,
+                    errors = e.Errors
+                });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Test Answers With Criteria Scores
+        /// <summary>
+        /// Get test answers with criteria scores breakdown for a test session
+        /// </summary>
+        /// <param name="testSessionId">Test session ID</param>
+        /// <remarks>
+        /// **Get detailed test answers including criteria scores breakdown**
+        /// 
+        /// This endpoint retrieves all test answers for a specific test session and parses 
+        /// the EssayAnswer field to extract:
+        /// - Individual criteria scores (e.g., Pronunciation, Fluency, Grammar)
+        /// - Student's original essay/answer content (if exists)
+        /// - Question information
+        /// 
+        /// **Security:**
+        /// - Requires authentication
+        /// 
+        /// **Use Cases:**
+        /// - Review detailed scoring breakdown for speaking tests
+        /// - View essay answers with rubric scores
+        /// - Display criteria-based feedback to students
+        /// - Analyze scoring patterns for quality assurance
+        /// 
+        /// **Response Structure:**
+        /// ```json
+        /// {
+        ///   "code": 200,
+        ///   "data": [
+        ///     {
+        ///       "answerId": 1,
+        ///       "score": 24,
+        ///       "isCorrect": true,
+        ///       "criteriaScores": {
+        ///         "Pronunciation": 8,
+        ///         "Fluency": 7,
+        ///         "Grammar": 9
+        ///       },
+        ///       "studentAnswer": "This is my essay...",
+        ///       "answerAudioFileURL": "https://...",
+        ///       "question": {
+        ///         "questionId": 5,
+        ///         "questionContent": "Describe your favorite place",
+        ///         "orderNumber": 1,
+        ///         "maxScore": 30
+        ///       }
+        ///     }
+        ///   ]
+        /// }
+        /// ```
+        /// 
+        /// **Example:**
+        /// ```
+        /// GET /api/v1/test-sessions/123/answers-with-criteria
+        /// ```
+        /// </remarks>
+        /// <returns>List of test answers with parsed criteria scores</returns>
+        /// <response code="200">Ok - Test answers retrieved successfully</response>
+        /// <response code="400">Bad Request - Test session not found</response>
+        [HttpGet("{testSessionId}/answers-with-criteria")]
+        [ProducesResponseType(typeof(Response<List<TestAnswerWithCriteriaResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetTestAnswersWithCriteriaAsync(int testSessionId)
+        {
+            try
+            {
+                var query = new GetTestAnswersWithCriteriaQuery
+                {
+                    TestSessionId = testSessionId
+                };
+
+                return Ok(await mediator.Send(query));
             }
             catch (ValidationException e)
             {
