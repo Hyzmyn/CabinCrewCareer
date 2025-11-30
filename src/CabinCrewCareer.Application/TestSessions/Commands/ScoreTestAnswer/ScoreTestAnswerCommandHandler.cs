@@ -4,6 +4,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
 {
@@ -101,9 +102,26 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                     throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
                 }
 
+                // Save criteria scores as JSON in EssayAnswer field for later review
+                var criteriaScoresJson = JsonSerializer.Serialize(answerScore.CriteriaScores, new JsonSerializerOptions
+                {
+                    WriteIndented = false
+                });
+
                 // Update test answer score and correctness
                 testAnswer.Score = calculatedScore;
                 testAnswer.IsCorrect = answerScore.IsCorrect;
+                
+                // Store criteria scores in EssayAnswer field
+                // If EssayAnswer already has content (from student's essay), append criteria scores
+                if (!string.IsNullOrEmpty(testAnswer.EssayAnswer))
+                {
+                    testAnswer.EssayAnswer = $"{{\"studentAnswer\":\"{testAnswer.EssayAnswer.Replace("\"", "\\\"")}\",\"criteriaScores\":{criteriaScoresJson}}}";
+                }
+                else
+                {
+                    testAnswer.EssayAnswer = $"{{\"criteriaScores\":{criteriaScoresJson}}}";
+                }
 
                 // Add to total score
                 totalScore += calculatedScore;
