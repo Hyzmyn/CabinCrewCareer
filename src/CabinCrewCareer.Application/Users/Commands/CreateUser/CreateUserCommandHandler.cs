@@ -61,7 +61,14 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
 
             mailRequest.ToEmail = user.Email;
             mailRequest.Subject = "TÀI KHOẢN ĐĂNG NHẬP PHẦN MỀM";
-            mailRequest.Body = "Xin chào: " + $"{user.FullName}" + ",\r\n\r\nHệ thống gửi tài khoản để  đăng nhập phần mềm:\r\n\r\nUsername\r\n\r\n" + $"{user.UserName}" + "\r\n\r\nHãy giữ kín việc này\r\n\r\nPassword\r\n\r\n" + $"{user.Password}" + "\r\n\r\nNhập đúng ký tự hoa/thường\r\n\r\nTrân trọng,\r\n\r\nHệ thống Cabin Crew Career";
+
+            // Đọc template email và thay thế các tham số động
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "EmailTemplate.html");
+            string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
+            templateBody = templateBody.Replace("{FullName}", user.FullName ?? "")
+                                     .Replace("{UserName}", user.UserName ?? "")
+                                     .Replace("{Password}", user.Password ?? "");
+            mailRequest.Body = templateBody;
 
             await _emailService.SendEmailAsync(mailRequest);
 

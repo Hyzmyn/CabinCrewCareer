@@ -14,15 +14,22 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
     public class CreateAppearanceEvaluationFormCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateAppearanceEvaluationFormCommand, Response<string>>
+        IDateTimeProvider dateTimeProvider,
+        IEmailService emailService) : IRequestHandler<CreateAppearanceEvaluationFormCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
         private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IEmailService _emailService = emailService;
 
         public async Task<Response<string>> Handle(CreateAppearanceEvaluationFormCommand request, CancellationToken cancellationToken)
         {
             int count = 0;
+            string resultText = "Không đạt";
+            string listeningJoinCode = "";
+            string speakingJoinCode = "";
+            string campaignName = "";
+            string extraMessage = "";
 
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId))
@@ -57,10 +64,14 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
             }
 
             if (count > 7) form.IsPassed = true;
+            // Lấy thông tin user để gửi email (sẽ lấy sau khi roundActivity đã khởi tạo)
 
             var roundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
                 expression: x => x.ActivityId == request.ActivityId,
-                includeFunc: x => x.Include(x => x.Round));
+                includeFunc: x => x
+                    .Include(x => x.Round)
+                        .ThenInclude(r => r.CampaignRound)
+                            .ThenInclude(cr => cr.Campaign));
 
             var roundActivity = await roundActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -69,26 +80,76 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                 if (form.IsPassed)
                 {
                     roundActivity.Status = ActivityStatus.Passed;
+                    resultText = "Đạt";
+                    extraMessage = "Chúc mừng bạn đã vượt qua vòng Ngoại hình.";
 
-                    var listeningRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                        expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.EnglishListeningTest);
+                    // Lấy tên campaign
+                    campaignName = roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "";
 
-                    var listeningRound = await listeningRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                    // Lấy mã join code vòng nghe
+                    if (roundActivity.Round != null)
+                    {
+                        var listeningRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                            expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.EnglishListeningTest,
+                            includeFunc: x => x.Include(r => r.CampaignRound).ThenInclude(cr => cr.Campaign));
+                        var listeningRound = await listeningRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                        if (listeningRound is not null)
+                        {
+                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = listeningRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                            if (listeningRound.TestId.HasValue)
+                            {
+                                var test = await _unitOfWork.Tests.GetByIdAsync(listeningRound.TestId.Value);
+                                listeningJoinCode = test?.JoinCode ?? "";
+                            }
+                        }
 
-                    if (listeningRound is not null) await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = listeningRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
-
-                    var speakingRoundQuery = await _unitOfWork.Rounds.GetAsync(expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.EnglishSpeakingTest);
-
-                    var speakingRound = await speakingRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-                    if (speakingRound is not null) await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = speakingRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                        // Lấy mã join code vòng nói
+                        var speakingRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                            expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.EnglishSpeakingTest,
+                            includeFunc: x => x.Include(r => r.CampaignRound).ThenInclude(cr => cr.Campaign));
+                        var speakingRound = await speakingRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                        if (speakingRound is not null)
+                        {
+                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = speakingRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                            if (speakingRound.TestId.HasValue)
+                            {
+                                var test = await _unitOfWork.Tests.GetByIdAsync(speakingRound.TestId.Value);
+                                speakingJoinCode = test?.JoinCode ?? "";
+                            }
+                        }
+                    }
                 }
                 else
                 {
                     roundActivity.Status = ActivityStatus.Failed;
+                    resultText = "Không đạt";
+                    extraMessage = "Rất tiếc bạn chưa vượt qua vòng Ngoại hình.";
                 }
 
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+
+                // Gửi email kết quả cho user
+                if (roundActivity.UserId != null)
+                {
+                    var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
+                    if (user is not null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "AppearanceResultTemplate.html");
+                        string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
+                        templateBody = templateBody.Replace("{FullName}", user.FullName ?? "")
+                                                 .Replace("{Result}", resultText)
+                                                 .Replace("{CampaignName}", campaignName)
+                                                 .Replace("{ListeningJoinCode}", listeningJoinCode)
+                                                 .Replace("{SpeakingJoinCode}", speakingJoinCode);
+                        var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
+                        {
+                            ToEmail = user.Email,
+                            Subject = "Kết quả vòng Ngoại hình Cabin Crew",
+                            Body = templateBody
+                        };
+                        await _emailService.SendEmailAsync(mailRequest);
+                    }
+                }
             }
 
             await _unitOfWork.EvaluationForms.AddAsync(form);
