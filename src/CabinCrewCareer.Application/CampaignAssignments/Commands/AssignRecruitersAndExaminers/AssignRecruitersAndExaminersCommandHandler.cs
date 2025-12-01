@@ -168,15 +168,15 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
 
                 // ========== VALIDATION LOGIC MỚI ==========
                 // Chỉ kiểm tra overlap thời gian với các campaigns khác
-                var hasOverlap = await _unitOfWork.CampaignAssignments
-                    .HasOverlappingCampaignAsync(assignment.UserId, request.CampaignId);
-                if (hasOverlap)
-                {
-                    return new Response<bool>(
-                        code: (int)ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN,
-                        data: false,
-                        message: $"{user.UserName}: {ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN.GetDescription()}");
-                }
+                // var hasOverlap = await _unitOfWork.CampaignAssignments
+                //     .HasOverlappingCampaignAsync(assignment.UserId, request.CampaignId);
+                // if (hasOverlap)
+                // {
+                //     return new Response<bool>(
+                //         code: (int)ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN,
+                //         data: false,
+                //         message: $"{user.UserName}: {ResponseCode.USER_HAS_OVERLAPPING_CAMPAIGN.GetDescription()}");
+                // }
             }
 
             // ======= TỰ ĐỘNG TẠO ROUNDS CHO ĐỢT ĐẦU TIÊN =======
