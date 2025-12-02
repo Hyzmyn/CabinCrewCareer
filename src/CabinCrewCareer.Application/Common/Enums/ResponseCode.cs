@@ -138,6 +138,15 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Candidate's interview has been evaluated 3 times")]
         EXCEED_FORM_LIMIT = 43,
 
+        [Description("Round activity not found")]
+        ROUND_ACTIVITY_NOT_FOUND = 44,
+
+        [Description("Round not found")]
+        ROUND_NOT_FOUND = 45,
+
+        [Description("Campaign round not found")]
+        CAMPAIGN_ROUND_NOT_FOUND_ALT = 46,
+
         #endregion
     }
 }

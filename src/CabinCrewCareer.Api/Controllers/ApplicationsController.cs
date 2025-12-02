@@ -8,7 +8,8 @@ using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Asp.Versioning;
-
+using CabinCrewCareer.Domain.Wrappers;	
+using static CabinCrewCareer.Application.UserApplications.Commands.ApproveScreeningProfileCommand;
 namespace CabinCrewCareer.Api.Controllers
 {
 	[Route("api/v1/applications")]
@@ -62,6 +63,23 @@ namespace CabinCrewCareer.Api.Controllers
 			if (result.Code == 4)
 				return Ok(result);
 			return BadRequest(result);
+		}
+		/// <summary>
+		/// Duyệt hồ sơ vòng sàng lọc (Screening Approval)
+		/// </summary>
+		/// <param name="activityId">Id của RoundActivity cần duyệt (truyền qua URL)</param>
+		/// <param name="dto">Body truyền vào dạng object: { "status": 2 }<br/>Status: 1 = Ongoing, 2 = Passed, 3 = Failed</param>
+		/// <returns>Response với mã kết quả và dữ liệu. Trả về 200 nếu thành công, 400 nếu lỗi.</returns>
+		[HttpPut("screening-approve/{activityId}")]
+		[Authorize]
+		public async Task<IActionResult> ApproveScreeningProfile(int activityId, [FromBody] ApproveScreeningProfileDto dto)
+		{
+			var command = new ApproveScreeningProfileCommand(activityId, dto.Status);
+			var result = await _mediator.Send(command);
+
+			if (result == null || result.Code != 4)
+				return BadRequest(result);
+			return Ok(result);
 		}
 	}
 }
