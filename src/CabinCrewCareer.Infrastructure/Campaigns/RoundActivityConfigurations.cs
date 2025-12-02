@@ -21,6 +21,11 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 .WithMany(n => n.RoundActivities)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(n => n.UserApplicationSnapshot)
+                .WithMany(n => n.RoundActivities)
+                .HasForeignKey(n => n.ApplicationSnapshotId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

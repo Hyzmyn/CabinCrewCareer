@@ -387,6 +387,37 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("Document", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.DocumentSnapshot", b =>
+                {
+                    b.Property<int>("DocumentSnapshotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentSnapshotId"));
+
+                    b.Property<int?>("ApplicationSnapshotId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DocumentURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("UploadDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("DocumentSnapshotId");
+
+                    b.HasIndex("ApplicationSnapshotId");
+
+                    b.ToTable("DocumentSnapshot", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EnquiryRequest", b =>
                 {
                     b.Property<int>("EnquiryId")
@@ -663,6 +694,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityId"));
 
+                    b.Property<int?>("ApplicationSnapshotId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("RoundId")
                         .HasColumnType("int");
 
@@ -673,6 +707,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ActivityId");
+
+                    b.HasIndex("ApplicationSnapshotId");
 
                     b.HasIndex("RoundId");
 
@@ -1097,6 +1133,82 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("UserApplication", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", b =>
+                {
+                    b.Property<int>("ApplicationSnapshotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApplicationSnapshotId"));
+
+                    b.Property<int>("ApplicationStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CitizenId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EnglishDegreeNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateOnly?>("EnglishTestDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Experience")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ListeningScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.Property<int>("ReadingScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
+
+                    b.HasKey("ApplicationSnapshotId");
+
+                    b.ToTable("UserApplicationSnapshot", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserHistory", b =>
                 {
                     b.Property<int>("HistoryId")
@@ -1247,6 +1359,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.DocumentSnapshot", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", "UserApplicationSnapshot")
+                        .WithMany("DocumentSnapshots")
+                        .HasForeignKey("ApplicationSnapshotId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("UserApplicationSnapshot");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EnquiryRequest", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.TestSession", "TestSession")
@@ -1254,11 +1376,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasForeignKey("CabinCrewCareer.Domain.Entities.EnquiryRequest", "TestSessionId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("CabinCrewCareer.Domain.Entities.User", null)
+                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
                         .WithMany("EnquiryRequests")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("TestSession");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.EvaluationForm", b =>
@@ -1341,6 +1466,11 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundActivity", b =>
                 {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", "UserApplicationSnapshot")
+                        .WithMany("RoundActivities")
+                        .HasForeignKey("ApplicationSnapshotId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("CabinCrewCareer.Domain.Entities.Round", "Round")
                         .WithMany("RoundActivities")
                         .HasForeignKey("RoundId")
@@ -1354,6 +1484,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Round");
 
                     b.Navigation("User");
+
+                    b.Navigation("UserApplicationSnapshot");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", b =>
@@ -1623,6 +1755,13 @@ namespace CabinCrewCareer.Infrastructure.Migrations
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>
                 {
                     b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", b =>
+                {
+                    b.Navigation("DocumentSnapshots");
+
+                    b.Navigation("RoundActivities");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Ward", b =>

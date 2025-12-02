@@ -18,13 +18,13 @@ namespace CabinCrewCareer.Infrastructure.UserApplications
             builder.Property(n => n.EnglishDegreeNumber)
                 .HasMaxLength(50);
 
-                builder.Property(n => n.CitizenId)
-                    .HasMaxLength(20);
+            builder.Property(n => n.CitizenId)
+                .HasMaxLength(20);
 
-                builder.Property(n => n.EnglishTestDate);
-                builder.Property(n => n.ListeningScore);
-                builder.Property(n => n.ReadingScore);
-                builder.Property(n => n.TotalScore);
+            builder.Property(n => n.EnglishTestDate);
+            builder.Property(n => n.ListeningScore);
+            builder.Property(n => n.ReadingScore);
+            builder.Property(n => n.TotalScore);
 
             //builder.HasOne(n => n.Round)
             //    .WithMany(n => n.Applications)

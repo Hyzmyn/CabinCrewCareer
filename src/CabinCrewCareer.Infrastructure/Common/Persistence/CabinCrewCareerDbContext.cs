@@ -78,6 +78,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<UserHistory> UserHistories { get; set; }
 
+        public DbSet<UserApplicationSnapshot> UserApplicationSnapshots { get; set; }
+
+        public DbSet<DocumentSnapshot> DocumentSnapshots { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);

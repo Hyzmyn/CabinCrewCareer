@@ -15,6 +15,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int? UserId { get; set; }
         public virtual User User { get; set; } = null!;
 
+        public int? ApplicationSnapshotId { get; set; }
+        public virtual UserApplicationSnapshot UserApplicationSnapshot { get; set; } = null!;
+
         // Navigation Properties
         public virtual ICollection<EvaluationForm> EvaluationForms { get; set; } = [];
     }
