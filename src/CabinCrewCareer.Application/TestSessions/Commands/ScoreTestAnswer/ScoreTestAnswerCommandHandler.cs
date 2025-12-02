@@ -172,6 +172,76 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                 roundActivity.Status = isPassed ? ActivityStatus.Passed : ActivityStatus.Failed;
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
 
+                // If passed, create RoundActivity for next round (Interview)
+                if (isPassed && round.CampaignRoundId.HasValue)
+                {
+                    // Find Interview round in the same CampaignRound
+                    var interviewRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                        expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                                      && r.RoundType == RoundType.Interview);
+
+                    var interviewRound = await interviewRoundQuery.FirstOrDefaultAsync();
+
+                    if (interviewRound != null)
+                    {
+                        // Check for English tests - need both to pass before creating Interview activity
+                        bool canCreateInterviewActivity = false;
+
+                        if (testSession.Test.TestType == TestType.EnglishListening || 
+                            testSession.Test.TestType == TestType.EnglishSpeaking)
+                        {
+                            // For English tests, check if the other English test is also passed
+                            var otherEnglishRoundType = testSession.Test.TestType == TestType.EnglishListening 
+                                ? RoundType.EnglishSpeakingTest 
+                                : RoundType.EnglishListeningTest;
+
+                            var otherEnglishRoundQuery = await _unitOfWork.Rounds.GetAsync(
+                                expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                                              && r.RoundType == otherEnglishRoundType,
+                                includeFunc: q => q.Include(r => r.RoundActivities
+                                    .Where(ra => ra.UserId == testSession.UserId)));
+
+                            var otherEnglishRound = await otherEnglishRoundQuery.FirstOrDefaultAsync();
+
+                            if (otherEnglishRound != null)
+                            {
+                                var otherRoundActivity = otherEnglishRound.RoundActivities
+                                    .FirstOrDefault(ra => ra.UserId == testSession.UserId);
+
+                                // Only create Interview activity if other English test is also Passed
+                                if (otherRoundActivity != null && otherRoundActivity.Status == ActivityStatus.Passed)
+                                {
+                                    canCreateInterviewActivity = true;
+                                }
+                            }
+                        }
+                        else if (testSession.Test.TestType == TestType.Practical)
+                        {
+                            // For Practical test, can move to Interview immediately
+                            canCreateInterviewActivity = true;
+                        }
+
+                        // Create Interview RoundActivity if conditions met
+                        if (canCreateInterviewActivity)
+                        {
+                            // Check if Interview activity already exists
+                            var existingInterviewActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
+                                expression: ra => ra.RoundId == interviewRound.RoundId 
+                                               && ra.UserId == testSession.UserId);
+
+                            if (!await existingInterviewActivityQuery.AnyAsync())
+                            {
+                                await _unitOfWork.RoundActivites.AddAsync(new Domain.Entities.RoundActivity
+                                {
+                                    RoundId = interviewRound.RoundId,
+                                    UserId = testSession.UserId,
+                                    Status = ActivityStatus.Ongoing
+                                });
+                            }
+                        }
+                    }
+                }
+
                 // Handle UserHistory for failed tests
                 if (!isPassed && testSession.UserId.HasValue)
                 {
