@@ -72,6 +72,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IEnquiryRequestRepository EnquiryRequests { get; private set; }
 
+        public IUserApplicationSnapshotRepository UserApplicationSnapshots { get; private set; }
+
+        public IDocumentSnapshotRepository DocumentSnapshots { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -125,6 +129,10 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             UserHistories = new UserHistoryRepository(_dbContext, _logger);
 
             EnquiryRequests = new EnquiryRequestRepository(_dbContext, _logger);
+
+            UserApplicationSnapshots = new UserApplicationSnapshotRepository(_dbContext, _logger);
+
+            DocumentSnapshots = new DocumentSnapshotRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

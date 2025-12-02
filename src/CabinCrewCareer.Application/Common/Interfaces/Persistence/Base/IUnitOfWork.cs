@@ -49,6 +49,10 @@
 
         IEnquiryRequestRepository EnquiryRequests { get; }
 
+        IUserApplicationSnapshotRepository UserApplicationSnapshots { get; }
+
+        IDocumentSnapshotRepository DocumentSnapshots { get; }
+
         Task CompleteAsync();
     }
 }
