@@ -61,6 +61,17 @@ namespace CabinCrewCareer.Application.TestQuestions.Commands.CreateTestQuestion
                 throw new ApiException(ResponseCode.TEST_NOT_FOUND);
             }
 
+            // Validate total score constraint
+            var existingQuestions = await _unitOfWork.TestQuestions.GetAllAsync(q => q.TestId == request.TestId);
+            var currentTotalScore = existingQuestions.Sum(q => q.Score);
+            var newTotalScore = currentTotalScore + request.Score;
+
+            if (newTotalScore > test.MaxScore)
+            {
+                errorMessages.Add($"Total score of all questions ({newTotalScore}) would exceed test MaxScore ({test.MaxScore}). Current total: {currentTotalScore}, adding: {request.Score}");
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+            }
+
             // Validate Options based on TestType
             if (test.TestType == TestType.EnglishListening || test.TestType == TestType.Practical)
             {

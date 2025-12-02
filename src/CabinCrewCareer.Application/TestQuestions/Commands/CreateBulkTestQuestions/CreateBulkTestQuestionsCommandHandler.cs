@@ -61,6 +61,18 @@ namespace CabinCrewCareer.Application.TestQuestions.Commands.CreateBulkTestQuest
                 throw new ApiException(ResponseCode.TEST_NOT_FOUND);
             }
 
+            // Validate total score constraint
+            var existingQuestions = await _unitOfWork.TestQuestions.GetAllAsync(q => q.TestId == request.TestId);
+            var currentTotalScore = existingQuestions.Sum(q => q.Score);
+            var newQuestionsScore = request.Questions.Sum(q => q.Score);
+            var finalTotalScore = currentTotalScore + newQuestionsScore;
+
+            if (finalTotalScore != test.MaxScore)
+            {
+                errorMessages.Add($"Total score of all questions must equal test MaxScore ({test.MaxScore}). Current total: {currentTotalScore}, new questions: {newQuestionsScore}, final total: {finalTotalScore}");
+                throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+            }
+
             // Validate all questions based on TestType
             foreach (var questionDto in request.Questions)
             {
