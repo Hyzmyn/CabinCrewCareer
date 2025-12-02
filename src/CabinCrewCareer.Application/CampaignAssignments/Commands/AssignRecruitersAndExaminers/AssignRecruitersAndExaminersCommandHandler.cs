@@ -16,17 +16,20 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
         private readonly ICurrentUserService _currentUserService;
         private readonly ICampaignStatusService _campaignStatusService;
         private readonly INotificationService _notificationService;
+        private readonly ICampaignRoundStatusService _campaignRoundStatusService;
 
         public AssignRecruitersAndExaminersCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICampaignStatusService campaignStatusService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            ICampaignRoundStatusService campaignRoundStatusService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _campaignStatusService = campaignStatusService;
             _notificationService = notificationService;
+            _campaignRoundStatusService = campaignRoundStatusService;
         }
 
         public async Task<Response<bool>> Handle(
@@ -275,6 +278,17 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
 
             await _unitOfWork.CompleteAsync();
+
+            // Cập nhật trạng thái round cho đợt đầu tiên
+            var allCampaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(x => x.CampaignId == campaign.CampaignId);
+            var firstRound = allCampaignRounds
+                .Where(x => x.StartDate.HasValue)
+                .OrderBy(x => x.StartDate ?? DateTime.MaxValue)
+                .FirstOrDefault();
+            if (firstRound != null)
+            {
+                await _campaignRoundStatusService.UpdateCampaignRoundStatusByDateAsync(firstRound.CampaignRoundId, cancellationToken);
+            }
 
             // Gửi notification cho tất cả user được giao việc
             try
