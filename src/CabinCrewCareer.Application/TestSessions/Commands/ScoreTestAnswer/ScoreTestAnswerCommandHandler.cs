@@ -169,8 +169,8 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
             if (round != null && roundActivity != null)
             {
                 // Update RoundActivity status
+                // No need to call UpdateAsync because entity is already tracked
                 roundActivity.Status = isPassed ? ActivityStatus.Passed : ActivityStatus.Failed;
-                await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
 
                 // If passed, create RoundActivity for next round (Interview)
                 if (isPassed && round.CampaignRoundId.HasValue)
