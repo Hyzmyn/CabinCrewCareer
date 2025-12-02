@@ -197,16 +197,18 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
 
                             var otherEnglishRoundQuery = await _unitOfWork.Rounds.GetAsync(
                                 expression: r => r.CampaignRoundId == round.CampaignRoundId 
-                                              && r.RoundType == otherEnglishRoundType,
-                                includeFunc: q => q.Include(r => r.RoundActivities
-                                    .Where(ra => ra.UserId == testSession.UserId)));
+                                              && r.RoundType == otherEnglishRoundType);
 
                             var otherEnglishRound = await otherEnglishRoundQuery.FirstOrDefaultAsync();
 
                             if (otherEnglishRound != null)
                             {
-                                var otherRoundActivity = otherEnglishRound.RoundActivities
-                                    .FirstOrDefault(ra => ra.UserId == testSession.UserId);
+                                // Query RoundActivity separately to avoid tracking conflict
+                                var otherRoundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
+                                    expression: ra => ra.RoundId == otherEnglishRound.RoundId 
+                                                   && ra.UserId == testSession.UserId);
+                                
+                                var otherRoundActivity = await otherRoundActivityQuery.FirstOrDefaultAsync();
 
                                 // Only create Interview activity if other English test is also Passed
                                 if (otherRoundActivity != null && otherRoundActivity.Status == ActivityStatus.Passed)
