@@ -62,8 +62,13 @@ namespace CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFrom
                 throw new ApiException(ResponseCode.TEST_NOT_FOUND);
             }
 
+            // Get existing questions to validate total score
+            var existingQuestions = await _unitOfWork.TestQuestions.GetAllAsync(q => q.TestId == request.TestId);
+            var currentTotalScore = existingQuestions.Sum(q => q.Score);
+
             // Parse Excel file
             List<QuestionCreatedDto> createdQuestions = [];
+            int newQuestionsScore = 0;
             
             try
             {
@@ -206,6 +211,9 @@ namespace CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFrom
                         await _unitOfWork.TestQuestions.AddAsync(testQuestion);
                         await _unitOfWork.CompleteAsync();
 
+                        // Track new questions score
+                        newQuestionsScore += score;
+
                         // Create TestOptions
                         List<TestOptionResponse> optionResponses = [];
                         foreach (var option in options)
@@ -242,6 +250,25 @@ namespace CabinCrewCareer.Application.TestQuestions.Commands.ImportQuestionsFrom
 
                 if (!createdQuestions.Any() && errorMessages.Any())
                 {
+                    throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
+                }
+
+                // Validate total score constraint after importing all questions
+                var finalTotalScore = currentTotalScore + newQuestionsScore;
+                if (finalTotalScore != test.MaxScore)
+                {
+                    // Rollback: delete all created questions
+                    foreach (var createdQ in createdQuestions)
+                    {
+                        var questionToDelete = await _unitOfWork.TestQuestions.GetByIdAsync(createdQ.QuestionId);
+                        if (questionToDelete != null)
+                        {
+                            await _unitOfWork.TestQuestions.DeleteAsync(questionToDelete);
+                        }
+                    }
+                    await _unitOfWork.CompleteAsync();
+
+                    errorMessages.Add($"Total score of all questions must equal test MaxScore ({test.MaxScore}). Current total: {currentTotalScore}, imported questions: {newQuestionsScore}, final total: {finalTotalScore}");
                     throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
                 }
             }
