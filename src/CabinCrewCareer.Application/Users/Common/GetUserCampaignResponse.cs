@@ -30,5 +30,7 @@
         public string RoundName { get; set; } = string.Empty;
 
         public string Status { get; set; } = string.Empty;
+
+        public int? ApplicationId { get; set; }
     }
 }

@@ -48,7 +48,8 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampai
                         ActivityId = temp.ActivityId,
                         RoundId = item.RoundId,
                         RoundName = item.RoundType.GetDescription(),
-                        Status = temp.Status.GetDescription()
+                        Status = temp.Status.GetDescription(),
+                        ApplicationId = temp.ApplicationSnapshotId
                     });
                 }
             }

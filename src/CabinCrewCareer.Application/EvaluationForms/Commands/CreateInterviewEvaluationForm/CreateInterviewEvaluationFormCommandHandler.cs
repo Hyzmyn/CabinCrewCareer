@@ -108,7 +108,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             var existedFinalRoundActivity = await finalRoundActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
                             if (existedFinalRoundActivity is null)
                             {
-                                await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                                await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId });
                             }
                         }
                     }
@@ -117,14 +117,14 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                     {
                         roundActivity.Status = ActivityStatus.Failed;
                         // Không tạo mới RoundActivity cho vòng cuối
-                        var history = await _unitOfWork.UserHistories.GetAsync  (x => x.UserId == (int)roundActivity.UserId && x.Type == HistoryType.Ongoing);
-                            var rehe = await history.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                        var history = await _unitOfWork.UserHistories.GetAsync(x => x.UserId == (int)roundActivity.UserId && x.Type == HistoryType.Ongoing);
+                        var rehe = await history.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
                         rehe.Type = HistoryType.NotCompleted;
                         await _unitOfWork.UserHistories.UpdateAsync(rehe);
                     }
                     await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
-                    
+
                 }
 
                 await _unitOfWork.EvaluationForms.AddAsync(form);

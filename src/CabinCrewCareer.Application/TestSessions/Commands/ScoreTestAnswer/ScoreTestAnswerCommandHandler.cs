@@ -116,7 +116,7 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                 // Update test answer score and correctness
                 testAnswer.Score = calculatedScore;
                 testAnswer.IsCorrect = answerScore.IsCorrect;
-                
+
                 // Store criteria scores in EssayAnswer field
                 // If EssayAnswer already has content (from student's essay), append criteria scores
                 if (!string.IsNullOrEmpty(testAnswer.EssayAnswer))
@@ -156,7 +156,7 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                 );
 
                 // Find the round where user has Ongoing status (current active round)
-                round = allRoundsForTest.FirstOrDefault(r => 
+                round = allRoundsForTest.FirstOrDefault(r =>
                     r.RoundActivities.Any(ra => ra.UserId == testSession.UserId && ra.Status == ActivityStatus.Ongoing));
 
                 if (round != null)
@@ -177,7 +177,7 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                 {
                     // Find Interview round in the same CampaignRound
                     var interviewRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                        expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                        expression: r => r.CampaignRoundId == round.CampaignRoundId
                                       && r.RoundType == RoundType.Interview);
 
                     var interviewRound = await interviewRoundQuery.FirstOrDefaultAsync();
@@ -187,16 +187,16 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                         // Check for English tests - need both to pass before creating Interview activity
                         bool canCreateInterviewActivity = false;
 
-                        if (testSession.Test.TestType == TestType.EnglishListening || 
+                        if (testSession.Test.TestType == TestType.EnglishListening ||
                             testSession.Test.TestType == TestType.EnglishSpeaking)
                         {
                             // For English tests, check if the other English test is also passed
-                            var otherEnglishRoundType = testSession.Test.TestType == TestType.EnglishListening 
-                                ? RoundType.EnglishSpeakingTest 
+                            var otherEnglishRoundType = testSession.Test.TestType == TestType.EnglishListening
+                                ? RoundType.EnglishSpeakingTest
                                 : RoundType.EnglishListeningTest;
 
                             var otherEnglishRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                                expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                                expression: r => r.CampaignRoundId == round.CampaignRoundId
                                               && r.RoundType == otherEnglishRoundType);
 
                             var otherEnglishRound = await otherEnglishRoundQuery.FirstOrDefaultAsync();
@@ -205,9 +205,9 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                             {
                                 // Query RoundActivity separately to avoid tracking conflict
                                 var otherRoundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
-                                    expression: ra => ra.RoundId == otherEnglishRound.RoundId 
+                                    expression: ra => ra.RoundId == otherEnglishRound.RoundId
                                                    && ra.UserId == testSession.UserId);
-                                
+
                                 var otherRoundActivity = await otherRoundActivityQuery.FirstOrDefaultAsync();
 
                                 // Only create Interview activity if other English test is also Passed
@@ -228,7 +228,7 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                         {
                             // Check if Interview activity already exists
                             var existingInterviewActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
-                                expression: ra => ra.RoundId == interviewRound.RoundId 
+                                expression: ra => ra.RoundId == interviewRound.RoundId
                                                && ra.UserId == testSession.UserId);
 
                             if (!await existingInterviewActivityQuery.AnyAsync())
@@ -237,7 +237,8 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                                 {
                                     RoundId = interviewRound.RoundId,
                                     UserId = testSession.UserId,
-                                    Status = ActivityStatus.Ongoing
+                                    Status = ActivityStatus.Ongoing,
+                                    ApplicationSnapshotId = roundActivity.ApplicationSnapshotId
                                 });
                             }
                         }
@@ -295,7 +296,7 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
                 {
                     // Find English test rounds (Listening and Speaking)
                     var englishRounds = campaignRoundData.Rounds
-                        .Where(r => r.RoundType == RoundType.EnglishListeningTest || 
+                        .Where(r => r.RoundType == RoundType.EnglishListeningTest ||
                                    r.RoundType == RoundType.EnglishSpeakingTest)
                         .ToList();
 
@@ -317,22 +318,31 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
             {
                 // Check if history already exists to avoid duplicates
                 var existingHistory = await _unitOfWork.UserHistories.GetAllAsync(
-                    expression: h => h.UserId == userId && 
+                    expression: h => h.UserId == userId &&
                                    h.CampaignRoundId == campaignRoundId.Value &&
                                    h.Type == HistoryType.NotCompleted
                 );
 
                 if (!existingHistory.Any())
                 {
-                    var userHistory = new Domain.Entities.UserHistory
-                    {
-                        UserId = userId,
-                        CampaignRoundId = campaignRoundId.Value,
-                        ParticipatedDate = DateOnly.FromDateTime(DateTime.Now),
-                        Type = HistoryType.NotCompleted
-                    };
+                    var userHistoryQuery = await _unitOfWork.UserHistories.GetAsync(expression: x => x.UserId == userId && x.Type == HistoryType.Ongoing);
 
-                    await _unitOfWork.UserHistories.AddAsync(userHistory);
+                    var userHistory = await userHistoryQuery.FirstOrDefaultAsync();
+
+                    if (userHistory is not null)
+                    {
+                        userHistory.Type = HistoryType.NotCompleted;
+
+                        await _unitOfWork.UserHistories.UpdateAsync(userHistory);
+                    }
+
+                    //var userHistory = new Domain.Entities.UserHistory
+                    //{
+                    //    UserId = userId,
+                    //    CampaignRoundId = campaignRoundId.Value,
+                    //    ParticipatedDate = DateOnly.FromDateTime(DateTime.Now),
+                    //    Type = HistoryType.NotCompleted
+                    //};                 
                 }
             }
         }

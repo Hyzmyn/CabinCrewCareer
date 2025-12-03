@@ -49,6 +49,7 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 Status = u.Status,
                 RoundId = u.RoundId,
                 UserId = u.UserId,
+                ApplicationSnapshotId = u.ApplicationSnapshotId,
                 Round = new Round
                 {
                     RoundType = u.Round.RoundType
@@ -108,7 +109,8 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 .Select(x => new RoundActivity
                 {
                     ActivityId = x.ActivityId,
-                    Status = x.Status
+                    Status = x.Status,
+                    ApplicationSnapshotId = x.ApplicationSnapshotId
                 }).FirstOrDefaultAsync();
 
             if (result is null) return null;

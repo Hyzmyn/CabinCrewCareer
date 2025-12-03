@@ -1,11 +1,9 @@
-using System.Linq;
+using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.UserApplications.Common;
-using CabinCrewCareer.Domain.Common;
 using MediatR;
-using CabinCrewCareer.Application.Common.Enums;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicationByUserId
 {
@@ -20,7 +18,12 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
 
         public async Task<Response<UserApplicationDetailResponse>> Handle(GetUserApplicationByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var application = await _unitOfWork.UserApplications.GetUserApplicationByUserIdAsync(request.UserId);
+            var applicationQuery = await _unitOfWork.UserApplicationSnapshots.GetAsync(
+                expression: x => x.ApplicationSnapshotId == request.UserId,
+                includeFunc: x => x.Include(x => x.DocumentSnapshots));
+
+            var application = await applicationQuery.FirstOrDefaultAsync();
+
             if (application == null)
             {
                 return new Response<UserApplicationDetailResponse>
@@ -35,23 +38,27 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
             // Map to response
             var response = new UserApplicationDetailResponse
             {
-                ApplicationId = application.ApplicationId,
-                UserId = application.UserId,
+                ApplicationId = application.ApplicationSnapshotId,
                 Status = application.ApplicationStatus.ToString(),
                 SubmissionDate = application.SubmissionDate.HasValue ? application.SubmissionDate.Value.GetFormatDateTime() : null,
                 Experience = application.Experience,
+                Email = application.Email,
+                FullName = application.FullName,
+                PhoneNumber = application.PhoneNumber,
+                DateOfBirth = application.DateOfBirth.HasValue ? application.DateOfBirth.Value.GetFormatDate() : null,
+                Gender = application.Gender.GetDescription(),
                 Height = application.Height,
                 Weight = application.Weight,
                 EnglishDegreeNumber = application.EnglishDegreeNumber,
                 EndDate = application.EndDate.HasValue ? application.EndDate.Value.ToString("dd/MM/yyyy") : null,
                 CitizenId = application.CitizenId,
-                EnglishTestDate = application.EnglishTestDate.HasValue ?  application.EnglishTestDate.Value.ToString("dd/MM/yyyy") : null,
+                EnglishTestDate = application.EnglishTestDate.HasValue ? application.EnglishTestDate.Value.ToString("dd/MM/yyyy") : null,
                 ListeningScore = application.ListeningScore,
                 ReadingScore = application.ReadingScore,
-                TotalScore = application.TotalScore,    
-                Documents = application.Documents?.Select(d => new DocumentResponse
+                TotalScore = application.TotalScore,
+                Documents = application.DocumentSnapshots?.Select(d => new DocumentResponse
                 {
-                    DocumentId = d.DocumentId,
+                    DocumentId = d.DocumentSnapshotId,
                     DocumentURL = d.DocumentURL,
                     Type = d.Type.ToString(),
                     UploadDate = d.UploadDate.HasValue ? d.UploadDate.Value.ToString("dd/MM/yyyy") : null
