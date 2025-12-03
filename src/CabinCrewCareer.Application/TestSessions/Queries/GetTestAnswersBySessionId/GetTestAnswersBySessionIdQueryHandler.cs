@@ -79,6 +79,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestAnswersBySessi
                     AnswerAudioFileURL = ta.AnswerAudioFileURL,
                     IsCorrect = ta.IsCorrect,
                     Score = ta.Score,
+                    MaxScore = testQuestion?.Score ?? 0,
                     QuestionContent = testQuestion != null ? testQuestion.QuestionContent : string.Empty
                 };
             }).ToList();
