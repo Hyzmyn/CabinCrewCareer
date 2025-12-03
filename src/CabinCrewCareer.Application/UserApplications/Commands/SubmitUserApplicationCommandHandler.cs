@@ -153,38 +153,92 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 }
             }
 
-            var application = new UserApplication
+            // var application = new UserApplication
+            // {
+            //     ApplicationStatus = ApplicationStatus.Submitted,
+            //     Experience = request.Experience,
+            //     Height = request.Height,
+            //     Weight = request.Weight,
+            //     EnglishDegreeNumber = englishDegreeNumber,
+            //     EndDate = endDate,
+            //     SubmissionDate = _dateTimeProvider.UtcNow,
+            //     UserId = userId,
+            //     CitizenId = citizenId,
+            //     EnglishTestDate = englishTestDate,
+            //     ListeningScore = listeningScore,
+            //     ReadingScore = readingScore,
+            //     TotalScore = totalScore
+            // };
+
+            // var documents = new List<Document>();
+            // if (applicationFormUrl != null)
+            //     documents.Add(new Document { DocumentURL = applicationFormUrl, Type = DocumentType.ApplicationForm, IsVerified = true });
+            // if (profilePhotoUrl != null)
+            //     documents.Add(new Document { DocumentURL = profilePhotoUrl, Type = DocumentType.ProfilePhoto, IsVerified = true });
+            // if (educationDegreeUrl != null)
+            //     documents.Add(new Document { DocumentURL = educationDegreeUrl, Type = DocumentType.EducationDegree, IsVerified = true });
+            // if (englishCertificateUrl != null)
+            //     documents.Add(new Document { DocumentURL = englishCertificateUrl, Type = DocumentType.EnglishCertificate, IsVerified = true });
+            // if (passportOrIdUrl != null)
+            //     documents.Add(new Document { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
+            // if (passportOrIdBackUrl != null)
+            //     documents.Add(new Document { DocumentURL = passportOrIdBackUrl, Type = DocumentType.PassportOrIDBack, IsVerified = true });
+
+
+            // Tạo snapshot cho hồ sơ ứng viên
+            var userAppSnapshot = new UserApplicationSnapshot
             {
                 ApplicationStatus = ApplicationStatus.Submitted,
+                SubmissionDate = _dateTimeProvider.UtcNow,
                 Experience = request.Experience,
+                Email = request.Email,
+                FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber,
+                DateOfBirth = request.DateOfBirth,
+                Gender = request.Gender,
                 Height = request.Height,
                 Weight = request.Weight,
                 EnglishDegreeNumber = englishDegreeNumber,
                 EndDate = endDate,
-                SubmissionDate = _dateTimeProvider.UtcNow,
-                UserId = userId,
                 CitizenId = citizenId,
                 EnglishTestDate = englishTestDate,
                 ListeningScore = listeningScore,
                 ReadingScore = readingScore,
                 TotalScore = totalScore
             };
-
-            var documents = new List<Document>();
+             var documents = new List<DocumentSnapshot>();
             if (applicationFormUrl != null)
-                documents.Add(new Document { DocumentURL = applicationFormUrl, Type = DocumentType.ApplicationForm, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = applicationFormUrl, Type = DocumentType.ApplicationForm, IsVerified = true });
             if (profilePhotoUrl != null)
-                documents.Add(new Document { DocumentURL = profilePhotoUrl, Type = DocumentType.ProfilePhoto, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = profilePhotoUrl, Type = DocumentType.ProfilePhoto, IsVerified = true });
             if (educationDegreeUrl != null)
-                documents.Add(new Document { DocumentURL = educationDegreeUrl, Type = DocumentType.EducationDegree, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = educationDegreeUrl, Type = DocumentType.EducationDegree, IsVerified = true });
             if (englishCertificateUrl != null)
-                documents.Add(new Document { DocumentURL = englishCertificateUrl, Type = DocumentType.EnglishCertificate, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = englishCertificateUrl, Type = DocumentType.EnglishCertificate, IsVerified = true });
             if (passportOrIdUrl != null)
-                documents.Add(new Document { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = passportOrIdUrl, Type = DocumentType.PassportOrID, IsVerified = true });
             if (passportOrIdBackUrl != null)
-                documents.Add(new Document { DocumentURL = passportOrIdBackUrl, Type = DocumentType.PassportOrIDBack, IsVerified = true });
+                documents.Add(new DocumentSnapshot { DocumentURL = passportOrIdBackUrl, Type = DocumentType.PassportOrIDBack, IsVerified = true });
 
-            var result = await _unitOfWork.UserApplications.CreateUserApplicationAsync(application, documents);
+            var snapshotResult = await _unitOfWork.UserApplicationSnapshots.AddAsync(userAppSnapshot);
+            await _unitOfWork.CompleteAsync();
+
+            // Tạo các DocumentSnapshot
+            var documentSnapshots = documents.Select(doc => new DocumentSnapshot
+            {
+                DocumentURL = doc.DocumentURL,
+                Type = doc.Type,
+                UploadDate = _dateTimeProvider.Today,
+                IsVerified = doc.IsVerified,
+                ApplicationSnapshotId = snapshotResult.ApplicationSnapshotId
+            }).ToList();
+            if (documentSnapshots.Count > 0)
+            {
+                await _unitOfWork.DocumentSnapshots.AddRangeAsync(documentSnapshots);
+                await _unitOfWork.CompleteAsync();
+            }
+
+            // var result = await _unitOfWork.UserApplications.CreateUserApplicationAsync(application, documents);
 
             // --- Tạo RoundActivity trạng thái Ongoing cho user ---
             // Nếu request có campaignRoundId, thực hiện logic tự động
@@ -207,7 +261,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     {
                         RoundId = screeningRound.RoundId,
                         UserId = userId,
-                        Status = ActivityStatus.Ongoing
+                        Status = ActivityStatus.Ongoing,
+                        ApplicationSnapshotId = snapshotResult.ApplicationSnapshotId // Gắn snapshot vào activity
                     };
 
                     UserHistory history = new()
@@ -236,9 +291,9 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
 
             var response = new UserApplicationResponse
             {
-                ApplicationId = result.ApplicationId,
+                ApplicationId = snapshotResult.ApplicationSnapshotId,
                 UserId = userId,
-                Status = application.ApplicationStatus.ToString(),
+                Status = snapshotResult.ApplicationStatus.ToString(),
                 Message = "Submitted application successfully.",
                 Data = null
             };

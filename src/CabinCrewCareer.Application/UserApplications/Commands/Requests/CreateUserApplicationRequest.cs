@@ -21,6 +21,17 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
         // Thông tin đợt tuyển
         public int? CampaignRoundId { get; set; }
 
+        // Thông tin snapshot ứng viên
+        [Required]
+         public string Email { get; set; } = string.Empty;
+        [Required]
+        public string FullName { get; set; } = string.Empty;
+        [Required]
+        public string PhoneNumber { get; set; } = string.Empty;
+        [Required]
+        public DateOnly? DateOfBirth { get; set; }
+        [Required]
+        public Gender Gender { get; set; }
         // 5 loại tài liệu
         public IFormFile ApplicationForm { get; set; }
         public IFormFile ProfilePhoto { get; set; }
