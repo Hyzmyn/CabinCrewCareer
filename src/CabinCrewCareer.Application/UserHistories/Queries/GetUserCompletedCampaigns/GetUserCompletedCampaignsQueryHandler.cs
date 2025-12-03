@@ -52,7 +52,8 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserCompletedCamp
                             ActivityId = activity.ActivityId,
                             RoundId = item.RoundId,
                             RoundName = item.RoundType.GetDescription(),
-                            Status = activity.Status.GetDescription()
+                            Status = activity.Status.GetDescription(),
+                            ApplicationId = activity.ApplicationSnapshotId
                         });
                     }
                 }

@@ -56,7 +56,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         var existedActivity = existedActivityList.FirstOrDefault();
                         if (existedActivity == null)
                         {
-                            var newActivity = new RoundActivity { RoundId = nextRound.RoundId, UserId = activity.UserId, Status = ActivityStatus.Ongoing };
+                            var newActivity = new RoundActivity { RoundId = nextRound.RoundId, UserId = activity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = activity.ApplicationSnapshotId };
                             await _unitOfWork.RoundActivites.AddAsync(newActivity);
                             await _unitOfWork.CompleteAsync();
                             nextActivityId = newActivity.ActivityId;
@@ -75,7 +75,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         var existedActivity = existedActivityList.FirstOrDefault();
                         if (existedActivity == null)
                         {
-                            var newActivity = new RoundActivity { RoundId = nextRound.RoundId, UserId = activity.UserId, Status = ActivityStatus.Ongoing };
+                            var newActivity = new RoundActivity { RoundId = nextRound.RoundId, UserId = activity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = activity.ApplicationSnapshotId };
                             await _unitOfWork.RoundActivites.AddAsync(newActivity);
                             await _unitOfWork.CompleteAsync();
                             nextActivityId = newActivity.ActivityId;
@@ -91,8 +91,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 await _unitOfWork.RoundActivites.UpdateAsync(activity);
                 // Cập nhật UserHistory sang NotCompleted
                 var historyQuery = await _unitOfWork.UserHistories.GetAsync(x => x.UserId == (int)activity.UserId && x.Type == HistoryType.Ongoing);
-                var historyList = historyQuery.ToList();
-                var history = historyList.FirstOrDefault();
+
+                var history = await historyQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (history != null)
                 {
                     history.Type = HistoryType.NotCompleted;

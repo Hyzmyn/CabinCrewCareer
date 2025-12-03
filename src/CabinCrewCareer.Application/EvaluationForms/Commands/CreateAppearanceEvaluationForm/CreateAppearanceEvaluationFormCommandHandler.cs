@@ -95,7 +95,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                         var listeningRound = await listeningRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
                         if (listeningRound is not null)
                         {
-                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = listeningRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = listeningRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId });
                             if (listeningRound.TestId.HasValue)
                             {
                                 var test = await _unitOfWork.Tests.GetByIdAsync(listeningRound.TestId.Value);
@@ -110,7 +110,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                         var speakingRound = await speakingRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
                         if (speakingRound is not null)
                         {
-                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = speakingRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = speakingRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId });
                             if (speakingRound.TestId.HasValue)
                             {
                                 var test = await _unitOfWork.Tests.GetByIdAsync(speakingRound.TestId.Value);
@@ -124,8 +124,13 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                     roundActivity.Status = ActivityStatus.Failed;
                     resultText = "Không đạt";
                     extraMessage = "Rất tiếc bạn chưa vượt qua vòng Ngoại hình.";
-                }
 
+                    var history = await _unitOfWork.UserHistories.GetAsync(x => x.UserId == (int)roundActivity.UserId && x.Type == HistoryType.Ongoing);
+                    var rehe = await history.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                    rehe.Type = HistoryType.NotCompleted;
+                    await _unitOfWork.UserHistories.UpdateAsync(rehe);
+                }
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
 
                 // Gửi email kết quả cho user
