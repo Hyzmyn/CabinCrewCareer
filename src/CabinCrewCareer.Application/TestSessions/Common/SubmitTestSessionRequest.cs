@@ -21,6 +21,7 @@ namespace CabinCrewCareer.Application.TestSessions.Common
         public string SelectedOptionContent { get; set; } = string.Empty;
         public bool IsCorrect { get; set; }
         public int Score { get; set; }
+        public int MaxScore { get; set; }
         public string QuestionContent { get; set; } = string.Empty;
     }
 }
