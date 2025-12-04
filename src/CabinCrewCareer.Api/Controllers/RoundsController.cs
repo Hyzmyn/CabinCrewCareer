@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.RoundActivities.Queries;
 using CabinCrewCareer.Application.Rounds.Queries;
+using CabinCrewCareer.Application.Rounds.Commands.UpdateRoundDates;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -146,5 +147,41 @@ namespace CabinCrewCareer.Api.Controllers
                     return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
                 #endregion
+                #region Update Round Dates
+        /// <summary>
+        /// Update start date and end date for a specific round
+        /// </summary>
+        /// <param name="id">Id of the round</param>
+        /// <param name="dto">StartDate, EndDate</param>
+        /// <returns>True if updated successfully</returns>
+        [HttpPut("{id}/dates")]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateRoundDatesAsync(int id, [FromBody] UpdateRoundDatesDto dto)
+        {
+            try
+            {
+                var command = new CabinCrewCareer.Application.Rounds.Commands.UpdateRoundDates.UpdateRoundDatesCommand
+                {
+                    RoundId = id,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate
+                };
+                var result = await mediator.Send(command);
+                if (result)
+                    return Ok(true);
+                return BadRequest(new { success = false, message = "Invalid round date update." });
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
     }
 }
