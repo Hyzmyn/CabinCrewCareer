@@ -53,10 +53,10 @@ namespace CabinCrewCareer.Infrastructure.Users
                 .HasForeignKey(u => u.WardId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(u => u.Application)
-                .WithOne(u => u.User)
-                .HasForeignKey<UserApplication>(u => u.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
+            //builder.HasOne(u => u.Application)
+            //    .WithOne(u => u.User)
+            //    .HasForeignKey<UserApplication>(u => u.UserId)
+            //    .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

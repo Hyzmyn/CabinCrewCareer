@@ -1,9 +1,10 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
+using CabinCrewCareer.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using CabinCrewCareer.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
@@ -16,7 +17,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
 
         public async Task<Response<UserApplicationResponse>> Handle(VerifyUserApplicationCommand command, CancellationToken cancellationToken)
         {
-            var application = await _unitOfWork.UserApplications.GetUserApplicationByIdAsync(command.ApplicationId);
+            var application = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync(command.ApplicationId);
             if (application == null || application.ApplicationStatus != ApplicationStatus.Draft)
                 return new Response<UserApplicationResponse>
                 {
@@ -32,8 +33,13 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             int userId = 0;
             if (userIdClaim != null)
                 int.TryParse(userIdClaim.Value, out userId);
+
+            var activityQuery = await _unitOfWork.RoundActivites.GetAsync(expression: x => x.UserId == userId && x.ApplicationSnapshotId == application.ApplicationSnapshotId);
+
+            var activity = await activityQuery.FirstOrDefaultAsync();
+
             // Chỉ cho phép user sở hữu hồ sơ xác thực
-            if (application.UserId != userId)
+            if (activity is null)
                 return new Response<UserApplicationResponse>
                 {
                     Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAILED_AUTHENTICATION,
@@ -51,7 +57,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 DocumentType.PassportOrID,
                 DocumentType.PassportOrIDBack,
             };
-            var hasAllDocuments = requiredTypes.All(type => application.Documents.Any(d => d.Type == type && !string.IsNullOrEmpty(d.DocumentURL)));
+            var hasAllDocuments = requiredTypes.All(type => application.DocumentSnapshots.Any(d => d.Type == type && !string.IsNullOrEmpty(d.DocumentURL)));
             if (!hasAllDocuments)
                 return new Response<UserApplicationResponse>
                 {
@@ -61,7 +67,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     Errors = "Missing documents"
                 };
 
-            var updated = await _unitOfWork.UserApplications.UpdateApplicationStatusAsync(command.ApplicationId, ApplicationStatus.Submitted);
+            var updated = await _unitOfWork.UserApplicationSnapshots.UpdateApplicationStatusAsync(command.ApplicationId, ApplicationStatus.Submitted);
             if (!updated)
                 return new Response<UserApplicationResponse>
                 {
@@ -83,7 +89,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     {
                         RoundId = screeningRound.RoundId,
                         UserId = userId,
-                        Status = ActivityStatus.Ongoing
+                        Status = ActivityStatus.Ongoing,
+                        ApplicationSnapshotId = activity.ApplicationSnapshotId
                     };
                     await _unitOfWork.RoundActivites.AddAsync(roundActivity);
                     await _unitOfWork.CompleteAsync();
@@ -102,7 +109,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
 
             var response = new UserApplicationResponse
             {
-                ApplicationId = application.ApplicationId,
+                ApplicationId = application.ApplicationSnapshotId,
                 UserId = userId,
                 Status = ApplicationStatus.Submitted.ToString(),
                 Message = "Application submitted successfully.",

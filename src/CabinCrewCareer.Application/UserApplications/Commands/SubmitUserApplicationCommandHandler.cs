@@ -34,17 +34,17 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 int.TryParse(userIdClaim.Value, out userId);
 
             // Kiểm tra hồ sơ đã tồn tại chưa
-            var existedApplication = await _unitOfWork.UserApplications.GetUserApplicationByUserIdAsync(userId);
-            if (existedApplication != null)
-            {
-                return new Response<UserApplicationResponse>
-                {
-                    Code = (int)ResponseCode.FAIL,
-                    Message = "You already have an application. Cannot create a new one.",
-                    Data = null,
-                    Errors = "APPLICATION_ALREADY_EXISTS"
-                };
-            }
+            //var existedApplication = await _unitOfWork.UserApplications.GetUserApplicationByUserIdAsync(userId);
+            //if (existedApplication != null)
+            //{
+            //    return new Response<UserApplicationResponse>
+            //    {
+            //        Code = (int)ResponseCode.FAIL,
+            //        Message = "You already have an application. Cannot create a new one.",
+            //        Data = null,
+            //        Errors = "APPLICATION_ALREADY_EXISTS"
+            //    };
+            //}
 
             // Check for all 5 required files
             if (request.ApplicationForm == null || request.ProfilePhoto == null || request.EducationDegree == null || request.EnglishCertificate == null || request.PassportOrID == null)
@@ -206,7 +206,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 ReadingScore = readingScore,
                 TotalScore = totalScore
             };
-             var documents = new List<DocumentSnapshot>();
+            var documents = new List<DocumentSnapshot>();
             if (applicationFormUrl != null)
                 documents.Add(new DocumentSnapshot { DocumentURL = applicationFormUrl, Type = DocumentType.ApplicationForm, IsVerified = true });
             if (profilePhotoUrl != null)

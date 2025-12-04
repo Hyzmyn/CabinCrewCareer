@@ -1,7 +1,7 @@
-using ClosedXML.Excel;
-using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base; // Nếu cần dùng Application Layer
+using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities; // Nếu cần dùng Entity
+using ClosedXML.Excel;
 
 namespace CabinCrewCareer.Infrastructure.Services
 {
@@ -21,27 +21,27 @@ namespace CabinCrewCareer.Infrastructure.Services
             if (round == null || round.RoundType != Domain.Common.RoundType.Final)
             {
                 // Không phải round Final, trả về file mẫu trống
-                return CreateExcelFile(new List<User>(), representativeName);
+                return CreateExcelFile([], representativeName);
             }
 
             // 2. Lấy round activities status Ongoing
             var activities = (await _unitOfWork.RoundActivites.GetAllAsync(a => a.RoundId == roundId && a.Status == Domain.Common.ActivityStatus.Ongoing)).ToList();
-            var userIds = activities.Select(a => a.UserId ?? 0).Where(id => id != 0).Distinct().ToList();
-            var users = (await _unitOfWork.Users.GetAllAsync(u => userIds.Contains(u.UserId))).ToList();
-            var applications = (await _unitOfWork.UserApplications.GetAllAsync(app => userIds.Contains(app.UserId ?? 0))).ToList();
+            var userIds = activities.Select(a => a.ApplicationSnapshotId ?? 0).Where(id => id != 0).Distinct().ToList();
+            //var users = (await _unitOfWork.Users.GetAllAsync(u => userIds.Contains(u.UserId))).ToList();
+            var applications = (await _unitOfWork.UserApplicationSnapshots.GetAllAsync(app => userIds.Contains(app.ApplicationSnapshotId))).ToList();
 
             // Gán Application cho user
-            foreach (var user in users)
-            {
-                user.Application = applications.FirstOrDefault(app => app.UserId == user.UserId);
-            }
+            //foreach (var user in users)
+            //{
+            //    user.Application = applications.FirstOrDefault(app => app.UserId == user.UserId);
+            //}
             // 3. Tạo file Excel theo mẫu
-            return CreateExcelFile(users, representativeName);
+            return CreateExcelFile(applications, representativeName);
             // 3. Tạo file Excel theo mẫu
             // dòng này đã thay bằng return CreateExcelFile(users) phía trên
         }
 
-        private byte[] CreateExcelFile(List<User> users, string representativeName)
+        private byte[] CreateExcelFile(List<UserApplicationSnapshot> users, string representativeName)
         {
             using (var workbook = new XLWorkbook())
             {
@@ -77,16 +77,15 @@ namespace CabinCrewCareer.Infrastructure.Services
                     int stt = 1;
                     foreach (var user in users)
                     {
-                        var app = user.Application;
                         ws.Cell(row, 1).Value = stt;
                         ws.Cell(row, 2).Value = user.FullName;
                         ws.Cell(row, 3).Value = user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "";
-                        ws.Cell(row, 4).Value = app?.CitizenId ?? "";
-                        ws.Cell(row, 5).Value = app?.EnglishTestDate?.ToString("dd/MM/yyyy") ?? "";
-                        ws.Cell(row, 6).Value = app?.EnglishDegreeNumber ?? "";
-                        ws.Cell(row, 7).Value = app?.ListeningScore ?? 0;
-                        ws.Cell(row, 8).Value = app?.ReadingScore ?? 0;
-                        ws.Cell(row, 9).Value = app?.TotalScore ?? 0;
+                        ws.Cell(row, 4).Value = user?.CitizenId ?? "";
+                        ws.Cell(row, 5).Value = user?.EnglishTestDate?.ToString("dd/MM/yyyy") ?? "";
+                        ws.Cell(row, 6).Value = user?.EnglishDegreeNumber ?? "";
+                        ws.Cell(row, 7).Value = user?.ListeningScore ?? 0;
+                        ws.Cell(row, 8).Value = user?.ReadingScore ?? 0;
+                        ws.Cell(row, 9).Value = user?.TotalScore ?? 0;
                         row++;
                         stt++;
                     }
@@ -100,6 +99,6 @@ namespace CabinCrewCareer.Infrastructure.Services
                 }
             }
         }
-        }
     }
+}
 

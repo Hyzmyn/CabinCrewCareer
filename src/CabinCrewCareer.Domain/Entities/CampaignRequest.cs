@@ -29,6 +29,8 @@ namespace CabinCrewCareer.Domain.Entities
 
         public DateTime? RejectedAt { get; set; }
 
+        public DateOnly? DueDate { get; set; }
+
         // Foreign Keys
         public int? PartnerId { get; set; }
         public virtual AirlinePartner AirlinePartner { get; set; } = null!;

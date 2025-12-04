@@ -16,17 +16,17 @@ namespace CabinCrewCareer.Application.Documents.Commands.DeleteDocument
 
         public async Task<Response<string>> Handle(DeleteDocumentCommand request, CancellationToken cancellationToken)
         {
-            UserApplication? application = new();
+            UserApplicationSnapshot? application = new();
 
-            var result = await _unitOfWork.Documents.GetByIdAsync(request.DocumentId);
+            var result = await _unitOfWork.DocumentSnapshots.GetByIdAsync(request.DocumentId);
 
             if (result is null) throw new ApiException(ResponseCode.DOCUMENT_NOT_FOUND);
 
             if (result.Type == DocumentType.EnglishCertificate)
             {
-                if (result.ApplicationId is not null)
+                if (result.ApplicationSnapshotId is not null)
                 {
-                    application = await _unitOfWork.UserApplications.GetUserApplicationByIdAsync((int)result.ApplicationId);
+                    application = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync((int)result.ApplicationSnapshotId);
 
                     if (application is not null)
                     {
@@ -37,7 +37,7 @@ namespace CabinCrewCareer.Application.Documents.Commands.DeleteDocument
                         application.ReadingScore = 0;
                         application.TotalScore = 0;
 
-                        await _unitOfWork.UserApplications.UpdateAsync(application);
+                        await _unitOfWork.UserApplicationSnapshots.UpdateAsync(application);
                     }
                 }
 
@@ -45,15 +45,15 @@ namespace CabinCrewCareer.Application.Documents.Commands.DeleteDocument
 
             if (result.Type == DocumentType.PassportOrID)
             {
-                if (result.ApplicationId is not null)
+                if (result.ApplicationSnapshotId is not null)
                 {
-                    application = await _unitOfWork.UserApplications.GetUserApplicationByIdAsync((int)result.ApplicationId);
+                    application = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync((int)result.ApplicationSnapshotId);
 
                     if (application is not null)
                     {
                         application.CitizenId = string.Empty;
 
-                        await _unitOfWork.UserApplications.UpdateAsync(application);
+                        await _unitOfWork.UserApplicationSnapshots.UpdateAsync(application);
                     }
                 }
             }
