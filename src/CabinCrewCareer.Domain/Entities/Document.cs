@@ -15,8 +15,8 @@ namespace CabinCrewCareer.Domain.Entities
         public bool IsVerified { get; set; }
 
         // Foreign Keys
-        public int? ApplicationId { get; set; }
-        public virtual UserApplication Application { get; set; } = null!;
+        //public int? ApplicationId { get; set; }
+        //public virtual UserApplication Application { get; set; } = null!;
 
         // Navigation Properties
     }

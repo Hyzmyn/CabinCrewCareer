@@ -31,11 +31,11 @@ namespace CabinCrewCareer.Domain.Entities
 
         public int TotalScore { get; set; } = 0; // Tổng điểm
 
-        // Foreign Keys
-        public int? UserId { get; set; }
-        public virtual User User { get; set; } = null!;
+        //// Foreign Keys
+        //public int? UserId { get; set; }
+        //public virtual User User { get; set; } = null!;
 
-        // Navigation Properties
-        public virtual ICollection<Document> Documents { get; set; } = [];
+        //// Navigation Properties
+        //public virtual ICollection<Document> Documents { get; set; } = [];
     }
 }

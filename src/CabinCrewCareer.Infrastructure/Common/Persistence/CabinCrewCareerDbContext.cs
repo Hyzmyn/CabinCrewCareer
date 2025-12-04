@@ -42,9 +42,9 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<Round> Rounds { get; set; }
 
-        public DbSet<UserApplication> UserApplications { get; set; }
+        //public DbSet<UserApplication> UserApplications { get; set; }
 
-        public DbSet<Document> Documents { get; set; }
+        //public DbSet<Document> Documents { get; set; }
 
         public DbSet<Test> Tests { get; set; }
 

@@ -243,6 +243,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int?>("DirectorId")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -354,37 +357,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasKey("CityId");
 
                     b.ToTable("City", (string)null);
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Document", b =>
-                {
-                    b.Property<int>("DocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"));
-
-                    b.Property<int?>("ApplicationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DocumentURL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly?>("UploadDate")
-                        .HasColumnType("date");
-
-                    b.HasKey("DocumentId");
-
-                    b.HasIndex("ApplicationId");
-
-                    b.ToTable("Document", (string)null);
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.DocumentSnapshot", b =>
@@ -1071,68 +1043,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>
-                {
-                    b.Property<int>("ApplicationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApplicationId"));
-
-                    b.Property<int>("ApplicationStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CitizenId")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("EnglishDegreeNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateOnly?>("EnglishTestDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Experience")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("Height")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ListeningScore")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReadingScore")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("SubmissionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TotalScore")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Weight")
-                        .HasColumnType("int");
-
-                    b.HasKey("ApplicationId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
-
-                    b.ToTable("UserApplication", (string)null);
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", b =>
                 {
                     b.Property<int>("ApplicationSnapshotId")
@@ -1347,16 +1257,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Campaign");
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Document", b =>
-                {
-                    b.HasOne("CabinCrewCareer.Domain.Entities.UserApplication", "Application")
-                        .WithMany("Documents")
-                        .HasForeignKey("ApplicationId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Application");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.DocumentSnapshot", b =>
@@ -1586,16 +1486,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Ward");
                 });
 
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>
-                {
-                    b.HasOne("CabinCrewCareer.Domain.Entities.User", "User")
-                        .WithOne("Application")
-                        .HasForeignKey("CabinCrewCareer.Domain.Entities.UserApplication", "UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserHistory", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.CampaignRound", "CampaignRound")
@@ -1731,8 +1621,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Application");
-
                     b.Navigation("Assignments");
 
                     b.Navigation("CampaignRequests");
@@ -1750,11 +1638,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("RoundActivities");
 
                     b.Navigation("TestSessions");
-                });
-
-            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplication", b =>
-                {
-                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.UserApplicationSnapshot", b =>

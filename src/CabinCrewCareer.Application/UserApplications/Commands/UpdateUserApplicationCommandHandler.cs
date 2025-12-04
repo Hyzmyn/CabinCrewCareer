@@ -1,11 +1,12 @@
+using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
-using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
@@ -26,7 +27,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
         public async Task<Response<UserApplicationResponse>> Handle(UpdateUserApplicationCommand command, CancellationToken cancellationToken)
         {
             var request = command.Request;
-            var application = await _unitOfWork.UserApplications.GetUserApplicationByIdAsync(command.ApplicationId);
+            var application = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync(command.ApplicationId);
             if (application == null || application.ApplicationStatus != ApplicationStatus.Draft)
                 return new Response<UserApplicationResponse>
                 {
@@ -36,14 +37,21 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     Errors = "Not found or invalid status"
                 };
 
+
+
             // Lấy userId từ token
             var user = _httpContextAccessor.HttpContext?.User;
             var userIdClaim = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
             int userId = 0;
             if (userIdClaim != null)
                 int.TryParse(userIdClaim.Value, out userId);
+
+            var activityQuery = await _unitOfWork.RoundActivites.GetAsync(expression: x => x.UserId == userId && x.ApplicationSnapshotId == application.ApplicationSnapshotId);
+
+            var activity = await activityQuery.FirstOrDefaultAsync();
+
             // Chỉ cho phép user sở hữu hồ sơ được cập nhật
-            if (application.UserId != userId)
+            if (activity is null)
                 return new Response<UserApplicationResponse>
                 {
                     Code = (int)CabinCrewCareer.Application.Common.Enums.ResponseCode.FAILED_AUTHENTICATION,
@@ -56,12 +64,12 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             if (request.Experience != null) application.Experience = request.Experience;
             if (request.Height.HasValue) application.Height = request.Height.Value;
             if (request.Weight.HasValue) application.Weight = request.Weight.Value;
-            
+
 
             // --- Xử lý cập nhật file và AI OCR cho CCCD và chứng chỉ tiếng Anh ---
-            var documents = application.Documents.ToList();
+            var documents = application.DocumentSnapshots.ToList();
             // Helper lấy document hiện tại
-            Document FindDoc(DocumentType type) => documents.FirstOrDefault(d => d.Type == type);
+            DocumentSnapshot FindDoc(DocumentType type) => documents.FirstOrDefault(d => d.Type == type);
 
             // Xử lý CCCD (PassportOrID)
             var oldCccdDoc = FindDoc(DocumentType.PassportOrID);
@@ -78,13 +86,13 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 }
                 else
                 {
-                    documents.Add(new Document
+                    documents.Add(new DocumentSnapshot
                     {
                         DocumentURL = newUrl,
                         Type = DocumentType.PassportOrID,
                         UploadDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         IsVerified = false,
-                        ApplicationId = application.ApplicationId
+                        ApplicationSnapshotId = application.ApplicationSnapshotId
                     });
                 }
                 // Gọi AI OCR để lấy CitizenId
@@ -129,13 +137,13 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 }
                 else
                 {
-                    documents.Add(new Document
+                    documents.Add(new DocumentSnapshot
                     {
                         DocumentURL = newUrl,
                         Type = DocumentType.EnglishCertificate,
                         UploadDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         IsVerified = false,
-                        ApplicationId = application.ApplicationId
+                        ApplicationSnapshotId = application.ApplicationSnapshotId
                     });
                 }
                 // Gọi AI OCR để lấy thông tin chứng chỉ tiếng Anh
@@ -231,13 +239,13 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     }
                     else
                     {
-                        documents.Add(new Document
+                        documents.Add(new DocumentSnapshot
                         {
                             DocumentURL = newUrl,
                             Type = type,
                             UploadDate = DateOnly.FromDateTime(DateTime.UtcNow),
                             IsVerified = false,
-                            ApplicationId = application.ApplicationId
+                            ApplicationSnapshotId = application.ApplicationSnapshotId
                         });
                     }
                 }
@@ -247,7 +255,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             await UpdateDocument(DocumentType.EducationDegree, request.EducationDegree);
             await UpdateDocument(DocumentType.PassportOrIDBack, request.PassportOrIDBack);
 
-            application.Documents = documents;
+            application.DocumentSnapshots = documents;
             await _unitOfWork.CompleteAsync();
 
             // --- Tạo RoundActivity trạng thái Ongoing cho user nếu có CampaignRoundId ---
@@ -262,7 +270,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     {
                         RoundId = screeningRound.RoundId,
                         UserId = userId,
-                        Status = ActivityStatus.Ongoing
+                        Status = ActivityStatus.Ongoing,
+                        ApplicationSnapshotId = application.ApplicationSnapshotId
                     };
                     await _unitOfWork.RoundActivites.AddAsync(roundActivity);
                     await _unitOfWork.CompleteAsync();
@@ -281,7 +290,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
 
             var response = new UserApplicationResponse
             {
-                ApplicationId = application.ApplicationId,
+                ApplicationId = application.ApplicationSnapshotId,
                 UserId = userId,
                 Status = application.ApplicationStatus.ToString(),
                 Message = "Draft application updated successfully.",
