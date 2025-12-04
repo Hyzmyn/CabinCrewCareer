@@ -2,7 +2,7 @@ using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-
+using CabinCrewCareer.Domain.Common;
 namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
 {
     public class GetCampaignDetailQueryHandler : IRequestHandler<GetCampaignDetailQuery, GetCampaignDetailDto>
@@ -18,6 +18,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
             var campaignQuery = await _unitOfWork.Campaigns.GetAsync(
                 c => c.CampaignId == request.CampaignId,
                 includeFunc: q => q.Include(c => c.CampaignRounds)
+                    .ThenInclude(cr => cr.Rounds)
                     .Include(c => c.CampaignRequest)
                     .ThenInclude(cr => cr.AirlinePartner),
                 disableTracking: true);
@@ -41,7 +42,9 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 ReviewedBy = campaign.ReviewedBy,
                 RejectedReason = campaign.RejectedReason,
                 RejectedCount = campaign.RejectedCount,
-                Rounds = campaign.CampaignRounds.Select(r => new RoundDto
+                Rounds = campaign.CampaignRounds.Select(r => {
+                    var screeningRound = r.Rounds.FirstOrDefault(rd => rd.RoundType == RoundType.Screening); // Assuming 1 represents Screening Round");
+                    return new RoundDto
                 {
                     CampaignRoundId = r.CampaignRoundId,
                     RoundName = r.RoundName,
@@ -50,7 +53,10 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                     ActualQuantiy = r.ActualQuantiy,
                     Status = r.RoundStatus.ToString(),
                     StartDate = r.StartDate.HasValue ? r.StartDate.Value.GetFormatDateTime() : null,
-                    EndDate = r.EndDate.HasValue ? r.EndDate.Value.GetFormatDateTime() : null
+                    EndDate = r.EndDate.HasValue ? r.EndDate.Value.GetFormatDateTime() : null,
+                    ScreeningStartDate = screeningRound?.StartDate.HasValue == true ? screeningRound.StartDate.Value.GetFormatDateTime() : null,
+                    ScreeningEndDate = screeningRound?.EndDate.HasValue == true ? screeningRound.EndDate.Value.GetFormatDateTime() : null
+                };
                 }).ToList(),
                 PartnerName = campaign.CampaignRequest != null && campaign.CampaignRequest.AirlinePartner != null ? campaign.CampaignRequest.AirlinePartner.PartnerName : null,
                 CreatedAt = campaign.CreatedAt.HasValue ? campaign.CreatedAt.Value.GetFormatDateTime() : null

@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities;
+using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 
@@ -149,6 +150,68 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                 }
             }
             await _unitOfWork.CompleteAsync();
+                            // ====== TỰ ĐỘNG TẠO VÒNG CHO TẤT CẢ CÁC ĐỢT ======
+                List<RoundType> roundTypes;
+                if (campaign.CampaignType == CampaignType.Recruitment)
+                {
+                    roundTypes = new List<RoundType>
+                    {
+                        RoundType.Screening,
+                        RoundType.Appearance,
+                        RoundType.EnglishListeningTest,
+                        RoundType.EnglishSpeakingTest,
+                        RoundType.Interview,
+                        RoundType.Final
+                    };
+                }
+                else if (campaign.CampaignType == CampaignType.Promotion)
+                {
+                    roundTypes = new List<RoundType>
+                    {
+                        RoundType.Screening,
+                        RoundType.FlightHoursConfirmation,
+                        RoundType.PracticalTest,
+                        RoundType.Interview,
+                        RoundType.Final
+                    };
+                }
+                else
+                {
+                    roundTypes = new List<RoundType>();
+                }
+
+                foreach (var campaignRound in campaign.CampaignRounds)
+                {
+                    var newRounds = new List<Round>();
+                    foreach (var roundType in roundTypes)
+                    {
+                        DateTime? startDate = null;
+                        DateTime? endDate = null;
+                        if (roundType == RoundType.Screening)
+                        {
+                            startDate = campaignRound.StartDate;
+                        }
+                        if (roundType == RoundType.Final)
+                        {
+                            endDate = campaignRound.EndDate;
+                        }
+                        // Các vòng khác để null, sẽ cập nhật qua API khác
+                        newRounds.Add(new Round
+                        {
+                            CampaignRoundId = campaignRound.CampaignRoundId,
+                            RoundType = roundType,
+                            StartDate = startDate,
+                            EndDate = endDate,
+                            TestId = null,
+                            Notes = string.Empty
+                        });
+                    }
+                    // Validate: không cho phép các vòng trùng ngày với nhau trong cùng một đợt
+                    // (Screening startDate, Final endDate, các vòng khác null)
+                    // Nếu cần validate thêm, có thể kiểm tra ở đây
+                    await _unitOfWork.Rounds.AddRangeAsync(newRounds);
+                }
+                await _unitOfWork.CompleteAsync();
             return new Response<bool>(
                 code: (int)ResponseCode.UPDATED_SUCCESS,
                 data: true,
