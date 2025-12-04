@@ -18,11 +18,11 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
 
         public async Task<Response<UserApplicationDetailResponse>> Handle(GetUserApplicationByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var applicationQuery = await _unitOfWork.UserApplicationSnapshots.GetAsync(
-                expression: x => x.ApplicationSnapshotId == request.UserId,
-                includeFunc: x => x.Include(x => x.DocumentSnapshots));
+            var applicationQuery = await _unitOfWork.RoundActivites.GetAsync(
+                expression: x => x.ActivityId == request.UserId,
+                includeFunc: x => x.Include(x => x.UserApplicationSnapshot).ThenInclude(x => x.DocumentSnapshots));
 
-            var application = await applicationQuery.FirstOrDefaultAsync();
+            var application = await applicationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (application == null)
             {
@@ -38,25 +38,25 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
             // Map to response
             var response = new UserApplicationDetailResponse
             {
-                ApplicationId = application.ApplicationSnapshotId,
-                Status = application.ApplicationStatus.ToString(),
-                SubmissionDate = application.SubmissionDate.HasValue ? application.SubmissionDate.Value.GetFormatDateTime() : null,
-                Experience = application.Experience,
-                Email = application.Email,
-                FullName = application.FullName,
-                PhoneNumber = application.PhoneNumber,
-                DateOfBirth = application.DateOfBirth.HasValue ? application.DateOfBirth.Value.GetFormatDate() : null,
-                Gender = application.Gender.GetDescription(),
-                Height = application.Height,
-                Weight = application.Weight,
-                EnglishDegreeNumber = application.EnglishDegreeNumber,
-                EndDate = application.EndDate.HasValue ? application.EndDate.Value.ToString("dd/MM/yyyy") : null,
-                CitizenId = application.CitizenId,
-                EnglishTestDate = application.EnglishTestDate.HasValue ? application.EnglishTestDate.Value.ToString("dd/MM/yyyy") : null,
-                ListeningScore = application.ListeningScore,
-                ReadingScore = application.ReadingScore,
-                TotalScore = application.TotalScore,
-                Documents = application.DocumentSnapshots?.Select(d => new DocumentResponse
+                ApplicationId = application.UserApplicationSnapshot.ApplicationSnapshotId,
+                Status = application.Status.ToString(),
+                SubmissionDate = application.UserApplicationSnapshot.SubmissionDate.HasValue ? application.UserApplicationSnapshot.SubmissionDate.Value.GetFormatDateTime() : null,
+                Experience = application.UserApplicationSnapshot.Experience,
+                Email = application.UserApplicationSnapshot.Email,
+                FullName = application.UserApplicationSnapshot.FullName,
+                PhoneNumber = application.UserApplicationSnapshot.PhoneNumber,
+                DateOfBirth = application.UserApplicationSnapshot.DateOfBirth.HasValue ? application.UserApplicationSnapshot.DateOfBirth.Value.GetFormatDate() : null,
+                Gender = application.UserApplicationSnapshot.Gender.GetDescription(),
+                Height = application.UserApplicationSnapshot.Height,
+                Weight = application.UserApplicationSnapshot.Weight,
+                EnglishDegreeNumber = application.UserApplicationSnapshot.EnglishDegreeNumber,
+                EndDate = application.UserApplicationSnapshot.EndDate.HasValue ? application.UserApplicationSnapshot.EndDate.Value.ToString("dd/MM/yyyy") : null,
+                CitizenId = application.UserApplicationSnapshot.CitizenId,
+                EnglishTestDate = application.UserApplicationSnapshot.EnglishTestDate.HasValue ? application.UserApplicationSnapshot.EnglishTestDate.Value.ToString("dd/MM/yyyy") : null,
+                ListeningScore = application.UserApplicationSnapshot.ListeningScore,
+                ReadingScore = application.UserApplicationSnapshot.ReadingScore,
+                TotalScore = application.UserApplicationSnapshot.TotalScore,
+                Documents = application.UserApplicationSnapshot.DocumentSnapshots?.Select(d => new DocumentResponse
                 {
                     DocumentId = d.DocumentSnapshotId,
                     DocumentURL = d.DocumentURL,
