@@ -63,7 +63,9 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(cr => cr.EndDate, cr => cr.MapFrom(cr => cr.EndDate.HasValue ? cr.EndDate.Value.GetFormatDateTime() : null));
 
             CreateMap<Round, GetRoundResponse>()
-                .ForMember(cr => cr.RoundName, cr => cr.MapFrom(cr => cr.RoundType.GetDescription()));
+                .ForMember(cr => cr.RoundName, cr => cr.MapFrom(cr => cr.RoundType.GetDescription()))
+                .ForMember(cr => cr.StartDate, cr => cr.MapFrom(cr => cr.StartDate.HasValue ? cr.StartDate.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.EndDate, cr => cr.MapFrom(cr => cr.EndDate.HasValue ? cr.EndDate.Value.GetFormatDateTime() : null));
 
             CreateMap<CampaignRound, GetUserCampaignResponse>()
                 .ForMember(u => u.CampaignName, u => u.MapFrom(u => u.Campaign.CampaignName))
