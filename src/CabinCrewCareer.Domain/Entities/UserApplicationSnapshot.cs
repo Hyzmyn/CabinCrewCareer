@@ -10,7 +10,9 @@ namespace CabinCrewCareer.Domain.Entities
 
         public DateTime? SubmissionDate { get; set; }
 
-        public string Experience { get; set; } = string.Empty;
+        public string? Experience { get; set; }
+
+        public int TotalFightHours { get; set; }
 
         public string Email { get; set; } = string.Empty;
 

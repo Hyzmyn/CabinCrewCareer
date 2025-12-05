@@ -1079,7 +1079,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Experience")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -1107,6 +1106,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<DateTime?>("SubmissionDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalFightHours")
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalScore")
                         .HasColumnType("int");
