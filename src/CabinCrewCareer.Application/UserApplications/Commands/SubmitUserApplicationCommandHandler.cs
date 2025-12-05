@@ -190,7 +190,6 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             {
                 ApplicationStatus = ApplicationStatus.Submitted,
                 SubmissionDate = _dateTimeProvider.UtcNow,
-                Experience = request.Experience,
                 Email = request.Email,
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,

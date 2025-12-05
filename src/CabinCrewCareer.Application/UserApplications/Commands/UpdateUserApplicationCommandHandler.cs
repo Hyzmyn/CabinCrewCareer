@@ -61,7 +61,6 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 };
 
             // Cập nhật các trường thông tin
-            if (request.Experience != null) application.Experience = request.Experience;
             if (request.Height.HasValue) application.Height = request.Height.Value;
             if (request.Weight.HasValue) application.Weight = request.Weight.Value;
 
