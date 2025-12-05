@@ -52,6 +52,7 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
                 {
                     (int)AvailableRole.Recruiter => (int)AvailableRole.Recruiter,
                     (int)AvailableRole.Examiner => (int)AvailableRole.Examiner,
+                    (int)AvailableRole.CabinCrew => (int)AvailableRole.CabinCrew,
                     _ => (int?)(int)AvailableRole.AirlinePartner,
                 }
             };
