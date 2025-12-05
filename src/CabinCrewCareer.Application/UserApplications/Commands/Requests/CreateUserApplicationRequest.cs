@@ -9,8 +9,6 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
     {
         // Các trường thông tin ứng viên
         [Required]
-        public string Experience { get; set; } = string.Empty;
-        [Required]
         public int Height { get; set; }
         [Required]
         public int Weight { get; set; }

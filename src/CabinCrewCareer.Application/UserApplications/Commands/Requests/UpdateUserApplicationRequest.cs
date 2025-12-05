@@ -5,7 +5,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
 {
     public class UpdateUserApplicationRequest
     {
-        public string? Experience { get; set; }
+
         public int? Height { get; set; }
         public int? Weight { get; set; }
         // public string? EnglishDegreeNumber { get; set; }
