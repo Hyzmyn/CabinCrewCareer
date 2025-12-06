@@ -5,13 +5,13 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
 {
     public class UpdateFlightExperienceCommand : IRequest<Response<string>>
     {
-        public int ApplicationSnapshotId { get; set; }
+        public int ActivityId { get; set; }
         public int TotalFlightHours { get; set; }
         public string? Experience { get; set; }
 
-        public UpdateFlightExperienceCommand(int applicationSnapshotId, int totalFlightHours, string? experience)
+        public UpdateFlightExperienceCommand(int activityId, int totalFlightHours, string? experience)
         {
-            ApplicationSnapshotId = applicationSnapshotId;
+            ActivityId = activityId;
             TotalFlightHours = totalFlightHours;
             Experience = experience;
         }

@@ -6,7 +6,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
     {
         public UpdateFlightExperienceCommandValidator()
         {
-            RuleFor(x => x.ApplicationSnapshotId)
+            RuleFor(x => x.ActivityId)
                 .GreaterThan(0)
                 .WithMessage("Application Snapshot ID must be greater than 0.");
 

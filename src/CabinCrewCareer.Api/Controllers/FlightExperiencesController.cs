@@ -12,19 +12,19 @@ using System.Net;
 
 namespace CabinCrewCareer.Api.Controllers
 {
-    [Route("api/v{version:apiVersion}/flight-experience")]
+    [Route("api/v{version:apiVersion}/flight-experiences")]
     [ApiVersion(1)]
     [Authorize]
-    public class FlightExperienceController(
+    public class FlightExperiencesController(
         IMediator mediator,
-        ILogger<FlightExperienceController> logger,
+        ILogger<FlightExperiencesController> logger,
         IUserExportService userExportService) : ApiController(mediator, logger)
     {
         #region Update Flight Experience
         /// <summary>
         /// Update flight hours and experience for cabin crew application snapshot
         /// </summary>
-        /// <param name="applicationSnapshotId">Application Snapshot ID</param>
+        /// <param name="activitytId">Activity Id</param>
         /// <param name="request">Request body with TotalFlightHours and Experience</param>
         /// <remarks>
         /// **Update flight experience information for a cabin crew application**
@@ -88,12 +88,12 @@ namespace CabinCrewCareer.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> UpdateFlightExperienceAsync(int applicationSnapshotId, [FromBody] UpdateFlightExperienceRequest request)
+        public async Task<IActionResult> UpdateFlightExperienceAsync(int activitytId, [FromBody] UpdateFlightExperienceRequest request)
         {
             try
             {
                 var command = new UpdateFlightExperienceCommand(
-                    applicationSnapshotId,
+                    activitytId,
                     request.TotalFlightHours,
                     request.Experience);
 
@@ -185,10 +185,10 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 var fileBytes = await userExportService.ExportFlightHoursConfirmationAsync(roundId);
                 var fileName = $"FlightHoursConfirmation_{roundId}_{DateTime.Now:yyyyMMdd}.xlsx";
-                
+
                 return File(
-                    fileBytes, 
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     fileName
                 );
             }
