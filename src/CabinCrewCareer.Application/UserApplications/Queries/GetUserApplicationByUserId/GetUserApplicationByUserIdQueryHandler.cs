@@ -42,6 +42,7 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
                 Status = application.Status.ToString(),
                 SubmissionDate = application.UserApplicationSnapshot.SubmissionDate.HasValue ? application.UserApplicationSnapshot.SubmissionDate.Value.GetFormatDateTime() : null,
                 Experience = application.UserApplicationSnapshot.Experience,
+                TotalFlightHours = application.UserApplicationSnapshot.TotalFightHours,
                 Email = application.UserApplicationSnapshot.Email,
                 FullName = application.UserApplicationSnapshot.FullName,
                 PhoneNumber = application.UserApplicationSnapshot.PhoneNumber,
