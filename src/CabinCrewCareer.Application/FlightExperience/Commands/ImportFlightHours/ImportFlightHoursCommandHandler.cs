@@ -56,10 +56,18 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 throw new ValidationException(ResponseCode.UPDATED_UNSUCC, errorMessages);
             }
 
-            // 4. Process each row
+            // 4. Get all ongoing round activities and collect UserIds from Excel
+            var ongoingActivities = round.RoundActivities
+                .Where(ra => ra.Status == ActivityStatus.Ongoing)
+                .ToList();
+
+            var userIdsInExcel = importResults.Select(r => r.UserId).ToHashSet();
+
+            // 5. Process each row from Excel
             int totalProcessed = 0;
             int totalPassed = 0;
             int totalFailed = 0;
+            int totalAutoFailed = 0;
             List<string> detailResults = [];
 
             foreach (var result in importResults)
@@ -125,12 +133,39 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
             }
 
+            // 6. Auto-fail users not in Excel file
+            foreach (var activity in ongoingActivities)
+            {
+                if (!userIdsInExcel.Contains(activity.UserId ?? 0))
+                {
+                    totalProcessed++;
+                    totalAutoFailed++;
+
+                    // Update status to Failed
+                    activity.Status = ActivityStatus.Failed;
+
+                    // Create UserHistory
+                    await _unitOfWork.UserHistories.AddAsync(new UserHistory
+                    {
+                        UserId = activity.UserId,
+                        CampaignRoundId = round.CampaignRoundId,
+                        ParticipatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                        Type = HistoryType.NotCompleted
+                    });
+
+                    await _unitOfWork.RoundActivites.UpdateAsync(activity);
+
+                    detailResults.Add($"User {activity.UserId}: AUTO-FAILED - Not found in Excel file");
+                }
+            }
+
             await _unitOfWork.CompleteAsync();
 
-            // 5. Build response message
-            string summaryMessage = $"Processed {totalProcessed} records from Excel file:\n" +
+            // 7. Build response message
+            string summaryMessage = $"Processed {totalProcessed} records:\n" +
                                    $"- Passed: {totalPassed}\n" +
-                                   $"- Failed: {totalFailed}\n";
+                                   $"- Failed (from Excel): {totalFailed}\n" +
+                                   $"- Auto-Failed (not in Excel): {totalAutoFailed}\n";
 
             if (nextRound == null && totalPassed > 0)
             {
