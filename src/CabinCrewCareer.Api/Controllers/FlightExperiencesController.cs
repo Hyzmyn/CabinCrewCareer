@@ -83,7 +83,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="400">Bad Request - Validation errors or application snapshot not found</response>
         /// <response code="401">Unauthorized - User not authenticated</response>
         /// <response code="403">Forbidden - Insufficient permissions</response>
-        [HttpPut("{applicationSnapshotId}")]
+        [HttpPut("{activitytId}")]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
