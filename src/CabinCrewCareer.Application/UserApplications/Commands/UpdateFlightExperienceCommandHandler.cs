@@ -30,7 +30,9 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             }
 
             // Get UserApplicationSnapshot by ID
-            var applicationSnapshot = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync(request.ApplicationSnapshotId);
+            var applicationSnapshotId = await _unitOfWork.RoundActivites.GetApplicationIdAsync(request.ActivityId);
+
+            var applicationSnapshot = await _unitOfWork.UserApplicationSnapshots.GetUserApplicationSnapshotByIdAsync((int)applicationSnapshotId);
 
             if (applicationSnapshot == null)
             {
@@ -49,7 +51,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             return new Response<string>(
                 code: (int)ResponseCode.UPDATED_SUCCESS,
                 message: "Flight experience updated successfully.",
-                data: $"Updated Application Snapshot ID: {request.ApplicationSnapshotId}"
+                data: $"Updated Application Snapshot ID: {applicationSnapshotId}"
             );
         }
     }

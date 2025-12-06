@@ -117,5 +117,10 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
 
             return result;
         }
+
+        public async Task<int?> GetApplicationIdAsync(int activityId)
+        {
+            return await _dbContext.RoundActivities.Where(x => x.ActivityId == activityId).Select(a => a.ApplicationSnapshotId).FirstOrDefaultAsync();
+        }
     }
 }
