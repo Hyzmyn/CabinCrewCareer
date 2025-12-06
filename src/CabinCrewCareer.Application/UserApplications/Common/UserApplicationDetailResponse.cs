@@ -14,6 +14,7 @@ namespace CabinCrewCareer.Application.UserApplications.Common
         public string? Status { get; set; }
         public string? SubmissionDate { get; set; }
         public string? Experience { get; set; }
+        public int TotalFlightHours { get; set; }
         public string? Email { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
