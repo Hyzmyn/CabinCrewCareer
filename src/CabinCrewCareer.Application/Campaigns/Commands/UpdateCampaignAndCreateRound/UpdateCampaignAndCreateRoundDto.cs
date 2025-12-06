@@ -9,5 +9,7 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
 
         // List of rounds to create
         public List<RoundDto>? Rounds { get; set; }
+        // List of round dates for each round (optional, for advanced use)
+        public List<RoundDateDto>? RoundDates { get; set; }
     }
 }
