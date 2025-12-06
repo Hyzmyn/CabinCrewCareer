@@ -7,5 +7,6 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
         public int TargetQuantity { get; set; }
         public DateTime? RoundStartDate { get; set; }
         public DateTime? RoundEndDate { get; set; }
+        public List<RoundDateDto>? RoundDates { get; set; }
     }
 }

@@ -59,11 +59,8 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             // If there is a list of rounds, handle automatic quantity division or check total quantity
             if (request.Rounds != null && request.Rounds.Count > 0)
             {
-
                 int campaignTarget = campaign.TargetQuantity;
                 var rounds = request.Rounds;
-
-
                 // Require targetQuantity for all rounds
                 if (rounds.Any(r => r.TargetQuantity <= 0))
                 {
@@ -72,7 +69,6 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         data: false,
                         message: "Each round must have a positive targetQuantity");
                 }
-
                 int remain = campaignTarget;
                 for (int i = 0; i < rounds.Count; i++)
                 {
@@ -115,16 +111,16 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                         remain -= rounds[i].TargetQuantity;
                     }
                 }
-                    // Kiểm tra tổng targetQuantity của các round
-                    int totalRoundTarget = rounds.Sum(r => r.TargetQuantity);
-                    if (totalRoundTarget > campaignTarget)
-                    {
-                        return new Response<bool>(
-                            code: (int)ResponseCode.FAIL,
-                            data: false,
-                            message: $"Total targetQuantity of all rounds ({totalRoundTarget}) must not exceed the campaign target ({campaignTarget})");
-                    }
-
+                // Kiểm tra tổng targetQuantity của các round
+                int totalRoundTarget = rounds.Sum(r => r.TargetQuantity);
+                if (totalRoundTarget > campaignTarget)
+                {
+                    return new Response<bool>(
+                        code: (int)ResponseCode.FAIL,
+                        data: false,
+                        message: $"Total targetQuantity of all rounds ({totalRoundTarget}) must not exceed the campaign target ({campaignTarget})");
+                }
+                // Tạo các campaign round
                 foreach (var round in rounds)
                 {
                     var campaignRound = new CampaignRound
@@ -142,7 +138,113 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                     campaign.CampaignRounds.Add(campaignRound);
                 }
                 await _unitOfWork.Campaigns.UpdateAsync(campaign);
-
+                await _unitOfWork.CompleteAsync();
+                // Sau khi đã lưu campaignRounds, tạo các Round nhỏ nếu có
+                var campaignRounds = campaign.CampaignRounds.ToList();
+                for (int idx = 0; idx < rounds.Count; idx++)
+                {
+                    var round = rounds[idx];
+                    var campaignRound = campaignRounds[idx];
+                    // Xác định danh sách roundTypes theo loại campaign
+                    List<RoundType> roundTypes;
+                    if (campaign.CampaignType == CampaignType.Recruitment)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.Appearance,
+                            RoundType.EnglishListeningTest,
+                            RoundType.EnglishSpeakingTest,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else if (campaign.CampaignType == CampaignType.Promotion)
+                    {
+                        roundTypes = new List<RoundType>
+                        {
+                            RoundType.Screening,
+                            RoundType.FlightHoursConfirmation,
+                            RoundType.PracticalTest,
+                            RoundType.Interview,
+                            RoundType.Final
+                        };
+                    }
+                    else
+                    {
+                        roundTypes = new List<RoundType>();
+                    }
+                    var newRounds = new List<Round>();
+                    for (int i = 0; i < roundTypes.Count; i++)
+                    {
+                        // Luôn chỉ gán ngày nếu có roundDates truyền vào
+                        if (round.RoundDates != null && round.RoundDates.Count > i)
+                        {
+                            var rd = round.RoundDates[i];
+                            // Validate ngày bắt đầu < ngày kết thúc
+                            if (!rd.StartDate.HasValue || !rd.EndDate.HasValue)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: $"RoundDates[{i}] must have both StartDate and EndDate");
+                            }
+                            if (rd.StartDate.Value >= rd.EndDate.Value)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: $"RoundDates[{i}] StartDate must be before EndDate");
+                            }
+                            // Validate ngày nằm trong khoảng của round cha
+                            if (rd.StartDate.Value < round.RoundStartDate || rd.EndDate.Value > round.RoundEndDate)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: $"RoundDates[{i}] must be within parent round's date range");
+                            }
+                            newRounds.Add(new Round
+                            {
+                                CampaignRoundId = campaignRound.CampaignRoundId,
+                                RoundType = roundTypes[i],
+                                StartDate = rd.StartDate,
+                                EndDate = rd.EndDate,
+                                TestId = null,
+                                Notes = string.Empty
+                            });
+                        }
+                        else
+                        {
+                            newRounds.Add(new Round
+                            {
+                                CampaignRoundId = campaignRound.CampaignRoundId,
+                                RoundType = roundTypes[i],
+                                StartDate = null,
+                                EndDate = null,
+                                TestId = null,
+                                Notes = string.Empty
+                            });
+                        }
+                    }
+                    // Validate không trùng/chồng lấn ngày nếu có roundDates
+                    if (round.RoundDates != null && round.RoundDates.Count > 1)
+                    {
+                        var sortedDates = round.RoundDates.OrderBy(x => x.StartDate).ToList();
+                        for (int i = 1; i < sortedDates.Count; i++)
+                        {
+                            if (sortedDates[i].StartDate < sortedDates[i - 1].EndDate)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: $"RoundDates[{i}] overlaps with previous round");
+                            }
+                        }
+                    }
+                    await _unitOfWork.Rounds.AddRangeAsync(newRounds);
+                }
+                await _unitOfWork.Campaigns.UpdateAsync(campaign);
                 // Tự động cập nhật status cho tất cả campaign rounds vừa tạo
                 foreach (var round in campaign.CampaignRounds.Where(r => r.IsActive))
                 {
@@ -150,68 +252,6 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                 }
             }
             await _unitOfWork.CompleteAsync();
-                            // ====== TỰ ĐỘNG TẠO VÒNG CHO TẤT CẢ CÁC ĐỢT ======
-                List<RoundType> roundTypes;
-                if (campaign.CampaignType == CampaignType.Recruitment)
-                {
-                    roundTypes = new List<RoundType>
-                    {
-                        RoundType.Screening,
-                        RoundType.Appearance,
-                        RoundType.EnglishListeningTest,
-                        RoundType.EnglishSpeakingTest,
-                        RoundType.Interview,
-                        RoundType.Final
-                    };
-                }
-                else if (campaign.CampaignType == CampaignType.Promotion)
-                {
-                    roundTypes = new List<RoundType>
-                    {
-                        RoundType.Screening,
-                        RoundType.FlightHoursConfirmation,
-                        RoundType.PracticalTest,
-                        RoundType.Interview,
-                        RoundType.Final
-                    };
-                }
-                else
-                {
-                    roundTypes = new List<RoundType>();
-                }
-
-                foreach (var campaignRound in campaign.CampaignRounds)
-                {
-                    var newRounds = new List<Round>();
-                    foreach (var roundType in roundTypes)
-                    {
-                        DateTime? startDate = null;
-                        DateTime? endDate = null;
-                        if (roundType == RoundType.Screening)
-                        {
-                            startDate = campaignRound.StartDate;
-                        }
-                        if (roundType == RoundType.Final)
-                        {
-                            endDate = campaignRound.EndDate;
-                        }
-                        // Các vòng khác để null, sẽ cập nhật qua API khác
-                        newRounds.Add(new Round
-                        {
-                            CampaignRoundId = campaignRound.CampaignRoundId,
-                            RoundType = roundType,
-                            StartDate = startDate,
-                            EndDate = endDate,
-                            TestId = null,
-                            Notes = string.Empty
-                        });
-                    }
-                    // Validate: không cho phép các vòng trùng ngày với nhau trong cùng một đợt
-                    // (Screening startDate, Final endDate, các vòng khác null)
-                    // Nếu cần validate thêm, có thể kiểm tra ở đây
-                    await _unitOfWork.Rounds.AddRangeAsync(newRounds);
-                }
-                await _unitOfWork.CompleteAsync();
             return new Response<bool>(
                 code: (int)ResponseCode.UPDATED_SUCCESS,
                 data: true,

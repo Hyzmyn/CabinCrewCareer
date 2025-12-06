@@ -106,25 +106,41 @@ namespace CabinCrewCareer.Api.Controllers
         ///
         ///     PUT /api/v1/campaigns/1/campaign-rounds
         ///     {
-        ///         "startDate": "2025-01-01T00:00:00Z",
-        ///         "endDate": "2025-12-31T23:59:59Z",
+        ///         "startDate": "2025-12-06",
+        ///         "endDate": "2026-01-30",
         ///         "rounds": [
         ///             {
         ///                 "roundName": "Round 1",
         ///                 "description": "First recruitment round",
-        ///                 "targetQuantity": 60,
-        ///                 "roundStartDate": "2025-01-01T00:00:00Z",
-        ///                 "roundEndDate": "2025-06-30T23:59:59Z"
-        ///             },
-        ///             {
-        ///                 "roundName": "Round 2", 
-        ///                 "description": "Second recruitment round",
-        ///                 "targetQuantity": 40,
-        ///                 "roundStartDate": "2025-07-01T00:00:00Z",
-        ///                 "roundEndDate": "2025-12-31T23:59:59Z"
-        ///             }
-        ///         ]
-        ///     }
+        ///             "targetQuantity": 21,
+        ///             "roundStartDate": "2025-12-06",
+        ///            "roundEndDate": "2025-12-25",
+        ///             "roundDates": [
+        ///                 { "startDate": "2025-12-07", "endDate": "2025-12-09" },
+        ///                 { "startDate": "2025-12-10", "endDate": "2025-12-12" },
+        ///                 { "startDate": "2025-12-13", "endDate": "2025-12-15" },
+        ///                 { "startDate": "2025-12-16", "endDate": "2025-12-18" },
+        ///                 { "startDate": "2025-12-19", "endDate": "2025-12-22" },
+        ///                 { "startDate": "2025-12-23", "endDate": "2025-12-25" }
+        ///             ]
+        ///         },
+        ///         {
+        ///             "roundName": "Round 2", 
+        ///             "description": "Second recruitment round",
+        ///             "targetQuantity": 9,
+        ///             "roundStartDate": "2025-12-27",
+        ///             "roundEndDate": "2026-01-30",
+        ///             "roundDates": [
+        ///                 { "startDate": "2025-12-27", "endDate": "2025-12-29" },
+        ///                 { "startDate": "2025-12-30", "endDate": "2026-01-02" },
+        ///                 { "startDate": "2026-01-05", "endDate": "2026-01-08" },
+        ///                 { "startDate": "2026-01-10", "endDate": "2026-01-13" },
+        ///                 { "startDate": "2026-01-15", "endDate": "2026-01-18" },
+        ///                 { "startDate": "2026-01-19", "endDate": "2026-01-22" }
+        ///             ]
+        ///         }
+        ///     ]
+        /// }
         ///
         /// Notes:
         /// - Campaign must be in Draft or Rejected status
@@ -141,7 +157,7 @@ namespace CabinCrewCareer.Api.Controllers
             try
             {
                 var command = new CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound.UpdateCampaignAndCreateRoundCommand(
-                    id, dto.StartDate, dto.EndDate, dto.Rounds);
+                    id, dto.StartDate, dto.EndDate, dto.Rounds, dto.RoundDates);
                 var result = await mediator.Send(command);
                 if (!result.Data)
                     return BadRequest(result);
