@@ -114,20 +114,27 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 }
                 else
                 {
-                    // FAIL: Update status to Failed and create UserHistory
+                    // FAIL: Update status to Failed and update UserHistory
                     roundActivity.Status = ActivityStatus.Failed;
                     totalFailed++;
 
-                    // Create UserHistory
-                    await _unitOfWork.UserHistories.AddAsync(new UserHistory
-                    {
-                        UserId = result.UserId,
-                        CampaignRoundId = round.CampaignRoundId,
-                        ParticipatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                        Type = HistoryType.NotCompleted
-                    });
+                    // Find and update existing UserHistory (Ongoing → NotCompleted)
+                    var userHistoryQuery = await _unitOfWork.UserHistories.GetAsync(
+                        expression: x => x.UserId == result.UserId && x.Type == HistoryType.Ongoing
+                    );
 
-                    detailResults.Add($"User {result.UserId}: FAILED - UserHistory created");
+                    var userHistory = await userHistoryQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                    if (userHistory is not null)
+                    {
+                        userHistory.Type = HistoryType.NotCompleted;
+                        await _unitOfWork.UserHistories.UpdateAsync(userHistory);
+                        detailResults.Add($"User {result.UserId}: FAILED - UserHistory updated to NotCompleted");
+                    }
+                    else
+                    {
+                        detailResults.Add($"User {result.UserId}: FAILED - UserHistory not found (no Ongoing record)");
+                    }
                 }
 
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
@@ -144,14 +151,18 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                     // Update status to Failed
                     activity.Status = ActivityStatus.Failed;
 
-                    // Create UserHistory
-                    await _unitOfWork.UserHistories.AddAsync(new UserHistory
+                    // Find and update existing UserHistory (Ongoing → NotCompleted)
+                    var userHistoryQuery = await _unitOfWork.UserHistories.GetAsync(
+                        expression: x => x.UserId == activity.UserId && x.Type == HistoryType.Ongoing
+                    );
+
+                    var userHistory = await userHistoryQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                    if (userHistory is not null)
                     {
-                        UserId = activity.UserId,
-                        CampaignRoundId = round.CampaignRoundId,
-                        ParticipatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                        Type = HistoryType.NotCompleted
-                    });
+                        userHistory.Type = HistoryType.NotCompleted;
+                        await _unitOfWork.UserHistories.UpdateAsync(userHistory);
+                    }
 
                     await _unitOfWork.RoundActivites.UpdateAsync(activity);
 
