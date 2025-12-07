@@ -51,10 +51,6 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             // Update campaign fields
             campaign.StartDate = request.StartDate;
             campaign.EndDate = request.EndDate;
-            // After successful update and round creation, change to Pending for Director approval
-            campaign.CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Pending;
-            // Add other campaign fields if needed
-            await _unitOfWork.Campaigns.UpdateAsync(campaign);
 
             // If there is a list of rounds, handle automatic quantity division or check total quantity
             if (request.Rounds != null && request.Rounds.Count > 0)
@@ -251,6 +247,9 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                     await _campaignRoundStatusService.UpdateCampaignRoundStatusByDateAsync(round.CampaignRoundId);
                 }
             }
+            // If everything is successful, change to Pending for Director approval
+            campaign.CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Pending;
+            await _unitOfWork.Campaigns.UpdateAsync(campaign);
             await _unitOfWork.CompleteAsync();
             return new Response<bool>(
                 code: (int)ResponseCode.UPDATED_SUCCESS,
