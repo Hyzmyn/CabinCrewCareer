@@ -1,6 +1,8 @@
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
+using CabinCrewCareer.Application.Common.Models.Requests;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
@@ -10,10 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHours
 {
-    public class ImportFlightHoursCommandHandler(IUnitOfWork unitOfWork) 
+    public class ImportFlightHoursCommandHandler(
+        IUnitOfWork unitOfWork,
+        IEmailService emailService) 
         : IRequestHandler<ImportFlightHoursCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IEmailService _emailService = emailService;
 
         public async Task<Response<string>> Handle(ImportFlightHoursCommand request, CancellationToken cancellationToken)
         {
@@ -138,6 +143,9 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 }
 
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+
+                // Send email notification
+                await SendResultEmailAsync(roundActivity, result.IsPassed, round, nextRound, cancellationToken);
             }
 
             // 6. Auto-fail users not in Excel file
@@ -190,6 +198,68 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 data: $"Passed: {totalPassed}, Failed: {totalFailed}",
                 message: $"{summaryMessage}\nDetails:\n{detailMessage}"
             );
+        }
+
+        private async Task SendResultEmailAsync(
+            RoundActivity roundActivity,
+            bool isPassed,
+            Round round,
+            Round? nextRound,
+            CancellationToken cancellationToken)
+        {
+            if (roundActivity.UserId == null) return;
+
+            var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId.Value);
+            if (user == null || string.IsNullOrEmpty(user.Email)) return;
+
+            // Get campaign name
+            var roundWithCampaign = await _unitOfWork.Rounds.GetAsync(
+                expression: r => r.RoundId == round.RoundId,
+                includeFunc: q => q.Include(r => r.CampaignRound).ThenInclude(cr => cr.Campaign)
+            );
+            var roundData = await roundWithCampaign.FirstOrDefaultAsync(cancellationToken);
+            string campaignName = roundData?.CampaignRound?.Campaign?.CampaignName ?? "";
+
+            string resultText = isPassed ? "Đạt" : "Không đạt";
+            string extraMessage = isPassed
+                ? "Chúc mừng bạn đã vượt qua vòng Xác nhận giờ bay và kinh nghiệm."
+                : "Rất tiếc bạn chưa vượt qua vòng Xác nhận giờ bay và kinh nghiệm.";
+
+            // Build next round info
+            string nextRoundInfo = "";
+            if (isPassed && nextRound != null)
+            {
+                string nextRoundName = nextRound.RoundType switch
+                {
+                    RoundType.PracticalTest => "Kiểm tra Thực hành",
+                    RoundType.Interview => "Phỏng vấn",
+                    RoundType.Final => "Hoàn tất",
+                    _ => "Vòng tiếp theo"
+                };
+
+                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
+                nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
+                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+            }
+
+            // Read template and replace placeholders
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "FlightHoursResultTemplate.html");
+            string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
+            templateBody = templateBody
+                .Replace("{FullName}", user.FullName ?? "")
+                .Replace("{Result}", resultText)
+                .Replace("{CampaignName}", campaignName)
+                .Replace("{ExtraMessage}", extraMessage)
+                .Replace("{NextRoundInfo}", nextRoundInfo);
+
+            var mailRequest = new MailRequest
+            {
+                ToEmail = user.Email,
+                Subject = "Kết quả Xác nhận giờ bay - Cabin Crew Career",
+                Body = templateBody
+            };
+
+            await _emailService.SendEmailAsync(mailRequest);
         }
 
         private async Task<List<ImportResult>> ParseExcelFile(Microsoft.AspNetCore.Http.IFormFile file)

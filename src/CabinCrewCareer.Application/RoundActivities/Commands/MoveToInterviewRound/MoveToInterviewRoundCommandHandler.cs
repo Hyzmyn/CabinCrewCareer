@@ -2,6 +2,8 @@ using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
+using CabinCrewCareer.Application.Common.Models.Requests;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
@@ -11,9 +13,11 @@ using Microsoft.EntityFrameworkCore;
 namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRound
 {
     public class MoveToInterviewRoundCommandHandler(
-        IUnitOfWork unitOfWork) : IRequestHandler<MoveToInterviewRoundCommand, Response<string>>
+        IUnitOfWork unitOfWork,
+        IEmailService emailService) : IRequestHandler<MoveToInterviewRoundCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IEmailService _emailService = emailService;
 
         public async Task<Response<string>> Handle(MoveToInterviewRoundCommand request, CancellationToken cancellationToken)
         {
@@ -197,9 +201,23 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 {
                     roundActivity.Status = ActivityStatus.Failed;
                     totalFailed++;
+
+                    // Update UserHistory to NotCompleted
+                    var userHistoryQuery = await _unitOfWork.UserHistories.GetAsync(
+                        expression: x => x.UserId == roundActivity.UserId && x.Type == HistoryType.Ongoing
+                    );
+                    var userHistory = await userHistoryQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                    if (userHistory is not null)
+                    {
+                        userHistory.Type = HistoryType.NotCompleted;
+                        await _unitOfWork.UserHistories.UpdateAsync(userHistory);
+                    }
                 }
 
                 await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+
+                // Send email notification (only include next round if user can move to interview)
+                await SendResultEmailAsync(roundActivity, allSessionsPassed, canMoveToInterview, round, interviewRound, cancellationToken);
             }
 
             await _unitOfWork.CompleteAsync();
@@ -224,6 +242,91 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 code: (int)ResponseCode.SUCCESS,
                 data: $"Passed: {totalPassed}, Failed: {totalFailed}",
                 message: $"{summaryMessage}\nDetails:\n{detailMessage}");
+        }
+
+        private async Task SendResultEmailAsync(
+            RoundActivity roundActivity,
+            bool isPassed,
+            bool canMoveToInterview,
+            Round round,
+            Round? nextRound,
+            CancellationToken cancellationToken)
+        {
+            if (roundActivity.UserId == null) return;
+
+            var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId.Value);
+            if (user == null || string.IsNullOrEmpty(user.Email)) return;
+
+            // Get campaign name
+            var roundWithCampaign = await _unitOfWork.Rounds.GetAsync(
+                expression: r => r.RoundId == round.RoundId,
+                includeFunc: q => q.Include(r => r.CampaignRound).ThenInclude(cr => cr.Campaign)
+            );
+            var roundData = await roundWithCampaign.FirstOrDefaultAsync(cancellationToken);
+            string campaignName = roundData?.CampaignRound?.Campaign?.CampaignName ?? "";
+
+            // Determine round name
+            string roundName = round.RoundType switch
+            {
+                RoundType.EnglishListeningTest => "Kiểm tra Tiếng Anh Nghe",
+                RoundType.EnglishSpeakingTest => "Kiểm tra Tiếng Anh Nói",
+                RoundType.PracticalTest => "Kiểm tra Thực hành",
+                _ => "Kiểm tra"
+            };
+
+            string resultText = isPassed ? "Đạt" : "Không đạt";
+            
+            // For English tests, add note if waiting for other test
+            bool isEnglishTest = round.RoundType == RoundType.EnglishListeningTest || round.RoundType == RoundType.EnglishSpeakingTest;
+            string extraMessage;
+            if (isPassed && isEnglishTest && !canMoveToInterview)
+            {
+                extraMessage = $"Chúc mừng bạn đã vượt qua vòng {roundName}. Bạn cần hoàn thành cả 2 vòng Tiếng Anh để tiến vào vòng Phỏng vấn.";
+            }
+            else if (isPassed)
+            {
+                extraMessage = $"Chúc mừng bạn đã vượt qua vòng {roundName}.";
+            }
+            else
+            {
+                extraMessage = $"Rất tiếc bạn chưa vượt qua vòng {roundName}.";
+            }
+
+            // Build next round info - Only show if user can actually move to next round
+            string nextRoundInfo = "";
+            if (isPassed && canMoveToInterview && nextRound != null)
+            {
+                string nextRoundName = nextRound.RoundType switch
+                {
+                    RoundType.Interview => "Phỏng vấn",
+                    RoundType.Final => "Hoàn tất",
+                    _ => "Vòng tiếp theo"
+                };
+
+                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
+                nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
+                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+            }
+
+            // Read template and replace placeholders
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
+            string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
+            templateBody = templateBody
+                .Replace("{FullName}", user.FullName ?? "")
+                .Replace("{Result}", resultText)
+                .Replace("{RoundName}", roundName)
+                .Replace("{CampaignName}", campaignName)
+                .Replace("{ExtraMessage}", extraMessage)
+                .Replace("{NextRoundInfo}", nextRoundInfo);
+
+            var mailRequest = new MailRequest
+            {
+                ToEmail = user.Email,
+                Subject = $"Kết quả {roundName} - Cabin Crew Career",
+                Body = templateBody
+            };
+
+            await _emailService.SendEmailAsync(mailRequest);
         }
     }
 }
