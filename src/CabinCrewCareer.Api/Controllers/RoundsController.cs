@@ -6,6 +6,7 @@ using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.RoundActivities.Queries;
 using CabinCrewCareer.Application.Rounds.Queries;
 using CabinCrewCareer.Application.Rounds.Commands.UpdateRoundDates;
+using CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -147,6 +148,47 @@ namespace CabinCrewCareer.Api.Controllers
                     return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
                 #endregion
+        #region Import Final Round Result
+        /// <summary>
+        /// Import kết quả vòng Final từ file Excel (Pass/Fail)
+        /// </summary>
+        /// <param name="roundId">Id của round Final</param>
+        /// <param name="file">File Excel kết quả</param>
+        /// <returns>Kết quả xử lý import</returns>
+        [HttpPost("{roundId}/import-final")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ImportFinalRoundResultAsync(int roundId, IFormFile file)
+        {
+            try
+            {
+                var command = new ImportFinalRoundResultCommand(roundId, file);
+                var result = await mediator.Send(command);
+                return Ok(result);
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error importing final round result for round {RoundId}", roundId);
+                return BadRequest(new
+                {
+                    errorCode = 400,
+                    errorMessage = "Failed to import final round result",
+                    error = ex.Message
+                });
+            }
+        }
+        #endregion
                 #region Update Round Dates
         /// <summary>
         /// Update start date and end date for a specific round
