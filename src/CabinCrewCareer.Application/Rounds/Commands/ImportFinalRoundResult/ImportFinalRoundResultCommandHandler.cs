@@ -68,15 +68,11 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                         userHistory.Type = Domain.Common.HistoryType.Completed;
                         await _unitOfWork.UserHistories.UpdateAsync(userHistory);
                     }
-                    // Đổi role nếu là candidate, log giá trị trước/sau
-                    if (user != null && user.RoleId == candidateRole?.RoleId && cabinCrewRole != null)
+                    // Đổi role nếu là candidate (RoleId = 7), chuyển sang cabincrew (RoleId = 6)
+                    if (user != null && user.RoleId == 7)
                     {
-                        var oldRoleId = user.RoleId;
-                        var newRoleId = cabinCrewRole.RoleId;
-                        Console.WriteLine($"[ImportFinalRoundResult] UserId: {user.UserId}, OldRoleId: {oldRoleId}, NewRoleId: {newRoleId}");
-                        user.RoleId = newRoleId;
+                        user.RoleId = 6;
                         await _unitOfWork.Users.UpdateAsync(user);
-                        Console.WriteLine($"[ImportFinalRoundResult] UserId: {user.UserId}, RoleId after update: {user.RoleId}");
                     }
                     // Gửi email theo template
                     await SendResultEmailAsync(user, true, cancellationToken);
