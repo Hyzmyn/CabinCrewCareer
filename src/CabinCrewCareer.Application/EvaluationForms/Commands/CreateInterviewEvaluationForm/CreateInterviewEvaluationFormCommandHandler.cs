@@ -14,12 +14,13 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
     public class CreateInterviewEvaluationFormCommandHandler(
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateInterviewEvaluationFormCommand, Response<string>>
+        IDateTimeProvider dateTimeProvider,
+        IEmailService emailService) : IRequestHandler<CreateInterviewEvaluationFormCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
         private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
-
+        private readonly IEmailService _emailService = emailService;
         public async Task<Response<string>> Handle(CreateInterviewEvaluationFormCommand request, CancellationToken cancellationToken)
         {
             var finalScore = 0;
@@ -111,6 +112,37 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                 await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId });
                             }
                         }
+                        await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+                        // Gửi email PASS
+                        try
+                        {
+                            var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
+                            if (user != null && !string.IsNullOrEmpty(user.Email))
+                            {
+                                var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
+                                string subject = "Kết quả vòng Phỏng vấn";
+                                string extraMessage = "Chúc mừng bạn đã vượt qua vòng Phỏng vấn.";
+                                string nextRoundInfo = "";
+                                string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                                body = body.Replace("{FullName}", user.FullName)
+                                           .Replace("{Result}", "Đậu (PASS)")
+                                           .Replace("{RoundName}", "Phỏng vấn")
+                                           .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
+                                           .Replace("{ExtraMessage}", extraMessage)
+                                           .Replace("{NextRoundInfo}", nextRoundInfo);
+                                var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
+                                {
+                                    ToEmail = user.Email,
+                                    Subject = subject,
+                                    Body = body
+                                };
+                                await emailService.SendEmailAsync(mailRequest);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[Interview Email PASS] {ex.Message}");
+                        }
                     }
                     // Chỉ khi đủ 3 phiếu và fail >= 2
                     else if (totalCount == 3 && failCount >= 2)
@@ -119,17 +151,46 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         // Không tạo mới RoundActivity cho vòng cuối
                         var history = await _unitOfWork.UserHistories.GetAsync(x => x.UserId == (int)roundActivity.UserId && x.Type == HistoryType.Ongoing);
                         var rehe = await history.FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
                         rehe.Type = HistoryType.NotCompleted;
                         await _unitOfWork.UserHistories.UpdateAsync(rehe);
+                        await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+                        // Gửi email FAIL
+                        try
+                        {
+                            var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
+                            if (user != null && !string.IsNullOrEmpty(user.Email))
+                            {
+                                var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
+                                string subject = "Kết quả vòng Phỏng vấn";
+                                string extraMessage = "Rất tiếc bạn chưa vượt qua vòng Phỏng vấn.";
+                                string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                                body = body.Replace("{FullName}", user.FullName)
+                                           .Replace("{Result}", "Rớt (FAIL)")
+                                           .Replace("{RoundName}", "Phỏng vấn")
+                                           .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
+                                           .Replace("{ExtraMessage}", extraMessage)
+                                           .Replace("{NextRoundInfo}", "");
+                                var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
+                                {
+                                    ToEmail = user.Email,
+                                    Subject = subject,
+                                    Body = body
+                                };
+                                await emailService.SendEmailAsync(mailRequest);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[Interview Email FAIL] {ex.Message}");
+                        }
                     }
-                    await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
-
+                    else
+                    {
+                        await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
+                    }
                 }
-
                 await _unitOfWork.EvaluationForms.AddAsync(form);
                 await _unitOfWork.CompleteAsync();
-
                 return new Response<string>(
                     code: (int)ResponseCode.CREATED_SUCCESS,
                     data: ResponseCode.CREATED_SUCCESS.ToString(),

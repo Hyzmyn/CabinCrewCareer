@@ -1,6 +1,7 @@
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
@@ -12,9 +13,11 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
     public class ApproveScreeningProfileCommandHandler : IRequestHandler<ApproveScreeningProfileCommand, Response<int?>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        public ApproveScreeningProfileCommandHandler(IUnitOfWork unitOfWork)
+        private readonly IEmailService _emailService;
+        public ApproveScreeningProfileCommandHandler(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         public async Task<Response<int?>> Handle(ApproveScreeningProfileCommand request, CancellationToken cancellationToken)
@@ -83,6 +86,64 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     }
                 }
                 await _unitOfWork.CompleteAsync();
+                // Gửi email thông báo PASS
+                try
+                {
+                    var user = await _unitOfWork.Users.GetByIdAsync(activity.UserId);
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
+                        string subject = "Kết quả vòng Sàng lọc hồ sơ";
+                        string extraMessage = "Chúc mừng bạn đã vượt qua vòng Sàng lọc hồ sơ.";
+                        string nextRoundInfo = "";
+                        Round? nextRoundForInfo = null;
+                        if (campaign.CampaignType == CampaignType.Recruitment)
+                        {
+                            var nextRoundQuery = await _unitOfWork.Rounds.GetAsync(r => r.CampaignRoundId == campaignRound.CampaignRoundId && r.RoundType == RoundType.Appearance);
+                            var nextRoundList = nextRoundQuery.ToList();
+                            nextRoundForInfo = nextRoundList.FirstOrDefault();
+                        }
+                        else if (campaign.CampaignType == CampaignType.Promotion)
+                        {
+                            var nextRoundQuery = await _unitOfWork.Rounds.GetAsync(r => r.CampaignRoundId == campaignRound.CampaignRoundId && r.RoundType == RoundType.FlightHoursConfirmation);
+                            var nextRoundList = nextRoundQuery.ToList();
+                            nextRoundForInfo = nextRoundList.FirstOrDefault();
+                        }
+                        if (nextRoundForInfo != null)
+                        {
+                            string nextRoundName = nextRoundForInfo.RoundType switch
+                            {
+                                RoundType.PracticalTest => "Kiểm tra Thực hành",
+                                RoundType.Interview => "Phỏng vấn",
+                                RoundType.Final => "Hoàn tất",
+                                RoundType.Appearance => "Kiểm tra Ngoại hình",
+                                RoundType.FlightHoursConfirmation => "Xác nhận giờ bay",
+                                _ => "Vòng tiếp theo"
+                            };
+                            string startDate = nextRoundForInfo.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
+                            nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
+                                           $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+                        }
+                        string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                        body = body.Replace("{FullName}", user.FullName)
+                                   .Replace("{Result}", "Đậu (PASS)")
+                                   .Replace("{RoundName}", "Sàng lọc hồ sơ")
+                                   .Replace("{CampaignName}", campaign.CampaignName ?? "")
+                                   .Replace("{ExtraMessage}", extraMessage)
+                                   .Replace("{NextRoundInfo}", nextRoundInfo);
+                        var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
+                        {
+                            ToEmail = user.Email,
+                            Subject = subject,
+                            Body = body
+                        };
+                        await _emailService.SendEmailAsync(mailRequest);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Screening Email PASS] {ex.Message}");
+                }
                 return new Response<int?>(nextActivityId, ResponseCode.UPDATED_SUCCESS.GetDescription(), (int)ResponseCode.UPDATED_SUCCESS);
             }
             else if (request.Status == (int)ActivityStatus.Failed)
@@ -99,6 +160,35 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     await _unitOfWork.UserHistories.UpdateAsync(history);
                 }
                 await _unitOfWork.CompleteAsync();
+                // Gửi email thông báo FAIL
+                try
+                {
+                    var user = await _unitOfWork.Users.GetByIdAsync(activity.UserId);
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
+                        string subject = "Kết quả vòng Sàng lọc hồ sơ";
+                        string extraMessage = "Rất tiếc bạn chưa vượt qua vòng Sàng lọc hồ sơ.";
+                        string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                        body = body.Replace("{FullName}", user.FullName)
+                                   .Replace("{Result}", "Rớt (FAIL)")
+                                   .Replace("{RoundName}", "Sàng lọc hồ sơ")
+                                   .Replace("{CampaignName}", campaign.CampaignName ?? "")
+                                   .Replace("{ExtraMessage}", extraMessage)
+                                   .Replace("{NextRoundInfo}", "");
+                        var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
+                        {
+                            ToEmail = user.Email,
+                            Subject = subject,
+                            Body = body
+                        };
+                        await _emailService.SendEmailAsync(mailRequest);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Screening Email FAIL] {ex.Message}");
+                }
                 return new Response<int?>(null, ResponseCode.UPDATED_SUCCESS.GetDescription(), (int)ResponseCode.UPDATED_SUCCESS);
             }
             else

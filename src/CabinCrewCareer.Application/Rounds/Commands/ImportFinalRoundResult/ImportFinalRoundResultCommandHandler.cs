@@ -66,7 +66,6 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                     if (userHistory != null)
                     {
                         userHistory.Type = Domain.Common.HistoryType.Completed;
-                        userHistory.ParticipatedDate = DateOnly.FromDateTime(DateTime.Now);
                         await _unitOfWork.UserHistories.UpdateAsync(userHistory);
                     }
                     // Đổi role nếu là candidate, log giá trị trước/sau
@@ -92,7 +91,6 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                     if (userHistory != null)
                     {
                         userHistory.Type = Domain.Common.HistoryType.NotCompleted;
-                        userHistory.ParticipatedDate = DateOnly.FromDateTime(DateTime.Now);
                         await _unitOfWork.UserHistories.UpdateAsync(userHistory);
                     }
                     await SendResultEmailAsync(user, false, cancellationToken);
