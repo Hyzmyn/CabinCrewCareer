@@ -3,6 +3,11 @@ using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities; // Nếu cần dùng Entity
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using CabinCrewCareer.Application.Common.Models;
+using Microsoft.AspNetCore.Http;
+using System.Text;
+using CabinCrewCareer.Domain.Common;
+using CabinCrewCareer.Domain.Wrappers;
 
 namespace CabinCrewCareer.Infrastructure.Services
 {
@@ -40,72 +45,93 @@ namespace CabinCrewCareer.Infrastructure.Services
 
             // 2. Lấy round activities status Ongoing
             var activities = (await _unitOfWork.RoundActivites.GetAllAsync(a => a.RoundId == roundId && a.Status == Domain.Common.ActivityStatus.Ongoing)).ToList();
-            var userIds = activities.Select(a => a.ApplicationSnapshotId ?? 0).Where(id => id != 0).Distinct().ToList();
-            //var users = (await _unitOfWork.Users.GetAllAsync(u => userIds.Contains(u.UserId))).ToList();
-            var applications = (await _unitOfWork.UserApplicationSnapshots.GetAllAsync(app => userIds.Contains(app.ApplicationSnapshotId))).ToList();
-
-            // Gán Application cho user
-            //foreach (var user in users)
-            //{
-            //    user.Application = applications.FirstOrDefault(app => app.UserId == user.UserId);
-            //}
-            // 3. Tạo file Excel theo mẫu
-            return CreateExcelFile(applications, representativeName);
+            var userAppList = new List<(int UserId, UserApplicationSnapshot Snapshot)>();
+            if (activities != null && activities.Count > 0)
+            {
+                var appSnapshotIds = activities.Select(a => a.ApplicationSnapshotId ?? 0).Where(id => id != 0).Distinct().ToList();
+                var applications = (await _unitOfWork.UserApplicationSnapshots.GetAllAsync(app => appSnapshotIds.Contains(app.ApplicationSnapshotId))).ToList();
+                foreach (var act in activities)
+                {
+                    if (act.ApplicationSnapshotId != null)
+                    {
+                        var snap = applications.FirstOrDefault(x => x.ApplicationSnapshotId == act.ApplicationSnapshotId);
+                        if (snap != null)
+                        {
+                            userAppList.Add((act.UserId ?? 0, snap));
+                        }
+                    }
+                }
+            }
+            return CreateExcelFile(userAppList, representativeName);
             // 3. Tạo file Excel theo mẫu
             // dòng này đã thay bằng return CreateExcelFile(users) phía trên
         }
 
-        private byte[] CreateExcelFile(List<UserApplicationSnapshot> users, string representativeName)
+        private byte[] CreateExcelFile(List<(int UserId, UserApplicationSnapshot Snapshot)> users, string representativeName)
         {
             using (var workbook = new XLWorkbook())
             {
                 var ws = workbook.Worksheets.Add("Users");
                 // Header mẫu
                 ws.Cell(1, 1).Value = "MẪU ĐỀ NGHỊ CUNG CẤP DỊCH VỤ HẬU KIỂM";
-                ws.Range(1, 1, 1, 10).Merge().Style.Font.SetBold().Font.FontSize = 14;
+                ws.Range(1, 1, 1, 11).Merge().Style.Font.SetBold().Font.FontSize = 14;
                 ws.Cell(2, 1).Value = "Tên đơn vị: Cabin Crew Career";
                 ws.Cell(2, 6).Value = "Chức vụ: Recruiter";
                 ws.Cell(3, 1).Value = "Địa chỉ: N/A";
                 ws.Cell(3, 6).Value = "Điện thoại: N/A";
                 ws.Cell(4, 1).Value = $"Đại diện: {representativeName}";
-                ws.Range(4, 1, 4, 10).Merge();
+                ws.Range(4, 1, 4, 11).Merge();
                 ws.Cell(5, 1).Value = "Mục đích sử dụng TOEIC: Sử dụng cho quá trình tuyển dụng tiếp viên hàng không";
-                ws.Range(5, 1, 5, 10).Merge();
+                ws.Range(5, 1, 5, 11).Merge();
                 ws.Cell(6, 1).Value = "Đề nghị cung cấp dịch vụ hậu kiểm đối với kết quả thi TOEIC của những cá nhân có tên và thông tin liên quan như sau:";
-                ws.Range(6, 1, 6, 10).Merge();
+                ws.Range(6, 1, 6, 11).Merge();
 
-                // Tiêu đề bảng
+                // Tiêu đề bảng (thêm UserId và Pass/Fail)
                 ws.Cell(8, 1).Value = "STT";
-                ws.Cell(8, 2).Value = "Họ và tên";
-                ws.Cell(8, 3).Value = "Ngày sinh";
-                ws.Cell(8, 4).Value = "Số CMND/HC";
-                ws.Cell(8, 5).Value = "Ngày thi";
-                ws.Cell(8, 6).Value = "Số điểm TOEIC hiện tại";
-                ws.Cell(8, 7).Value = "Nghe";
-                ws.Cell(8, 8).Value = "Đọc";
-                ws.Cell(8, 9).Value = "Tổng";
+                ws.Cell(8, 2).Value = "UserId";
+                ws.Cell(8, 3).Value = "Họ và tên";
+                ws.Cell(8, 4).Value = "Ngày sinh";
+                ws.Cell(8, 5).Value = "Số CMND/HC";
+                ws.Cell(8, 6).Value = "Ngày thi";
+                ws.Cell(8, 7).Value = "Số điểm TOEIC hiện tại";
+                ws.Cell(8, 8).Value = "Nghe";
+                ws.Cell(8, 9).Value = "Đọc";
+                ws.Cell(8, 10).Value = "Tổng";
+                ws.Cell(8, 11).Value = "Pass/Fail";
 
                 int row = 9;
                 if (users != null && users.Count > 0)
                 {
                     int stt = 1;
-                    foreach (var user in users)
+                    foreach (var (userId, user) in users)
                     {
                         ws.Cell(row, 1).Value = stt;
-                        ws.Cell(row, 2).Value = user.FullName;
-                        ws.Cell(row, 3).Value = user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "";
-                        ws.Cell(row, 4).Value = user?.CitizenId ?? "";
-                        ws.Cell(row, 5).Value = user?.EnglishTestDate?.ToString("dd/MM/yyyy") ?? "";
-                        ws.Cell(row, 6).Value = user?.EnglishDegreeNumber ?? "";
-                        ws.Cell(row, 7).Value = user?.ListeningScore ?? 0;
-                        ws.Cell(row, 8).Value = user?.ReadingScore ?? 0;
-                        ws.Cell(row, 9).Value = user?.TotalScore ?? 0;
+                        ws.Cell(row, 2).Value = userId; // Lấy UserId từ RoundActivity
+                        ws.Cell(row, 3).Value = user.FullName;
+                        ws.Cell(row, 4).Value = user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "";
+                        ws.Cell(row, 5).Value = user?.CitizenId ?? "";
+                        ws.Cell(row, 6).Value = user?.EnglishTestDate?.ToString("dd/MM/yyyy") ?? "";
+                        ws.Cell(row, 7).Value = user?.EnglishDegreeNumber ?? "";
+                        ws.Cell(row, 8).Value = user?.ListeningScore ?? 0;
+                        ws.Cell(row, 9).Value = user?.ReadingScore ?? 0;
+                        ws.Cell(row, 10).Value = user?.TotalScore ?? 0;
+                        // Thêm cột Pass/Fail (checkbox dropdown)
+                        ws.Cell(row, 11).Value = "";
+                        ws.Cell(row, 11).Style
+                            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                            .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+                        var validation = ws.Cell(row, 11).CreateDataValidation();
+                        validation.List("\"☐,☑,Pass,Fail\"");
+                        validation.ShowErrorMessage = true;
+                        validation.ErrorTitle = "Invalid Selection";
+                        validation.ErrorMessage = "Please select from the dropdown list.";
                         row++;
                         stt++;
                     }
                 }
                 // Định dạng bảng
                 ws.Columns().AdjustToContents();
+                ws.Column(11).Width = 12;
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
@@ -242,6 +268,8 @@ namespace CabinCrewCareer.Infrastructure.Services
                 }
             }
         }
+
+        // Đã xóa hàm ImportFinalRoundResultAsync để chuyển sang dùng Command/Handler cho import vòng Final
     }
 }
 

@@ -27,6 +27,16 @@
 				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			</None>
 		</ItemGroup>
+		<ItemGroup>
+			<None Update="Common\Templates\FlightHoursResultTemplate.html">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</None>
+		</ItemGroup>
+		<ItemGroup>
+			<None Update="Common\Templates\TestResultTemplate.html">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</None>
+		</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\CabinCrewCareer.Domain\CabinCrewCareer.Domain.csproj" />
