@@ -19,6 +19,9 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
 
             RuleFor(x => x.RequestType)
                 .IsInEnum().WithMessage("Request type must be valid (1 = Recruitment, 2 = Promotion)");
+                RuleFor(x => x.DueDate)
+                    .Must(date => !date.HasValue || date.Value > DateOnly.FromDateTime(DateTime.UtcNow))
+                    .WithMessage("DueDate must be in the future");
         }
     }
 }
