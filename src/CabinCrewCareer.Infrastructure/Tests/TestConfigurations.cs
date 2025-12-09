@@ -26,6 +26,11 @@ namespace CabinCrewCareer.Infrastructure.Tests
             builder.Property(n => n.JoinCode)
                 .HasMaxLength(20)
                 .IsRequired();
+
+            builder.HasOne(u => u.Type)
+                .WithMany(u => u.Tests)
+                .HasForeignKey(u => u.TestTypeId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

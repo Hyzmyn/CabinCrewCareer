@@ -273,6 +273,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("RequestType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RequirementId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -291,6 +294,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasIndex("DirectorId");
 
                     b.HasIndex("PartnerId");
+
+                    b.HasIndex("RequirementId");
 
                     b.ToTable("CampaignRequest", (string)null);
                 });
@@ -603,6 +608,50 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("NotificationType", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Requirement", b =>
+                {
+                    b.Property<int>("RequirementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequirementId"));
+
+                    b.Property<int>("CampaignType")
+                        .HasColumnType("int");
+
+                    b.HasKey("RequirementId");
+
+                    b.ToTable("Requirement", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RequirementItem", b =>
+                {
+                    b.Property<int>("RequirementItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequirementItemId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("RequirementId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("RequirementItemId");
+
+                    b.HasIndex("RequirementId");
+
+                    b.ToTable("RequirementItem", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Role", b =>
                 {
                     b.Property<int>("RoleId")
@@ -643,6 +692,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("RoundType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RoundTypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -652,6 +704,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasKey("RoundId");
 
                     b.HasIndex("CampaignRoundId");
+
+                    b.HasIndex("RoundTypeId");
 
                     b.HasIndex("TestId");
 
@@ -809,6 +863,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("TestType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TestTypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -817,6 +874,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("TestId");
+
+                    b.HasIndex("TestTypeId");
 
                     b.ToTable("Test", (string)null);
                 });
@@ -954,6 +1013,45 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TestSession", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TypeRound", b =>
+                {
+                    b.Property<int>("RoundTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoundTypeId"));
+
+                    b.Property<int>("CampaignType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoundTypeName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("RoundTypeId");
+
+                    b.ToTable("RoundType", (string)null);
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TypeTest", b =>
+                {
+                    b.Property<int>("TestTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestTypeId"));
+
+                    b.Property<string>("TestTypeName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("TestTypeId");
+
+                    b.ToTable("TestType", (string)null);
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>
@@ -1246,9 +1344,15 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasForeignKey("PartnerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Requirement", "Requirement")
+                        .WithMany("CampaignRequests")
+                        .HasForeignKey("RequirementId");
+
                     b.Navigation("AirlinePartner");
 
                     b.Navigation("Director");
+
+                    b.Navigation("Requirement");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.CampaignRound", b =>
@@ -1349,11 +1453,26 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RequirementItem", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Requirement", "Requirement")
+                        .WithMany("RequirementItems")
+                        .HasForeignKey("RequirementId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Requirement");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Round", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.CampaignRound", "CampaignRound")
                         .WithMany("Rounds")
                         .HasForeignKey("CampaignRoundId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TypeRound", "Type")
+                        .WithMany("Rounds")
+                        .HasForeignKey("RoundTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CabinCrewCareer.Domain.Entities.Test", "Test")
@@ -1364,6 +1483,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("CampaignRound");
 
                     b.Navigation("Test");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundActivity", b =>
@@ -1408,6 +1529,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ScoringCriteria");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Test", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TypeTest", "Type")
+                        .WithMany("Tests")
+                        .HasForeignKey("TestTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TestAnswer", b =>
@@ -1568,6 +1699,13 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("Notifications");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Requirement", b =>
+                {
+                    b.Navigation("CampaignRequests");
+
+                    b.Navigation("RequirementItems");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
@@ -1619,6 +1757,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("EnquiryRequest");
 
                     b.Navigation("TestAnswers");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TypeRound", b =>
+                {
+                    b.Navigation("Rounds");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TypeTest", b =>
+                {
+                    b.Navigation("Tests");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.User", b =>

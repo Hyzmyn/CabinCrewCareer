@@ -22,6 +22,8 @@ namespace CabinCrewCareer.Domain.Entities
         public int DurationInMinutes { get; set; }
 
         // Foreign Keys
+        public int? TestTypeId { get; set; }
+        public virtual TypeTest Type { get; set; } = null!;
 
         // Navigation Properties
         public virtual ICollection<TestQuestion> TestQuestions { get; set; } = [];
