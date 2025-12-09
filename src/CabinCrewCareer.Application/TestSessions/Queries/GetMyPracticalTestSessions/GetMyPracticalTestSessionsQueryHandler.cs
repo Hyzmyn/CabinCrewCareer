@@ -43,6 +43,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSes
                         .ThenInclude(t => t.Rounds)
                             .ThenInclude(r => r.RoundActivities)
                     .Include(ts => ts.TestAnswers)
+                    .Include(ts => ts.EnquiryRequest)
             );
 
             // Apply search term if provided
@@ -82,6 +83,9 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSes
                                        roundActivity.Status == ActivityStatus.Failed;
                 }
 
+                // Check if user can request enquiry (true = no enquiry yet, false = already has enquiry)
+                bool canRequestEnquiry = ts.EnquiryRequest == null;
+
                 return new GetTestSessionResponse
                 {
                     TestSessionId = ts.TestSessionId,
@@ -99,7 +103,8 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSes
                     Status = ts.Status,
                     CreatedAt = ts.CreatedAt,
                     TotalAnswers = ts.TestAnswers?.Count ?? 0,
-                    IsPassedOrFailed = isPassedOrFailed
+                    IsPassedOrFailed = isPassedOrFailed,
+                    CanRequestEnquiry = canRequestEnquiry
                 };
             }).ToList();
 
