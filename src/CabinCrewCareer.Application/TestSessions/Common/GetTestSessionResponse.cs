@@ -17,5 +17,12 @@ namespace CabinCrewCareer.Application.TestSessions.Common
         public bool Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int TotalAnswers { get; set; }
+        
+        /// <summary>
+        /// Indicates if the user has been evaluated in RoundActivity.
+        /// true = Has been evaluated (Passed or Failed)
+        /// false = Not yet evaluated (Still Ongoing)
+        /// </summary>
+        public bool IsPassedOrFailed { get; set; }
     }
 }
