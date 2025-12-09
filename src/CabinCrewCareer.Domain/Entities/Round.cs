@@ -21,6 +21,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int? TestId { get; set; }
         public virtual Test Test { get; set; } = null!;
 
+        public int? RoundTypeId { get; set; }
+        public virtual TypeRound Type { get; set; } = null!;
+
         // Navigation Properties
         public virtual ICollection<RoundActivity> RoundActivities { get; set; } = [];
     }

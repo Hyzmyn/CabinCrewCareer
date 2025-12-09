@@ -38,6 +38,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int? DirectorId { get; set; }
         public virtual User Director { get; set; } = null!;
 
+        public int? RequirementId { get; set; }
+        public virtual Requirement Requirement { get; set; } = null!;
+
         // Navigation Properties
         public virtual ICollection<Campaign> Campaigns { get; set; } = [];
     }

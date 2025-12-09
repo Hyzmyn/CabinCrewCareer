@@ -82,6 +82,14 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<DocumentSnapshot> DocumentSnapshots { get; set; }
 
+        public DbSet<TypeTest> TestTypes { get; set; }
+
+        public DbSet<TypeRound> RoundTypes { get; set; }
+
+        public DbSet<Requirement> Requirements { get; set; }
+
+        public DbSet<RequirementItem> RequirementItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);
