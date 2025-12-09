@@ -11,5 +11,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
         string JobDescription,
         string JobRequirement,
         int TargetQuantity,
-        CampaignType RequestType) : IRequest<Response<GetCampaignRequestResponse>>;
+        CampaignType RequestType,
+        DateOnly? DueDate
+    ) : IRequest<Response<GetCampaignRequestResponse>>;
 }

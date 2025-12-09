@@ -10,5 +10,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
         string Description,
         string JobDescription,
         string JobRequirement,
-        int TargetQuantity) : IRequest<Response<GetCampaignRequestResponse>>;
+        int TargetQuantity,
+        DateOnly? DueDate) : IRequest<Response<GetCampaignRequestResponse>>;
 }

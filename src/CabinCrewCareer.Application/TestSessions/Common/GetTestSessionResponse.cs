@@ -17,5 +17,19 @@ namespace CabinCrewCareer.Application.TestSessions.Common
         public bool Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int TotalAnswers { get; set; }
+        
+        /// <summary>
+        /// Indicates if the user has been evaluated in RoundActivity.
+        /// true = Has been evaluated (Passed or Failed)
+        /// false = Not yet evaluated (Still Ongoing)
+        /// </summary>
+        public bool IsPassedOrFailed { get; set; }
+        
+        /// <summary>
+        /// Indicates if the user can request an enquiry (appeal/review).
+        /// true = Can request enquiry (no existing enquiry request)
+        /// false = Cannot request enquiry (already has an enquiry request)
+        /// </summary>
+        public bool CanRequestEnquiry { get; set; }
     }
 }

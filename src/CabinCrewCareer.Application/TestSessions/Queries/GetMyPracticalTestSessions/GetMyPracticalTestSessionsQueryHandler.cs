@@ -40,7 +40,10 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSes
                 includeFunc: q => q
                     .Include(ts => ts.User)
                     .Include(ts => ts.Test)
+                        .ThenInclude(t => t.Rounds)
+                            .ThenInclude(r => r.RoundActivities)
                     .Include(ts => ts.TestAnswers)
+                    .Include(ts => ts.EnquiryRequest)
             );
 
             // Apply search term if provided
@@ -65,23 +68,44 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyPracticalTestSes
                 .ToListAsync(cancellationToken);
 
             // Map to response DTOs
-            var testSessionResponses = testSessions.Select(ts => new GetTestSessionResponse
+            var testSessionResponses = testSessions.Select(ts => 
             {
-                TestSessionId = ts.TestSessionId,
-                UserId = ts.UserId ?? 0,
-                UserFullName = ts.User?.FullName ?? string.Empty,
-                UserEmail = ts.User?.Email ?? string.Empty,
-                ImgURL = ts.User?.ImgURL,
-                TestId = ts.TestId ?? 0,
-                TestName = ts.Test?.TestName ?? string.Empty,
-                TestType = ts.Test?.TestType.ToString() ?? string.Empty,
-                StartTime = ts.StartTime,
-                EndTime = ts.EndTime,
-                TotalScore = ts.TotalScore,
-                MaxScore = ts.Test?.MaxScore ?? 0,
-                Status = ts.Status,
-                CreatedAt = ts.CreatedAt,
-                TotalAnswers = ts.TestAnswers?.Count ?? 0
+                // Find RoundActivity for this user in any round using this test
+                var roundActivity = ts.Test?.Rounds
+                    ?.SelectMany(r => r.RoundActivities ?? new List<Domain.Entities.RoundActivity>())
+                    .FirstOrDefault(ra => ra.UserId == userId);
+
+                // Check if user has been evaluated (Pass or Fail = true, Ongoing = false)
+                bool isPassedOrFailed = false;
+                if (roundActivity != null)
+                {
+                    isPassedOrFailed = roundActivity.Status == ActivityStatus.Passed || 
+                                       roundActivity.Status == ActivityStatus.Failed;
+                }
+
+                // Check if user can request enquiry (true = no enquiry yet, false = already has enquiry)
+                bool canRequestEnquiry = ts.EnquiryRequest == null;
+
+                return new GetTestSessionResponse
+                {
+                    TestSessionId = ts.TestSessionId,
+                    UserId = ts.UserId ?? 0,
+                    UserFullName = ts.User?.FullName ?? string.Empty,
+                    UserEmail = ts.User?.Email ?? string.Empty,
+                    ImgURL = ts.User?.ImgURL,
+                    TestId = ts.TestId ?? 0,
+                    TestName = ts.Test?.TestName ?? string.Empty,
+                    TestType = ts.Test?.TestType.ToString() ?? string.Empty,
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    TotalScore = ts.TotalScore,
+                    MaxScore = ts.Test?.MaxScore ?? 0,
+                    Status = ts.Status,
+                    CreatedAt = ts.CreatedAt,
+                    TotalAnswers = ts.TestAnswers?.Count ?? 0,
+                    IsPassedOrFailed = isPassedOrFailed,
+                    CanRequestEnquiry = canRequestEnquiry
+                };
             }).ToList();
 
             var paginatedResponse = new PaginatedList<GetTestSessionResponse>(

@@ -25,6 +25,10 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
             RuleFor(x => x.TargetQuantity)
                 .GreaterThan(0)
                 .WithMessage("Số lượng mục tiêu phải lớn hơn 0");
+
+            RuleFor(x => x.DueDate)
+                .Must(date => !date.HasValue || date.Value > DateOnly.FromDateTime(DateTime.UtcNow))
+                .WithMessage("DueDate phải lớn hơn thời điểm hiện tại");
         }
     }
 }
