@@ -30,13 +30,42 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyTestSessionsByTy
 
             var testType = (TestType)request.TestType;
 
+            // Get user IDs from RoundActivities if roundId is specified
+            List<int>? userIdsInRound = null;
+            if (request.RoundId.HasValue)
+            {
+                var roundQuery = await _unitOfWork.Rounds.GetAllAsync(
+                    expression: r => r.RoundId == request.RoundId.Value,
+                    includeFunc: q => q.Include(r => r.RoundActivities)
+                );
+                
+                var round = await roundQuery.FirstOrDefaultAsync(cancellationToken);
+                
+                if (round != null)
+                {
+                    userIdsInRound = round.RoundActivities?
+                        .Where(ra => ra.UserId.HasValue)
+                        .Select(ra => ra.UserId!.Value)
+                        .ToList();
+                }
+                else
+                {
+                    errorMessages.Add($"Round with ID {request.RoundId} not found");
+                    throw new ValidationException(ResponseCode.FAIL, errorMessages);
+                }
+            }
+
             // Build query with filters for specified test type, optional user filter, and optional round filter
             var query = await _unitOfWork.TestSessions.GetAllAsync(
                 expression: ts => 
                     ts.Test != null &&
                     ts.Test.TestType == testType &&
                     (request.UserId == null || ts.UserId == request.UserId) &&
-                    (request.RoundId == null || ts.Test.Rounds.Any(r => r.RoundId == request.RoundId)),
+                    (request.RoundId == null || 
+                        (ts.UserId.HasValue && 
+                         userIdsInRound != null && 
+                         userIdsInRound.Contains(ts.UserId.Value) &&
+                         ts.Test.Rounds.Any(r => r.RoundId == request.RoundId))),
                 includeFunc: q => q
                     .Include(ts => ts.User)
                     .Include(ts => ts.Test)
