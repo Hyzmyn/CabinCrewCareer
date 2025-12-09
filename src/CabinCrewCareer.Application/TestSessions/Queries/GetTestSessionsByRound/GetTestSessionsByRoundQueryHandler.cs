@@ -45,10 +45,36 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionsByRoun
                 throw new ValidationException(ResponseCode.CREATED_UNSUCC, errorMessages);
             }
 
-            // Get all test sessions for this round's test
+            // Get user IDs from RoundActivities in this round
+            var userIdsInRound = round.RoundActivities?
+                .Where(ra => ra.UserId.HasValue)
+                .Select(ra => ra.UserId!.Value)
+                .ToList() ?? new List<int>();
+
+            if (!userIdsInRound.Any())
+            {
+                // No users in this round, return empty result
+                var emptyResponse = new PaginatedList<TestSessionWithStatusResponse>(
+                    new List<TestSessionWithStatusResponse>(),
+                    request.Page,
+                    request.PageSize,
+                    0)
+                {
+                    TotalPages = 0
+                };
+
+                return new Response<PaginatedList<TestSessionWithStatusResponse>>(
+                    code: (int)ResponseCode.SUCCESS,
+                    data: emptyResponse,
+                    message: $"No users found in round {request.RoundId}");
+            }
+
+            // Get test sessions ONLY for users in this round's RoundActivities
             var query = await _unitOfWork.TestSessions.GetAllAsync(
                 expression: ts => 
-                    ts.TestId == round.TestId,
+                    ts.TestId == round.TestId && 
+                    ts.UserId.HasValue && 
+                    userIdsInRound.Contains(ts.UserId.Value),
                 includeFunc: q => q
                     .Include(ts => ts.User)
                     .Include(ts => ts.Test)
