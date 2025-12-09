@@ -60,6 +60,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 JobRequirement = request.JobRequirement,
                 TargetQuantity = request.TargetQuantity,
                 RequestType = request.RequestType,
+                    DueDate = request.DueDate,
                 Status = RequestStatus.Pending,
                 PartnerId = user.PartnerId,
                 DirectorId = null,
@@ -99,7 +100,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 RejectedAt = createdRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = createdRequest.AirlinePartner?.PartnerName,
                 DirectorName = createdRequest.Director?.FullName,
-                CreatedAt = (createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow).GetFormatDateTime()
+                CreatedAt = (createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow).GetFormatDateTime(),
+                DueDate = createdRequest.DueDate?.ToString()
             };
 
             return new Response<GetCampaignRequestResponse>(

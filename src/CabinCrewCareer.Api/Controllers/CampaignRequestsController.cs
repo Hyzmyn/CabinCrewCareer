@@ -30,13 +30,14 @@ namespace CabinCrewCareer.Api.Controllers
         /// Sample request:
         /// 
         ///     {
-        ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024",
-        ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế",
-        ///       "jobDescription": "",
-        ///       "jobRequirement": "",
-        ///       "targetQuantity": 50,
-        ///       "requestType": 1
-        ///     }
+        ///         "campaignName": "Thăng bậc Tiếp viên 2025",
+        ///         "description": "Chiến dịch đánh giá năng lực và đề bạt tiếp viên đủ tiêu chuẩn lên vị trí cao hơn.",
+        ///         "jobDescription": "Thực hiện phỏng vấn, kiểm tra nghiệp vụ, đánh giá kỹ năng dịch vụ và an toàn bay.",
+        ///         "jobRequirement": "Tiếp viên có thâm niên tối thiểu 2 năm, không vi phạm kỷ luật, đạt yêu cầu các bài kiểm tra.",
+        ///         "targetQuantity": 50,
+        ///         "requestType": 1,
+        ///         "dueDate": "2026-02-09"
+        ///      }
         /// 
         /// RequestType: 1 = Recruitment (Tuyển dụng), 2 = Promotion (Thăng bậc)
         ///         
@@ -59,7 +60,8 @@ namespace CabinCrewCareer.Api.Controllers
                     request.JobDescription,
                     request.JobRequirement,
                     request.TargetQuantity,
-                    request.RequestType);
+                    request.RequestType,
+                    request.DueDate);
 
                 return Ok(await mediator.Send(command));
             }
@@ -266,12 +268,15 @@ namespace CabinCrewCareer.Api.Controllers
         /// Sample request:
         /// 
         ///     {
-        ///       "campaignName": "Tuyển dụng tiếp viên hàng không 2024 - Cập nhật",
-        ///       "description": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
-        ///       "JobDescription": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
-        ///       "jobRequirement": "Tuyển dụng 50 tiếp viên cho các chuyến bay nội địa và quốc tế - đã chỉnh sửa theo yêu cầu",
-        ///       "targetQuantity": 50
-        ///     }
+        ///         "campaignName": "Thăng bậc Tiếp viên 2025",
+        ///         "description": "Chiến dịch đánh giá năng lực và đề bạt tiếp viên đủ tiêu chuẩn lên vị trí cao hơn.",
+        ///         "jobDescription": "Thực hiện phỏng vấn, kiểm tra nghiệp vụ, đánh giá kỹ năng dịch vụ và an toàn bay.",
+        ///         "jobRequirement": "Tiếp viên có thâm niên tối thiểu 2 năm, không vi phạm kỷ luật, đạt yêu cầu các bài kiểm tra.",
+        ///         "targetQuantity": 50,
+        ///         "requestType": 1,
+        ///         "dueDate": "2026-02-09"
+        ///      }
+        /// 
         ///         
         /// </remarks> 
         /// <returns>Updated campaign request</returns>
@@ -293,7 +298,8 @@ namespace CabinCrewCareer.Api.Controllers
                     request.Description,
                     request.JobDescription,
                     request.JobRequirement,
-                    request.TargetQuantity);
+                    request.TargetQuantity,
+                    request.DueDate);
 
                 return Ok(await mediator.Send(command));
             }

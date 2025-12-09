@@ -15,5 +15,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
         public int TargetQuantity { get; set; }
 
         public CampaignType RequestType { get; set; }
+            public DateOnly? DueDate { get; set; }
     }
 }

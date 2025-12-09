@@ -82,6 +82,10 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
             campaignRequest.JobDescription = request.JobDescription;
             campaignRequest.JobRequirement = request.JobRequirement;
             campaignRequest.TargetQuantity = request.TargetQuantity;
+            if (request.DueDate.HasValue)
+            {
+                campaignRequest.DueDate = request.DueDate;
+            }
             campaignRequest.Status = RequestStatus.Pending;
             campaignRequest.RejectReason = string.Empty;
             campaignRequest.RejectedAt = null;
@@ -121,7 +125,9 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
                 RejectedAt = updatedRequest.RejectedAt?.GetFormatDateTime(),
                 PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,
                 DirectorName = updatedRequest.DirectorId != null ? updatedRequest.Director?.FullName : null,
-                CreatedAt = (updatedRequest.CreatedAt ?? DateTime.UtcNow).GetFormatDateTime()
+                CreatedAt = (updatedRequest.CreatedAt ?? DateTime.UtcNow).GetFormatDateTime(),
+                DueDate = updatedRequest.DueDate?.ToString()
+
             };
 
             return new Response<GetCampaignRequestResponse>(
