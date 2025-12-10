@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 
 namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreateRound
@@ -24,13 +25,68 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
 
         public async Task<Response<bool>> Handle(UpdateCampaignAndCreateRoundCommand request, CancellationToken cancellationToken)
         {
-            var campaign = await _unitOfWork.Campaigns.GetByIdAsync(request.CampaignId);
+            var campaignQuery = await _unitOfWork.Campaigns.GetAsync(
+                c => c.CampaignId == request.CampaignId,
+                null,
+                q => q.Include(x => x.CampaignRequest),
+                true
+            );
+            var campaign = campaignQuery.FirstOrDefault();
             if (campaign == null)
             {
                 return new Response<bool>(
                     code: (int)ResponseCode.CAMPAIGN_NOT_FOUND,
                     data: false,
                     message: ResponseCode.CAMPAIGN_NOT_FOUND.GetDescription());
+            }
+
+            // Lấy DueDate từ CampaignRequest, kiểm tra ngày campaign ĐẦU TIÊN và trả về lỗi ngay nếu không hợp lệ
+            var dueDate = campaign.CampaignRequest?.DueDate;
+            DateTime? dueDateTime = dueDate.HasValue ? dueDate.Value.ToDateTime(TimeOnly.MaxValue) : (DateTime?)null;
+            // 1. Kiểm tra ngày bắt đầu/kết thúc của campaign
+            if (dueDateTime.HasValue && (request.StartDate > dueDateTime.Value || request.EndDate > dueDateTime.Value))
+            {
+                return new Response<bool>(
+                    code: (int)ResponseCode.FAIL,
+                    data: false,
+                    message: "Ngày bắt đầu/kết thúc của campaign phải nhỏ hơn hoặc bằng ngày đáo hạn (DueDate) của campaign request.");
+            }
+
+            // 2. Kiểm tra ngày của từng campaign round
+            if (request.Rounds != null && request.Rounds.Count > 0)
+            {
+                foreach (var round in request.Rounds)
+                {
+                    if (round.RoundStartDate < request.StartDate || round.RoundEndDate > request.EndDate)
+                    {
+                        return new Response<bool>(
+                            code: (int)ResponseCode.FAIL,
+                            data: false,
+                            message: "Ngày bắt đầu/kết thúc của campaign round phải nằm trong phạm vi ngày của campaign.");
+                    }
+
+                    // 3. Kiểm tra ngày của từng round trong campaign round
+                    if (round.RoundDates != null && round.RoundDates.Count > 0)
+                    {
+                        foreach (var rd in round.RoundDates)
+                        {
+                            if (!rd.StartDate.HasValue || !rd.EndDate.HasValue)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: "RoundDates phải có cả ngày bắt đầu và kết thúc.");
+                            }
+                            if (rd.StartDate.Value < round.RoundStartDate || rd.EndDate.Value > round.RoundEndDate)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: "Ngày của round phải nằm trong phạm vi ngày của campaign round.");
+                            }
+                        }
+                    }
+                }
             }
 
             // Chỉ cho phép cập nhật campaign ở trạng thái Draft hoặc Rejected
@@ -55,6 +111,66 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
             // If there is a list of rounds, handle automatic quantity division or check total quantity
             if (request.Rounds != null && request.Rounds.Count > 0)
             {
+                foreach (var round in request.Rounds)
+                {
+                    if (dueDateTime.HasValue)
+                    {
+                        if (round.RoundStartDate > dueDateTime.Value || round.RoundEndDate > dueDateTime.Value)
+                        {
+                            return new Response<bool>(
+                                code: (int)ResponseCode.FAIL,
+                                data: false,
+                                message: "Ngày bắt đầu/kết thúc của campaign round phải nhỏ hơn hoặc bằng ngày đáo hạn (DueDate) của campaign request.");
+                        }
+                    }
+                    if (round.RoundStartDate < request.StartDate || round.RoundEndDate > request.EndDate)
+                    {
+                        return new Response<bool>(
+                            code: (int)ResponseCode.FAIL,
+                            data: false,
+                            message: "Ngày bắt đầu/kết thúc của campaign round phải nằm trong phạm vi ngày của campaign.");
+                    }
+
+                    // 3. Kiểm tra ngày của từng round trong campaign round
+                    if (round.RoundDates != null && round.RoundDates.Count > 0)
+                    {
+                        foreach (var rd in round.RoundDates)
+                        {
+                            if (!rd.StartDate.HasValue || !rd.EndDate.HasValue)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: "RoundDates phải có cả ngày bắt đầu và kết thúc.");
+                            }
+                            if (rd.StartDate.Value < round.RoundStartDate || rd.EndDate.Value > round.RoundEndDate)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: "Ngày của round phải nằm trong phạm vi ngày của campaign round.");
+                            }
+                            if (rd.StartDate.Value < request.StartDate || rd.EndDate.Value > request.EndDate)
+                            {
+                                return new Response<bool>(
+                                    code: (int)ResponseCode.FAIL,
+                                    data: false,
+                                    message: "Ngày của round phải nằm trong phạm vi ngày của campaign.");
+                            }
+                            if (dueDateTime.HasValue)
+                            {
+                                if (rd.StartDate.Value > dueDateTime.Value || rd.EndDate.Value > dueDateTime.Value)
+                                {
+                                    return new Response<bool>(
+                                        code: (int)ResponseCode.FAIL,
+                                        data: false,
+                                        message: "Ngày của round phải nhỏ hơn hoặc bằng ngày đáo hạn (DueDate) của campaign request.");
+                                }
+                            }
+                        }
+                    }
+                }
+                // Sau khi kiểm tra ngày xong, tiếp tục kiểm tra targetQuantity và các logic cũ
                 int campaignTarget = campaign.TargetQuantity;
                 var rounds = request.Rounds;
                 // Require targetQuantity for all rounds
