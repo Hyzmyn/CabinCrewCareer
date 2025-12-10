@@ -85,12 +85,12 @@ namespace CabinCrewCareer.Api.Controllers
         }
         #endregion
 
-        #region Create Requirement
+        #region Create Interview Criteria
         /// <summary>
         /// Admin create a requirement
+        /// </summary>
         /// <param name="id">Id of a specific criteria</param>
         /// <param name="criteria">Request body</param>
-        /// </summary>
         /// <remarks>
         /// Sample request:
         /// 
