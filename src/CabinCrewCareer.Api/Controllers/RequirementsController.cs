@@ -5,7 +5,6 @@ using CabinCrewCareer.Application.Requirements.Commands.DeleteRequirement;
 using CabinCrewCareer.Application.Requirements.Commands.UpdateRequirement;
 using CabinCrewCareer.Application.Requirements.Common;
 using CabinCrewCareer.Application.Requirements.Queries.GetRequirementsByType;
-using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -122,7 +121,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPut("{id}/requirement-items/{itemId}")]
-        [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAsync(int id, int itemId, [FromBody] CreateRequirementRequest request)
         {
