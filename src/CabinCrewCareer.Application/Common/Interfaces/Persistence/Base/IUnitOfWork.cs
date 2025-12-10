@@ -53,6 +53,20 @@
 
         IDocumentSnapshotRepository DocumentSnapshots { get; }
 
+        ITestTypeRepository TestTypes { get; }
+
+        IRoundTypeRepository RoundTypes { get; }
+
+        IRequirementRepository Requirements { get; }
+
+        IRequirementItemRepository RequirementItems { get; }
+
+        IInterviewCriteriaItemRepository InterviewCriteriaItems { get; }
+
+        IScoringCriteriaItemRepository ScoringCriteriaItems { get; }
+
+        IScoringCriteriaDetailRepository ScoringCriteriaDetails { get; }
+
         Task CompleteAsync();
     }
 }

@@ -47,6 +47,7 @@
 	  <Folder Include="CampaignRounds\Commands\" />
 	  <Folder Include="Common\Models\Responses\" />
 	  <Folder Include="Documents\Common\" />
+	  <Folder Include="ScoringCriterias\Commands\UpdateScoringCriteria\" />
 	</ItemGroup>
 
 </Project>
