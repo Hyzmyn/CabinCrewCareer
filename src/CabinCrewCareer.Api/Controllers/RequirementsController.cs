@@ -1,11 +1,10 @@
 ﻿using Asp.Versioning;
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Requirements.Commands.CreateRequirement;
+using CabinCrewCareer.Application.Requirements.Commands.DeleteRequirement;
 using CabinCrewCareer.Application.Requirements.Commands.UpdateRequirement;
 using CabinCrewCareer.Application.Requirements.Common;
 using CabinCrewCareer.Application.Requirements.Queries.GetRequirementsByType;
-using CabinCrewCareer.Application.RoundTypes.Commands.DeleteRoundType;
-using CabinCrewCareer.Application.Users.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -34,14 +33,14 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="403">Forbidden</response>
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
-        [HttpGet]
+        [HttpGet("{id}/requirement-items")]
         [ProducesResponseType(typeof(Response<List<GetRequirementResponse>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetAllAsync([FromQuery] CampaignType type)
+        public async Task<IActionResult> GetAllAsync(int id)
         {
             try
             {
-                return Ok(await mediator.Send(new GetRequirementsByTypeQuery(type)));
+                return Ok(await mediator.Send(new GetRequirementsByTypeQuery((CampaignType)id)));
             }
             catch (ApiException e)
             {
@@ -76,7 +75,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="401">Unauthenticated</response>
         /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
-        [HttpPost("{id}")]
+        [HttpPost("{id}/requirement-items")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -122,7 +121,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPut("{id}/requirement-items/{itemId}")]
-        [ProducesResponseType(typeof(Response<GetUserResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAsync(int id, int itemId, [FromBody] CreateRequirementRequest request)
         {
@@ -142,11 +141,12 @@ namespace CabinCrewCareer.Api.Controllers
         }
         #endregion
 
-        #region Delete Round Type
+        #region Delete Requirement
         /// <summary>
         /// Delete a round type
         /// </summary>
-        /// <param name="id">Id of a specific round type</param>
+        /// <param name="id">Id of a specific requirement</param>
+        /// <param name="itemId">Id of a specific requirement item</param>
         /// <returns>Sucessful code</returns>
         /// <response code="200">Ok</response>
         /// <response code="400">Bad Request</response>
@@ -154,14 +154,14 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="403">Forbidden</response>
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/requirement-items/{itemId}")]
         [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> DeleteAsync(int id, int itemId)
         {
             try
             {
-                return Ok(await mediator.Send(new DeleteRoundTypeCommand(id)));
+                return Ok(await mediator.Send(new DeleteRequirementCommand(id, itemId)));
             }
             catch (ApiException e)
             {
