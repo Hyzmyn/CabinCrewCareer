@@ -124,11 +124,23 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
                     readingScore = readScore;
-                if (listeningScore > 0 && readingScore > 0)
-                    totalScore = listeningScore + readingScore;
+                // Tổng điểm
+                var totalScoreMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"TOTAL\s*.*?(\d{2,4})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (totalScoreMatch.Success && int.TryParse(totalScoreMatch.Groups[1].Value, out var tScore))
+                    totalScore = tScore;
                 // EnglishDegreeNumber = TOEIC + totalScore
-                if (totalScore > 0)
-                    englishDegreeNumber = $"TOEIC {totalScore}";
+                 // Chỉ lấy loại chứng chỉ từ text OCR
+                if (!string.IsNullOrWhiteSpace(ocrText))
+                {
+                    var certType = "";
+                    var upperText = ocrText.ToUpper();
+                    if (upperText.Contains("TOEIC")) certType = "TOEIC";
+                    else if (upperText.Contains("IELTS")) certType = "IELTS";
+                    else if (upperText.Contains("TOEFL")) certType = "TOEFL";
+                    else if (upperText.Contains("CEFR")) certType = "CEFR";
+                    // Có thể bổ sung thêm các loại khác nếu cần
+                    englishDegreeNumber = certType;
+                }
                 // Nếu không lấy được ngày thi, ngày hết hạn, điểm nghe, điểm đọc thì báo lỗi
                 if (englishTestDate == null || endDate == null || listeningScore == 0 || readingScore == 0)
                 {

@@ -238,8 +238,10 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                 };
 
                 string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
+                string endDate = nextRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
                 nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
-                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>" +
+                               $"<p><strong>Thời gian kết thúc:</strong> {endDate}</p>";
             }
 
             // Read template and replace placeholders

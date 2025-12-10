@@ -68,11 +68,22 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                         userHistory.Type = Domain.Common.HistoryType.Completed;
                         await _unitOfWork.UserHistories.UpdateAsync(userHistory);
                     }
-                    // Đổi role nếu là candidate (RoleId = 7), chuyển sang cabincrew (RoleId = 6)
-                    if (user != null && user.RoleId == 7)
+                    // Đổi role theo loại campaign
+                    if (user != null && round.CampaignRound?.Campaign != null)
                     {
-                        user.RoleId = 6;
-                        await _unitOfWork.Users.UpdateAsync(user);
+                        var campaignType = round.CampaignRound.Campaign.CampaignType;
+                        if (campaignType == Domain.Common.CampaignType.Recruitment && user.RoleId == 7)
+                        {
+                            // Tuyển dụng: Candidate -> CabinCrew
+                            user.RoleId = 6;
+                            await _unitOfWork.Users.UpdateAsync(user);
+                        }
+                        else if (campaignType == Domain.Common.CampaignType.Promotion && user.RoleId == 6)
+                        {
+                            // Thăng bậc: CabinCrew -> Purser
+                            user.RoleId = 9;
+                            await _unitOfWork.Users.UpdateAsync(user);
+                        }
                     }
                     // Gửi email theo template
                     await SendResultEmailAsync(user, true, cancellationToken);
@@ -117,15 +128,17 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 }
             }
             await _unitOfWork.CompleteAsync();
-            string summaryMessage = $"Processed {totalProcessed} records:\n" +
-                                   $"- Passed: {totalPassed}\n" +
-                                   $"- Failed (from Excel): {totalFailed}\n" +
-                                   $"- Auto-Failed (not in Excel): {totalAutoFailed}\n";
-            string detailMessage = string.Join("\n", detailResults);
+            // string summaryMessage = $"Processed {totalProcessed} records:\n" +
+            //                        $"- Passed: {totalPassed}\n" +
+            //                        $"- Failed (from Excel): {totalFailed}\n" +
+            //                        $"- Auto-Failed (not in Excel): {totalAutoFailed}\n";
+            // string detailMessage = string.Join("\n", detailResults);
+
             return new Response<string>(
                 code: 200,
-                data: $"Passed: {totalPassed}, Failed: {totalFailed}",
-                message: $"{summaryMessage}\nDetails:\n{detailMessage}"
+                data: $"Processed: {totalProcessed}, Passed: {totalPassed}, Failed: {totalFailed}, Auto-Failed: {totalAutoFailed}",
+                message: "Import completed successfully."
+                // message: $"{summaryMessage}\nDetails:\n{detailMessage}"
             );
         }
 
@@ -145,7 +158,7 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 .Replace("{Result}", isPassed ? "Đạt" : "Không đạt")
                 .Replace("{RoundName}", "Vòng Final")
                 .Replace("{CampaignName}", "Cabin Crew Career")
-                .Replace("{ExtraMessage}", isPassed ? "Chúc mừng bạn đã vượt qua vòng Final và trở thành Cabin Crew." : "Rất tiếc bạn chưa vượt qua vòng Final.")
+                .Replace("{ExtraMessage}", isPassed ? "Chúc mừng bạn đã vượt qua vòng Final." : "Rất tiếc bạn chưa vượt qua vòng Final.")
                 .Replace("{NextRoundInfo}", "");
             var mailRequest = new MailRequest
             {

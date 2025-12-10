@@ -121,8 +121,10 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                                 _ => "Vòng tiếp theo"
                             };
                             string startDate = nextRoundForInfo.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
+                            string endDate = nextRoundForInfo.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
                             nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
-                                           $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+                                           $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>" +
+                                           $"<p><strong>Thời gian kết thúc:</strong> {endDate}</p>";
                         }
                         string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                         body = body.Replace("{FullName}", user.FullName)
