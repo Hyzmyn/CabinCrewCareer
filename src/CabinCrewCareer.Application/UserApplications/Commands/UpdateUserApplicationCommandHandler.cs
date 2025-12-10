@@ -187,9 +187,21 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
                     readingScore = readScore;
                 int totalScore = 0;
-                if (listeningScore > 0 && readingScore > 0)
-                    totalScore = listeningScore + readingScore;
-                string englishDegreeNumber = totalScore > 0 ? $"TOEIC {totalScore}" : string.Empty;
+                var totalScoreMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"TOTAL\s*.*?(\d{2,4})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (totalScoreMatch.Success && int.TryParse(totalScoreMatch.Groups[1].Value, out var tScore))
+                    totalScore = tScore;
+                string englishDegreeNumber = string.Empty;
+                if (!string.IsNullOrWhiteSpace(ocrText))
+                {
+                    var certType = "";
+                    var upperText = ocrText.ToUpper();
+                    if (upperText.Contains("TOEIC")) certType = "TOEIC";
+                    else if (upperText.Contains("IELTS")) certType = "IELTS";
+                    else if (upperText.Contains("TOEFL")) certType = "TOEFL";
+                    else if (upperText.Contains("CEFR")) certType = "CEFR";
+                    // Có thể bổ sung thêm các loại khác nếu cần
+                    englishDegreeNumber = certType;
+                }
                 if (englishTestDate == null || endDate == null || listeningScore == 0 || readingScore == 0)
                 {
                     return new Response<UserApplicationResponse>
