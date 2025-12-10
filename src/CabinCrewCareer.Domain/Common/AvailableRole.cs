@@ -26,5 +26,8 @@ namespace CabinCrewCareer.Domain.Common
 
         [Description("Airline Partner")]
         AirlinePartner,
+
+        [Description("Purser")]
+        Purser
     }
 }

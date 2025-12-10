@@ -30,6 +30,10 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
             string speakingJoinCode = "";
             string campaignName = "";
             string extraMessage = "";
+            string listeningStartDate = "";
+            string listeningEndDate = "";
+            string speakingStartDate = "";
+            string speakingEndDate = "";
 
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId))
@@ -101,6 +105,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                 var test = await _unitOfWork.Tests.GetByIdAsync(listeningRound.TestId.Value);
                                 listeningJoinCode = test?.JoinCode ?? "";
                             }
+                            listeningStartDate = listeningRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
+                            listeningEndDate = listeningRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
                         }
 
                         // Lấy mã join code vòng nói
@@ -116,6 +122,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                 var test = await _unitOfWork.Tests.GetByIdAsync(speakingRound.TestId.Value);
                                 speakingJoinCode = test?.JoinCode ?? "";
                             }
+                            speakingStartDate = speakingRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
+                            speakingEndDate = speakingRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
                         }
                     }
                 }
@@ -145,7 +153,11 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                                  .Replace("{Result}", resultText)
                                                  .Replace("{CampaignName}", campaignName)
                                                  .Replace("{ListeningJoinCode}", listeningJoinCode)
-                                                 .Replace("{SpeakingJoinCode}", speakingJoinCode);
+                                                 .Replace("{ListeningStartDate}", listeningStartDate)
+                                                 .Replace("{ListeningEndDate}", listeningEndDate)
+                                                 .Replace("{SpeakingJoinCode}", speakingJoinCode)
+                                                 .Replace("{SpeakingStartDate}", speakingStartDate)
+                                                 .Replace("{SpeakingEndDate}", speakingEndDate);
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,

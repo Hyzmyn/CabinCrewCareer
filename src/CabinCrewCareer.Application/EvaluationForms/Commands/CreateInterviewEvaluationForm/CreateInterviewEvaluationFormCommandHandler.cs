@@ -102,6 +102,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             expression: x => x.CampaignRoundId == roundActivity.Round.CampaignRoundId && x.RoundType == RoundType.Final);
                         var finalRound = await finalRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
+                        string nextRoundInfo = "";
                         if (finalRound is not null)
                         {
                             var finalRoundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
@@ -111,6 +112,10 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             {
                                 await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId });
                             }
+                            // Lấy thông tin thời gian vòng final
+                            string finalStartDate = finalRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
+                            string finalEndDate = finalRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
+                            nextRoundInfo = $"Vòng tiếp theo: <strong>Final</strong><br>Thời gian: <strong>{finalStartDate}</strong> - <strong>{finalEndDate}</strong>";
                         }
                         await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
                         // Gửi email PASS
@@ -122,7 +127,6 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
                                 string subject = "Kết quả vòng Phỏng vấn";
                                 string extraMessage = "Chúc mừng bạn đã vượt qua vòng Phỏng vấn.";
-                                string nextRoundInfo = "";
                                 string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                                 body = body.Replace("{FullName}", user.FullName)
                                            .Replace("{Result}", "Đậu (PASS)")
