@@ -76,6 +76,20 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IDocumentSnapshotRepository DocumentSnapshots { get; private set; }
 
+        public ITestTypeRepository TestTypes { get; private set; }
+
+        public IRoundTypeRepository RoundTypes { get; private set; }
+
+        public IRequirementRepository Requirements { get; private set; }
+
+        public IRequirementItemRepository RequirementItems { get; private set; }
+
+        public IInterviewCriteriaItemRepository InterviewCriteriaItems { get; private set; }
+
+        public IScoringCriteriaItemRepository ScoringCriteriaItems { get; private set; }
+
+        public IScoringCriteriaDetailRepository ScoringCriteriaDetails { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -133,6 +147,20 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             UserApplicationSnapshots = new UserApplicationSnapshotRepository(_dbContext, _logger);
 
             DocumentSnapshots = new DocumentSnapshotRepository(_dbContext, _logger);
+
+            Requirements = new RequirementRepository(_dbContext, _logger);
+
+            RoundTypes = new RoundTypeRepository(_dbContext, _logger);
+
+            TestTypes = new TestTypeRepository(_dbContext, _logger);
+
+            RequirementItems = new RequirementItemRepository(_dbContext, _logger);
+
+            InterviewCriteriaItems = new InterviewCriteriaItemRepository(_dbContext, _logger);
+
+            ScoringCriteriaItems = new ScoringCriteriaItemRepository(_dbContext, _logger);
+
+            ScoringCriteriaDetails = new ScoringCriteriaDetailRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();
