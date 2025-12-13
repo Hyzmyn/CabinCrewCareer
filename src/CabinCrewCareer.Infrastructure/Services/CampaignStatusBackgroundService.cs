@@ -9,7 +9,7 @@ namespace CabinCrewCareer.Infrastructure.Services
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<CampaignStatusBackgroundService> _logger;
-        private readonly TimeSpan _period = TimeSpan.FromMinutes(5); // Chạy mỗi 5 phút
+        private readonly TimeSpan _period = TimeSpan.FromMinutes(1); // Chạy mỗi 1 phút
 
         public CampaignStatusBackgroundService(
             IServiceScopeFactory serviceScopeFactory,
