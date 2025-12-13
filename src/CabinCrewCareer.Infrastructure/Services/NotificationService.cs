@@ -27,8 +27,9 @@ namespace CabinCrewCareer.Infrastructure.Services
             var title = "New Task";
             var body = $"You have been assigned a task: {taskDescription} in campaign '{campaignName}' by {assignedBy}.";
             var notification = await CreateNotificationAsync(userId, title, body, notificationTypeId: null);
-            // Push realtime notification
-            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", new {
+            
+            // Gửi notification đến user group (tất cả connections của user)
+            await _hubContext.Clients.Group($"User_{userId}").SendAsync("ReceiveNotification", new {
                 notification.NotificationId,
                 notification.Title,
                 notification.Body,
@@ -36,6 +37,8 @@ namespace CabinCrewCareer.Infrastructure.Services
                 notification.IsRead,
                 notification.NotificationTypeId
             });
+            
+            Console.WriteLine($"NotificationService: Sent notification to User_{userId} group");
         }
 
         public async Task SendTaskCancellationNotificationAsync(int userId, string campaignName, string cancelReason, string cancelledBy)
@@ -43,8 +46,9 @@ namespace CabinCrewCareer.Infrastructure.Services
             var title = "Task Cancelled";
             var body = $"Your task in campaign '{campaignName}' has been cancelled by {cancelledBy}. Reason: {cancelReason}";
             var notification = await CreateNotificationAsync(userId, title, body, notificationTypeId: null);
-            // Push realtime notification
-            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", new {
+            
+            // Gửi notification đến user group
+            await _hubContext.Clients.Group($"User_{userId}").SendAsync("ReceiveNotification", new {
                 notification.NotificationId,
                 notification.Title,
                 notification.Body,
@@ -52,6 +56,8 @@ namespace CabinCrewCareer.Infrastructure.Services
                 notification.IsRead,
                 notification.NotificationTypeId
             });
+            
+            Console.WriteLine($"NotificationService: Sent notification to User_{userId} group");
         }
 
         public async Task<Notification> CreateNotificationAsync(int userId, string title, string body, int? notificationTypeId = null)
@@ -67,7 +73,6 @@ namespace CabinCrewCareer.Infrastructure.Services
             };
 
             await _unitOfWork.Notifications.AddAsync(notification);
-            // KHÔNG gọi CompleteAsync() ở đây - để caller tự quyết định khi nào commit
 
             return notification;
         }
