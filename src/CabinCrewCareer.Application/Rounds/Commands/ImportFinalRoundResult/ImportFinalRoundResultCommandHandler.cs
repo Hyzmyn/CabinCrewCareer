@@ -127,6 +127,32 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                     detailResults.Add($"User {activity.UserId}: AUTO-FAILED - Not found in Excel file, email sent");
                 }
             }
+            // Cập nhật ActualQuantity cho CampaignRound và Campaign
+            if (totalPassed > 0 && round.CampaignRoundId.HasValue)
+            {
+                var campaignRound = await _unitOfWork.CampaignRounds.GetByIdAsync(round.CampaignRoundId.Value);
+                if (campaignRound != null)
+                {
+                    // Tăng ActualQuantity của CampaignRound
+                    campaignRound.ActualQuantiy += totalPassed;
+                    await _unitOfWork.CampaignRounds.UpdateAsync(campaignRound);                   
+                    // Save CampaignRound trước để đảm bảo giá trị được commit
+                    await _unitOfWork.CompleteAsync();
+                    // Cập nhật ActualQuantity của Campaign (tổng của tất cả các đợt)
+                    if (campaignRound.CampaignId.HasValue)
+                    {
+                        var campaign = await _unitOfWork.Campaigns.GetByIdAsync(campaignRound.CampaignId.Value);
+                        if (campaign != null)
+                        {
+                            // Lấy lại tất cả CampaignRounds sau khi update để tính tổng chính xác
+                            var allCampaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(cr => cr.CampaignId == campaign.CampaignId);
+                            campaign.ActualQuantiy = allCampaignRounds.Sum(cr => cr.ActualQuantiy);
+                            await _unitOfWork.Campaigns.UpdateAsync(campaign);
+                        }
+                    }
+                }
+            }
+
             await _unitOfWork.CompleteAsync();
             // string summaryMessage = $"Processed {totalProcessed} records:\n" +
             //                        $"- Passed: {totalPassed}\n" +
@@ -185,7 +211,7 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                         try
                         {
                             var userIdCell = worksheet.Cell(currentRow, 2);
-                            var passFailCell = worksheet.Cell(currentRow, 11);
+                            var passFailCell = worksheet.Cell(currentRow, 12);
                             if (!int.TryParse(userIdCell.GetString(), out int userId))
                             {
                                 currentRow++;
