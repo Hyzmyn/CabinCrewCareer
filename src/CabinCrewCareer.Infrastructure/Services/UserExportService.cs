@@ -93,11 +93,12 @@ namespace CabinCrewCareer.Infrastructure.Services
                 ws.Cell(8, 4).Value = "Ngày sinh";
                 ws.Cell(8, 5).Value = "Số CMND/HC";
                 ws.Cell(8, 6).Value = "Ngày thi";
-                ws.Cell(8, 7).Value = "Số điểm TOEIC hiện tại";
-                ws.Cell(8, 8).Value = "Nghe";
-                ws.Cell(8, 9).Value = "Đọc";
-                ws.Cell(8, 10).Value = "Tổng";
-                ws.Cell(8, 11).Value = "Pass/Fail";
+                ws.Cell(8, 7).Value = "Ngày hết hạn";
+                ws.Cell(8, 8).Value = "Loại chứng chỉ";
+                ws.Cell(8, 9).Value = "Nghe";
+                ws.Cell(8, 10).Value = "Đọc";
+                ws.Cell(8, 11).Value = "Tổng";
+                ws.Cell(8, 12).Value = "Pass/Fail";
 
                 int row = 9;
                 if (users != null && users.Count > 0)
@@ -111,17 +112,18 @@ namespace CabinCrewCareer.Infrastructure.Services
                         ws.Cell(row, 4).Value = user.DateOfBirth?.ToString("dd/MM/yyyy") ?? "";
                         ws.Cell(row, 5).Value = user?.CitizenId ?? "";
                         ws.Cell(row, 6).Value = user?.EnglishTestDate?.ToString("dd/MM/yyyy") ?? "";
-                        ws.Cell(row, 7).Value = user?.EnglishDegreeNumber ?? "";
-                        ws.Cell(row, 8).Value = user?.ListeningScore ?? 0;
-                        ws.Cell(row, 9).Value = user?.ReadingScore ?? 0;
-                        ws.Cell(row, 10).Value = user?.TotalScore ?? 0;
+                        ws.Cell(row, 7).Value = user?.EndDate?.ToString("dd/MM/yyyy") ?? "";
+                        ws.Cell(row, 8).Value = user?.EnglishDegreeNumber ?? "";
+                        ws.Cell(row, 9).Value = user?.ListeningScore ?? 0;
+                        ws.Cell(row, 10).Value = user?.ReadingScore ?? 0;
+                        ws.Cell(row, 11).Value = user?.TotalScore ?? 0;
                         // Thêm cột Pass/Fail (checkbox dropdown)
-                        ws.Cell(row, 11).Value = "";
-                        ws.Cell(row, 11).Style
+                        ws.Cell(row, 12).Value = "";
+                        ws.Cell(row, 12).Style
                             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
                             .Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-                        var validation = ws.Cell(row, 11).CreateDataValidation();
-                        validation.List("\"☐,☑,Pass,Fail\"");
+                        var validation = ws.Cell(row, 12).CreateDataValidation();
+                        validation.List("\"Pass,Fail\"");
                         validation.ShowErrorMessage = true;
                         validation.ErrorTitle = "Invalid Selection";
                         validation.ErrorMessage = "Please select from the dropdown list.";
@@ -240,7 +242,7 @@ namespace CabinCrewCareer.Infrastructure.Services
                         
                         // Thêm Data Validation cho dropdown list
                         var validation = ws.Cell(currentRow, 9).CreateDataValidation();
-                        validation.List("\"☐,☑,Pass,Fail\"");
+                        validation.List("\"Pass,Fail\"");
                         validation.ShowErrorMessage = true;
                         validation.ErrorTitle = "Invalid Selection";
                         validation.ErrorMessage = "Please select from the dropdown list.";
