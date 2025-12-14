@@ -84,8 +84,14 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             {
                 var ocrText = await ocrService.ExtractTextFromImageAsync(request.EnglishCertificate);
                 Console.WriteLine($"ENGLISH CERT OCR: {ocrText}");
-                // Check if OCR result contains TOEIC keyword
-                if (string.IsNullOrWhiteSpace(ocrText) || !ocrText.ToUpper().Contains("TOEIC"))
+                // Check if OCR result contains TOEIC keyword (handle OCR misreads like TOE/C, TOEJC, etc.)
+                var normalizedText = ocrText?.ToUpper().Replace("/", "I").Replace("J", "I") ?? "";
+                var isToeic = normalizedText.Contains("TOEIC") || 
+                              ocrText?.ToUpper().Contains("TOE") == true && 
+                              (ocrText.ToUpper().Contains("LISTENING") || ocrText.ToUpper().Contains("READING") || 
+                               ocrText.ToUpper().Contains("OFFICIAL SCORE"));
+                
+                if (string.IsNullOrWhiteSpace(ocrText) || !isToeic)
                 {
                     return new Response<UserApplicationResponse>
                     {
@@ -103,8 +109,9 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         englishTestDate = testDate;
                 }
                 // Valid Until: yyyy/MM/dd (date may appear before or after 'Valid Until')
-                var validUntilMatchAfter = System.Text.RegularExpressions.Regex.Match(ocrText, @"Valid Until.*?(\d{4}/\d{2}/\d{2})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                var validUntilMatchBefore = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})\s*Valid Until", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                // Handle OCR typos: Uniil, Unlil, Untll, etc.
+                var validUntilMatchAfter = System.Text.RegularExpressions.Regex.Match(ocrText, @"Valid\s*U[nml][itl][itl][il]l?.*?(\d{4}/\d{2}/\d{2})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                var validUntilMatchBefore = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})\s*Valid\s*U[nml][itl][itl][il]l?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (validUntilMatchAfter.Success)
                 {
                     if (DateOnly.TryParseExact(validUntilMatchAfter.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
@@ -116,12 +123,12 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         endDate = validUntilDate;
                 }
                 // Tìm tất cả số sau 'Your score'
-                // Điểm nghe
-                var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTENING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                // Điểm nghe - handle OCR errors like LISTENINGI, LISTENNG, etc.
+                var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTEN[ING]+[\s\S]{0,20}?(\d{2,4})[\s\S]{0,20}?Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (listenMatch.Success && int.TryParse(listenMatch.Groups[1].Value, out var listenScore))
                     listeningScore = listenScore;
-                // Điểm đọc
-                var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READING\s*(\d{2,4})\s*Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                // Điểm đọc - handle OCR errors like READNG, READINC, etc.
+                var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READ[ING]+[\s\S]{0,20}?(\d{2,4})[\s\S]{0,20}?Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
                     readingScore = readScore;
                 // Tổng điểm

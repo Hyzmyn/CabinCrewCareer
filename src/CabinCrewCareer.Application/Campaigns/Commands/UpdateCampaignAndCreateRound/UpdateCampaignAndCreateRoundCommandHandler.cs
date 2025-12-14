@@ -357,13 +357,9 @@ namespace CabinCrewCareer.Application.Campaigns.Commands.UpdateCampaignAndCreate
                     await _unitOfWork.Rounds.AddRangeAsync(newRounds);
                 }
                 await _unitOfWork.Campaigns.UpdateAsync(campaign);
-                // Tự động cập nhật status cho tất cả campaign rounds vừa tạo
-                foreach (var round in campaign.CampaignRounds.Where(r => r.IsActive))
-                {
-                    await _campaignRoundStatusService.UpdateCampaignRoundStatusByDateAsync(round.CampaignRoundId);
-                }
             }
             // If everything is successful, change to Pending for Director approval
+            // Note: Round status sẽ được background service tự động cập nhật theo campaign status
             campaign.CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Pending;
             await _unitOfWork.Campaigns.UpdateAsync(campaign);
             await _unitOfWork.CompleteAsync();

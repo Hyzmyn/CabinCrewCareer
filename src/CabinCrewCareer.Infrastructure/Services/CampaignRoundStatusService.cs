@@ -60,7 +60,7 @@ namespace CabinCrewCareer.Infrastructure.Services
                 if (!rounds.Any()) continue;
 
                 // Nếu campaign đang Pending hoặc Approved, tất cả round phải là Upcoming
-                if (campaign.CampaignStatus == CampaignStatus.Pending || campaign.CampaignStatus == CampaignStatus.Approved)
+                if (campaign.CampaignStatus == CampaignStatus.Pending || campaign.CampaignStatus == CampaignStatus.Approved || campaign.CampaignStatus == CampaignStatus.Rejected)
                 {
                     foreach (var round in rounds)
                     {
