@@ -26,7 +26,10 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
             List<string> errorMessages = new();
             var roundQuery = await _unitOfWork.Rounds.GetAsync(
                 expression: r => r.RoundId == request.RoundId,
-                includeFunc: query => query.Include(r => r.RoundActivities)
+                includeFunc: query => query
+                    .Include(r => r.RoundActivities)
+                    .Include(r => r.CampaignRound)
+                        .ThenInclude(cr => cr.Campaign)
             );
             var round = await roundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (round == null || round.RoundType != Domain.Common.RoundType.Final)
@@ -128,28 +131,19 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 }
             }
             // Cập nhật ActualQuantity cho CampaignRound và Campaign
-            if (totalPassed > 0 && round.CampaignRoundId.HasValue)
+            if (totalPassed > 0 && round.CampaignRound != null)
             {
-                var campaignRound = await _unitOfWork.CampaignRounds.GetByIdAsync(round.CampaignRoundId.Value);
-                if (campaignRound != null)
+                // Tăng ActualQuantity của CampaignRound (sử dụng object đã load)
+                round.CampaignRound.ActualQuantiy += totalPassed;
+                await _unitOfWork.CampaignRounds.UpdateAsync(round.CampaignRound);
+                
+                // Cập nhật ActualQuantity của Campaign (tổng của tất cả các đợt)
+                if (round.CampaignRound.Campaign != null)
                 {
-                    // Tăng ActualQuantity của CampaignRound
-                    campaignRound.ActualQuantiy += totalPassed;
-                    await _unitOfWork.CampaignRounds.UpdateAsync(campaignRound);                   
-                    // Save CampaignRound trước để đảm bảo giá trị được commit
-                    await _unitOfWork.CompleteAsync();
-                    // Cập nhật ActualQuantity của Campaign (tổng của tất cả các đợt)
-                    if (campaignRound.CampaignId.HasValue)
-                    {
-                        var campaign = await _unitOfWork.Campaigns.GetByIdAsync(campaignRound.CampaignId.Value);
-                        if (campaign != null)
-                        {
-                            // Lấy lại tất cả CampaignRounds sau khi update để tính tổng chính xác
-                            var allCampaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(cr => cr.CampaignId == campaign.CampaignId);
-                            campaign.ActualQuantiy = allCampaignRounds.Sum(cr => cr.ActualQuantiy);
-                            await _unitOfWork.Campaigns.UpdateAsync(campaign);
-                        }
-                    }
+                    // Lấy lại tất cả CampaignRounds sau khi update để tính tổng chính xác
+                    var allCampaignRounds = await _unitOfWork.CampaignRounds.GetAllAsync(cr => cr.CampaignId == round.CampaignRound.Campaign.CampaignId);
+                    round.CampaignRound.Campaign.ActualQuantiy = allCampaignRounds.Sum(cr => cr.ActualQuantiy) + totalPassed;
+                    await _unitOfWork.Campaigns.UpdateAsync(round.CampaignRound.Campaign);
                 }
             }
 
