@@ -30,10 +30,14 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                     .Include(r => r.RoundActivities)
                     .Include(r => r.CampaignRound)
                         .ThenInclude(cr => cr.Campaign)
+                            .ThenInclude(c => c.CampaignRequest)
             );
             var round = await roundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (round == null || round.RoundType != Domain.Common.RoundType.Final)
                 return new Response<string>(null, "Invalid round or not Final round", 400);
+
+            // Lấy AirlinePartnerId từ Campaign
+            var airlinePartnerId = round.CampaignRound?.Campaign?.CampaignRequest?.PartnerId;
 
             var importResults = await ParseExcelFile(request.File);
             if (!importResults.Any())
@@ -41,10 +45,6 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
 
             var ongoingActivities = round.RoundActivities.Where(ra => ra.Status == Domain.Common.ActivityStatus.Ongoing).ToList();
             var userIdsInExcel = importResults.Select(r => r.UserId).ToHashSet();
-
-            var roles = await _unitOfWork.Roles.GetAllAsync(r => r.RoleName == Domain.Common.AvailableRole.Candidate.ToString() || r.RoleName == Domain.Common.AvailableRole.CabinCrew.ToString());
-            var candidateRole = roles.FirstOrDefault(r => r.RoleName == Domain.Common.AvailableRole.Candidate.ToString());
-            var cabinCrewRole = roles.FirstOrDefault(r => r.RoleName == Domain.Common.AvailableRole.CabinCrew.ToString());
 
             int totalProcessed = 0, totalPassed = 0, totalFailed = 0, totalAutoFailed = 0;
             List<string> detailResults = new();
@@ -71,20 +71,33 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                         userHistory.Type = Domain.Common.HistoryType.Completed;
                         await _unitOfWork.UserHistories.UpdateAsync(userHistory);
                     }
-                    // Đổi role theo loại campaign
+                    // Đổi role và gán AirlinePartner theo loại campaign
                     if (user != null && round.CampaignRound?.Campaign != null)
                     {
                         var campaignType = round.CampaignRound.Campaign.CampaignType;
+                        bool shouldUpdateUser = false;
+
                         if (campaignType == Domain.Common.CampaignType.Recruitment && user.RoleId == 7)
                         {
                             // Tuyển dụng: Candidate -> CabinCrew
                             user.RoleId = 6;
-                            await _unitOfWork.Users.UpdateAsync(user);
+                            // Gán AirlinePartner cho CabinCrew mới
+                            if (airlinePartnerId.HasValue)
+                            {
+                                user.PartnerId = airlinePartnerId.Value;
+                            }
+                            shouldUpdateUser = true;
                         }
                         else if (campaignType == Domain.Common.CampaignType.Promotion && user.RoleId == 6)
                         {
                             // Thăng bậc: CabinCrew -> Purser
                             user.RoleId = 9;
+                            // Giữ nguyên PartnerId của CabinCrew khi thăng lên Purser
+                            shouldUpdateUser = true;
+                        }
+
+                        if (shouldUpdateUser)
+                        {
                             await _unitOfWork.Users.UpdateAsync(user);
                         }
                     }

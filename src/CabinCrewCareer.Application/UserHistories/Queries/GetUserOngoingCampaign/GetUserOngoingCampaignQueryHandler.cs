@@ -25,6 +25,16 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampai
 
             var result = await _unitOfWork.UserHistories.GetUserOngoingCampaignAsync(userId);
 
+            // Check if user has any ongoing campaign (may be empty after filtering Recruitment campaigns for CabinCrew)
+            if (result == null || result.CampaignRound == null || result.CampaignRoundId == null ||
+                result.CampaignRound.Campaign == null || result.CampaignRound.Campaign.CampaignRequest == null)
+            {
+                return new Response<GetUserCampaignResponse>(
+                    code: (int)ResponseCode.SUCCESS,
+                    data: new GetUserCampaignResponse(),
+                    message: ResponseCode.SUCCESS.GetDescription());
+            }
+
             GetUserCampaignResponse response = new()
             {
                 CampaignRoundId = result.CampaignRoundId,
@@ -37,7 +47,10 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampai
                 AirlinePartner = result.CampaignRound.Campaign.CampaignRequest.AirlinePartner.PartnerName
             };
 
-            foreach (var item in result.CampaignRound.Rounds)
+            // Check if Rounds collection exists before iterating
+            if (result.CampaignRound.Rounds != null)
+            {
+                foreach (var item in result.CampaignRound.Rounds)
             {
                 var temp = await _unitOfWork.RoundActivites.GetRoundActivityAsync(item.RoundId, userId);
 
@@ -52,6 +65,7 @@ namespace CabinCrewCareer.Application.UserHistories.Queries.GetUserOngoingCampai
                         ApplicationId = temp.ApplicationSnapshotId
                     });
                 }
+            }
             }
 
             return new Response<GetUserCampaignResponse>(
