@@ -7,6 +7,7 @@ using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
 {
@@ -16,6 +17,15 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
+
+        /// <summary>
+        /// Converts enum name to a readable format by adding spaces between words
+        /// Example: "EnglishListening" -> "English Listening"
+        /// </summary>
+        private static string FormatEnumName(string enumValue)
+        {
+            return Regex.Replace(enumValue, "([a-z])([A-Z])", "$1 $2");
+        }
 
         public async Task<Response<GetTestsByUserIdResponse>> Handle(GetTestsByUserIdQuery request, CancellationToken cancellationToken)
         {
@@ -96,12 +106,12 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetTestsByUserId
                     {
                         TestId = activity.Round.Test.TestId,
                         TestName = activity.Round.Test.TestName,
-                        TestType = activity.Round.Test.TestType.ToString(),
+                        TestType = FormatEnumName(activity.Round.Test.TestType.ToString()),
                         MaxScore = activity.Round.Test.MaxScore,
                         DurationInMinutes = activity.Round.Test.DurationInMinutes,
                         JoinCode = activity.Round.Test.JoinCode,
                         RoundId = activity.Round.RoundId,
-                        RoundType = activity.Round.RoundType.ToString(),
+                        RoundType = FormatEnumName(activity.Round.RoundType.ToString()),
                         RoundStartDate = activity.Round.StartDate,
                         RoundEndDate = activity.Round.EndDate,
                         HasCompleted = hasCompleted
