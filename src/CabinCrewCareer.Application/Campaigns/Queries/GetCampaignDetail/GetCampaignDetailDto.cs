@@ -13,6 +13,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
         public string? PartnerName { get; set; }
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
+        public string? DueDate { get; set; }
         public string? ApprovedAt { get; set; }
         public string? RejectedAt { get; set; }
         public string? ReviewedBy { get; set; }
