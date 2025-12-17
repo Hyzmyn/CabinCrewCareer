@@ -192,7 +192,8 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                             {
                                 RoundId = interviewRound.RoundId,
                                 UserId = roundActivity.UserId,
-                                Status = ActivityStatus.Ongoing
+                                Status = ActivityStatus.Ongoing,
+                                ApplicationSnapshotId = roundActivity.ApplicationSnapshotId
                             });
                         }
                     }
