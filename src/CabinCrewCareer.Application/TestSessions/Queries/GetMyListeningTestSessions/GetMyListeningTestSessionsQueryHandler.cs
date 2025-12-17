@@ -8,6 +8,7 @@ using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSessions
 {
@@ -17,6 +18,15 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSes
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly ICurrentUserService _currentUserService = currentUserService;
+
+        /// <summary>
+        /// Converts enum name to a readable format by adding spaces between words
+        /// Example: "EnglishListening" -> "English Listening"
+        /// </summary>
+        private static string FormatEnumName(string enumValue)
+        {
+            return Regex.Replace(enumValue, "([a-z])([A-Z])", "$1 $2");
+        }
 
         public async Task<Response<PaginatedList<GetTestSessionResponse>>> Handle(
             GetMyListeningTestSessionsQuery request,
@@ -95,7 +105,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetMyListeningTestSes
                     ImgURL = ts.User?.ImgURL,
                     TestId = ts.TestId ?? 0,
                     TestName = ts.Test?.TestName ?? string.Empty,
-                    TestType = ts.Test?.TestType.ToString() ?? string.Empty,
+                    TestType = FormatEnumName(ts.Test?.TestType.ToString() ?? string.Empty),
                     StartTime = ts.StartTime,
                     EndTime = ts.EndTime,
                     TotalScore = ts.TotalScore,
