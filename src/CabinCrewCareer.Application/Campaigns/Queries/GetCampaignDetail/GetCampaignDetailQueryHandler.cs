@@ -37,6 +37,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 Status = campaign.CampaignStatus.ToString(),
                 StartDate = campaign.StartDate.HasValue ? campaign.StartDate.Value.GetFormatDateTime() : null,
                 EndDate = campaign.EndDate.HasValue ? campaign.EndDate.Value.GetFormatDateTime() : null,
+                DueDate = campaign.CampaignRequest?.DueDate.HasValue == true ? campaign.CampaignRequest.DueDate.Value.ToString("dd/MM/yyyy") : null,
                 ApprovedAt = campaign.ApprovedAt.HasValue ? campaign.ApprovedAt.Value.GetFormatDateTime() : null,
                 RejectedAt = campaign.RejectedAt.HasValue ? campaign.RejectedAt.Value.GetFormatDateTime() : null,
                 ReviewedBy = campaign.ReviewedBy,

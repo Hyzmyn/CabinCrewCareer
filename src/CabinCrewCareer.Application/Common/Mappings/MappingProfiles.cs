@@ -122,6 +122,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.Status, u => u.MapFrom(u => u.CampaignStatus.ToString()))
                 .ForMember(u => u.StartDate, u => u.MapFrom(u => u.StartDate.HasValue ? u.StartDate.Value.GetFormatDateTime() : null))
                 .ForMember(u => u.EndDate, u => u.MapFrom(u => u.EndDate.HasValue ? u.EndDate.Value.GetFormatDateTime() : null))
+                .ForMember(u => u.DueDate, u => u.MapFrom(u => u.CampaignRequest != null && u.CampaignRequest.DueDate.HasValue ? u.CampaignRequest.DueDate.Value.ToString("dd/MM/yyyy") : null))
                 .ForMember(u => u.RejectedAt, u => u.MapFrom(u => u.RejectedAt.HasValue ? u.RejectedAt.Value.GetFormatDateTime() : null))
                 .ForMember(u => u.ApprovedAt, u => u.MapFrom(u => u.ApprovedAt.HasValue ? u.ApprovedAt.Value.GetFormatDateTime() : null))
                 .ForMember(u => u.CreatedAt, u => u.MapFrom(u => u.CreatedAt.HasValue ? u.CreatedAt.Value.GetFormatDateTime() : null))
