@@ -182,12 +182,15 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                     if (canMoveToInterview && interviewRound != null)
                     {
                         // Check if interview round activity already exists
-                        var existingInterviewActivity = await _unitOfWork.RoundActivites.GetAsync(
+                        var existingInterviewActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
                             expression: x => x.RoundId == interviewRound.RoundId 
                                           && x.UserId == roundActivity.UserId);
 
-                        if (!await existingInterviewActivity.AnyAsync(cancellationToken: cancellationToken))
+                        var existingInterviewActivity = await existingInterviewActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                        if (existingInterviewActivity == null)
                         {
+                            // Create new Interview RoundActivity
                             await _unitOfWork.RoundActivites.AddAsync(new RoundActivity
                             {
                                 RoundId = interviewRound.RoundId,
@@ -195,6 +198,12 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                                 Status = ActivityStatus.Ongoing,
                                 ApplicationSnapshotId = roundActivity.ApplicationSnapshotId
                             });
+                        }
+                        else if (existingInterviewActivity.ApplicationSnapshotId == null)
+                        {
+                            // Update existing Interview RoundActivity with ApplicationSnapshotId if missing
+                            existingInterviewActivity.ApplicationSnapshotId = roundActivity.ApplicationSnapshotId;
+                            await _unitOfWork.RoundActivites.UpdateAsync(existingInterviewActivity);
                         }
                     }
                 }
