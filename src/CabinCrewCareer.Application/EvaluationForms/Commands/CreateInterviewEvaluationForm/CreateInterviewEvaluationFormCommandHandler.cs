@@ -220,7 +220,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         var existedFinalRoundActivity = await finalRoundActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
                         if (existedFinalRoundActivity is null)
                         {
-                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing });
+                            await _unitOfWork.RoundActivites.AddAsync(new RoundActivity { RoundId = finalRound.RoundId, UserId = roundActivity.UserId, Status = ActivityStatus.Ongoing, ApplicationSnapshotId = roundActivity.ApplicationSnapshotId});
                         }
                     }
                 }
