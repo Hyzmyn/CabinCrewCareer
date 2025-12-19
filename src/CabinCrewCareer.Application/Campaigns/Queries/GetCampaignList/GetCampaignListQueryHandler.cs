@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
 {
@@ -17,41 +18,34 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
 
         public async Task<Response<PaginatedList<GetCampaignListDto>>> Handle(GetCampaignListQuery request, CancellationToken cancellationToken)
         {
-            //var campaigns = await unitOfWork.Campaigns.GetAllAsync(disableTracking: true);
-            //var result = await campaigns
-            //    .Include(c => c.CampaignRequest)
-            //    .ThenInclude(cr => cr.AirlinePartner)
-            //    .Select(c => new GetCampaignListDto
-            //    {
-            //        CampaignId = c.CampaignId,
-            //        CampaignName = c.CampaignName,
-            //        Description = c.Description,
-            //        TargetQuantity = c.TargetQuantity,
-            //        CampaignType = c.CampaignType.ToString(),
-            //        Status = c.CampaignStatus.ToString(),
-            //        StartDate = c.StartDate.HasValue ? c.StartDate.Value.GetFormatDateTime() : null,
-            //        EndDate = c.EndDate.HasValue ? c.EndDate.Value.GetFormatDateTime() : null,
-            //        ApprovedAt = c.ApprovedAt.HasValue ? c.ApprovedAt.Value.GetFormatDateTime() : null,
-            //        RejectedAt = c.RejectedAt.HasValue ? c.RejectedAt.Value.GetFormatDateTime() : null,
-            //        ReviewedBy = c.ReviewedBy,
-            //        RejectedReason = c.RejectedReason,
-            //        RejectedCount = c.RejectedCount,
-            //        PartnerName = c.CampaignRequest != null && c.CampaignRequest.AirlinePartner != null ? c.CampaignRequest.AirlinePartner.PartnerName : null,
-            //        CreatedAt = c.CreatedAt.HasValue ? c.CreatedAt.Value.GetFormatDateTime() : null
-            //    })
-            //    .ToListAsync(cancellationToken);
-            //return result;
+            // Get both role names from database in a single query
+            var rolesQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
+            var rolesList = await rolesQuery.ToListAsync(cancellationToken);
+            var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
+            
+            var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
+            var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
+
+            var paginatedCampaigns = await _unitOfWork.Campaigns.PaginatedListAsync(
+                request.SearchTerm,
+                request.SortColumn,
+                request.SortOrder,
+                request.CampaignType,
+                request.CampaignStatus,
+                request.Page,
+                request.PageSize);
+
+            var mappedData = _mapper.Map<PaginatedList<GetCampaignListDto>>(paginatedCampaigns);
+            
+            // Set Position based on CampaignType and actual Role names
+            foreach (var campaign in mappedData.Items)
+            {
+                campaign.Position = campaign.CampaignType == "Recruitment" ? cabinCrewRoleName : purserRoleName;
+            }
 
             return new Response<PaginatedList<GetCampaignListDto>>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<PaginatedList<GetCampaignListDto>>(await _unitOfWork.Campaigns.PaginatedListAsync(
-                    request.SearchTerm,
-                    request.SortColumn,
-                    request.SortOrder,
-                    request.CampaignType,
-                    request.CampaignStatus,
-                    request.Page,
-                    request.PageSize)),
+                data: mappedData,
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }

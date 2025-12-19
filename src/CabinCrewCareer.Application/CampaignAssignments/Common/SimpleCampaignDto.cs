@@ -9,5 +9,6 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Common
         public DateTime? EndDate { get; set; }
         public string PartnerName { get; set; } = string.Empty;
         public string CampaignType { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
     }
 }
