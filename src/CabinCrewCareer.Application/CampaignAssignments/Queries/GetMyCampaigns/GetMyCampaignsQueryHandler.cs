@@ -25,6 +25,14 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
             GetMyCampaignsQuery request, 
             CancellationToken cancellationToken)
         {
+            // Get both role names from database in a single query
+            var rolesQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
+            var rolesList = await rolesQuery.ToListAsync(cancellationToken);
+            var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
+            
+            var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
+            var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
+
             // Lấy userId từ token - không cần phân biệt role
             var currentUserIdString = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out var currentUserId))
@@ -80,7 +88,8 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
                     StartDate = campaign.StartDate,
                     EndDate = campaign.EndDate,
                     PartnerName = partnerName,
-                    CampaignType = campaign.CampaignType.ToString()
+                    CampaignType = campaign.CampaignType.ToString(),
+                    Position = campaign.CampaignType == Domain.Common.CampaignType.Recruitment ? cabinCrewRoleName : purserRoleName
                 };
 
                 result.Add(campaignDto);

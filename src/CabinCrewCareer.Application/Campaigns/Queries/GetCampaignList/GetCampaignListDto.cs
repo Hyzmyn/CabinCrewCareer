@@ -8,6 +8,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
         public int TargetQuantity { get; set; }
         public string CampaignType { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public string? DueDate { get; set; }

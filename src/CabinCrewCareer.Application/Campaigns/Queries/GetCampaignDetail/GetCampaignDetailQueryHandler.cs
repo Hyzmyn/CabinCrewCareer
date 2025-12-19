@@ -15,6 +15,14 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
 
         public async Task<GetCampaignDetailDto> Handle(GetCampaignDetailQuery request, CancellationToken cancellationToken)
         {
+            // Get both role names from database in a single query
+            var rolesQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
+            var rolesList = await rolesQuery.ToListAsync(cancellationToken);
+            var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
+            
+            var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
+            var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
+
             var campaignQuery = await _unitOfWork.Campaigns.GetAsync(
                 c => c.CampaignId == request.CampaignId,
                 includeFunc: q => q.Include(c => c.CampaignRounds)
@@ -35,6 +43,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
                 TargetQuantity = campaign.TargetQuantity,
                 CampaignType = campaign.CampaignType.ToString(),
                 Status = campaign.CampaignStatus.ToString(),
+                Position = campaign.CampaignType == Domain.Common.CampaignType.Recruitment ? cabinCrewRoleName : purserRoleName,
                 StartDate = campaign.StartDate.HasValue ? campaign.StartDate.Value.GetFormatDateTime() : null,
                 EndDate = campaign.EndDate.HasValue ? campaign.EndDate.Value.GetFormatDateTime() : null,
                 DueDate = campaign.CampaignRequest?.DueDate.HasValue == true ? campaign.CampaignRequest.DueDate.Value.ToString("dd/MM/yyyy") : null,
