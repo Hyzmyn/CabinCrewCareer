@@ -18,6 +18,8 @@ namespace CabinCrewCareer.Application.CampaignRequests.Common
 
         public string Status { get; set; } = string.Empty;
 
+        public string Position { get; set; } = string.Empty;
+
         public string? RejectReason { get; set; }
 
         public int RejectedCount { get; set; }

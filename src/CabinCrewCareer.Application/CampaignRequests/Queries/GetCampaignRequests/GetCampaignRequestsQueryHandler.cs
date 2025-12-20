@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignRequests
 {
@@ -16,6 +17,14 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
             GetCampaignRequestsQuery request,
             CancellationToken cancellationToken)
         {
+            // Get both role names from database in a single query
+            var rolesQuery = await unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
+            var rolesList = await rolesQuery.ToListAsync(cancellationToken);
+            var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
+            
+            var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
+            var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
+
             var campaignRequests = await unitOfWork.CampaignRequests.PaginatedListAsync(
                 request.SearchTerm,
                 request.SortColumn,
@@ -27,6 +36,12 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
                 request.PageSize);
 
             var mappedRequests = mapper.Map<PaginatedList<GetCampaignRequestResponse>>(campaignRequests);
+
+            // Set Position based on RequestType and actual Role names
+            foreach (var campaignRequest in mappedRequests.Items)
+            {
+                campaignRequest.Position = campaignRequest.RequestType == "Recruitment" ? cabinCrewRoleName : purserRoleName;
+            }
 
             return new Response<PaginatedList<GetCampaignRequestResponse>>(code: (int)ResponseCode.SUCCESS, data: mappedRequests, message: ResponseCode.SUCCESS.ToString());
         }
