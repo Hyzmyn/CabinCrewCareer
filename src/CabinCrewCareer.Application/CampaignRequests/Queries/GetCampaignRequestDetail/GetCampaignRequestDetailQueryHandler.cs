@@ -17,6 +17,14 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
             GetCampaignRequestDetailQuery request,
             CancellationToken cancellationToken)
         {
+            // Get both role names from database in a single query
+            var rolesQuery = await unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
+            var rolesList = await rolesQuery.ToListAsync(cancellationToken);
+            var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
+            
+            var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
+            var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
+
             var campaignRequestQuery = await unitOfWork.CampaignRequests
                 .GetAsync(cr => cr.RequestId == request.RequestId);
 
@@ -31,6 +39,9 @@ namespace CabinCrewCareer.Application.CampaignRequests.Queries.GetCampaignReques
             }
 
             var mappedRequest = mapper.Map<GetCampaignRequestResponse>(campaignRequest);
+            
+            // Set Position based on RequestType and actual Role names
+            mappedRequest.Position = mappedRequest.RequestType == "Recruitment" ? cabinCrewRoleName : purserRoleName;
 
             return new Response<GetCampaignRequestResponse>(code: (int)ResponseCode.SUCCESS, data: mappedRequest, message: ResponseCode.SUCCESS.ToString());
         }
