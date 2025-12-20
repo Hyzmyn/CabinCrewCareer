@@ -2,10 +2,12 @@ using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
+using CabinCrewCareer.Application.Common.Models.Requests;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruitersAndExaminers
 {
@@ -17,19 +19,22 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
         private readonly ICampaignStatusService _campaignStatusService;
         private readonly INotificationService _notificationService;
         private readonly ICampaignRoundStatusService _campaignRoundStatusService;
+        private readonly IEmailService _emailService;
 
         public AssignRecruitersAndExaminersCommandHandler(
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
             ICampaignStatusService campaignStatusService,
             INotificationService notificationService,
-            ICampaignRoundStatusService campaignRoundStatusService)
+            ICampaignRoundStatusService campaignRoundStatusService,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _campaignStatusService = campaignStatusService;
             _notificationService = notificationService;
             _campaignRoundStatusService = campaignRoundStatusService;
+            _emailService = emailService;
         }
 
         public async Task<Response<bool>> Handle(
@@ -186,10 +191,156 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Commands.AssignRecruit
                 // Background service will update it later
             }
 
+            // ========== GỬI EMAIL BROADCAST CHO PROMOTION CAMPAIGN ==========
+            // Nếu là campaign Promotion, gửi email thông báo đến tất cả Cabin Crew của hãng
+            if (campaign.CampaignType == CampaignType.Promotion)
+            {
+                
+                try
+                {
+                    // LẤY TẤT CẢ DATA TRƯỚC KHI CHẠY BACKGROUND TASK để tránh disposed context
+                    var campaignRequestQuery = await _unitOfWork.CampaignRequests.GetAsync(
+                        cr => cr.RequestId == campaign.RequestId,
+                        includeFunc: q => q.Include(cr => cr.AirlinePartner)
+                    );
+                    var campaignRequest = await campaignRequestQuery.FirstOrDefaultAsync(cancellationToken);
+                    
+                    if (campaignRequest == null || campaignRequest.PartnerId == null || campaignRequest.AirlinePartner == null)
+                    {
+                        // Campaign request not found or missing partner info
+                    }
+                    else
+                    {
+                        
+                        // Lấy tất cả Cabin Crew
+                        var cabinCrews = await _unitOfWork.Users.GetAllAsync(u =>
+                            u.RoleId == 6 && 
+                            u.PartnerId == campaignRequest.PartnerId &&
+                            !string.IsNullOrEmpty(u.Email)
+                        );
+                        
+                        if (cabinCrews.Any())
+                        {
+                            // Lấy role name cho Purser (RoleId = 9)
+                            var purserRoleQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 9);
+                            var purserRole = await purserRoleQuery.FirstOrDefaultAsync(cancellationToken);
+                            var positionName = purserRole?.RoleName ?? "Purser";
+                            
+                            // Tạo snapshot data để dùng trong background task
+                            var emailData = new
+                            {
+                                CampaignName = campaign.CampaignName,
+                                Description = campaign.Description,
+                                TargetQuantity = campaign.TargetQuantity,
+                                Position = positionName,
+                                StartDate = campaign.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Đang cập nhật",
+                                EndDate = campaign.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Đang cập nhật",
+                                PartnerName = campaignRequest.AirlinePartner.PartnerName,
+                                CabinCrewEmails = cabinCrews.Select(c => new { 
+                                    Email = c.Email, 
+                                    FullName = c.FullName ?? c.UserName 
+                                }).ToList()
+                            };
+                            
+                            // Chạy trong background task với data đã snapshot
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await SendPromotionAnnouncementEmailsAsync(emailData);
+                                }
+                                catch (Exception)
+                                {
+                                    // Email sending failed in background task
+                                }
+                            }, CancellationToken.None); // Use None to avoid cancellation after request completes
+                        }
+                        else
+                        {
+                            // No cabin crews found for this partner
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Error preparing promotion email data
+                }
+            }
+
             return new Response<bool>(
                 code: (int)ResponseCode.CREATED_SUCCESS,
                 data: true,
                 message: ResponseCode.CREATED_SUCCESS.GetDescription());
+        }
+
+        /// <summary>
+        /// Gửi email thông báo promotion campaign đến tất cả Cabin Crew của hãng
+        /// Chạy trong background task với data đã được snapshot trước
+        /// </summary>
+        private async Task SendPromotionAnnouncementEmailsAsync(dynamic emailData)
+        {
+            // Đọc template email
+            var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "PromotionAnnouncementTemplate.html");
+            
+            if (!File.Exists(templatePath))
+            {
+                return;
+            }
+            
+            string templateBody = await File.ReadAllTextAsync(templatePath);
+
+            // Gửi email cho từng cabin crew theo batch để tránh quá tải
+            var cabinCrewList = ((IEnumerable<dynamic>)emailData.CabinCrewEmails).Cast<dynamic>().ToList();
+            
+            var batchSize = 50;
+            var batches = cabinCrewList
+                .Select((crew, index) => new { crew, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => g.Select(x => x.crew).ToList())
+                .ToList();
+            
+            foreach (var batch in batches)
+            {
+                var emailTasks = new List<Task>();
+                
+                foreach (var crew in batch)
+                {
+                    var emailBody = templateBody
+                        .Replace("{FullName}", crew.FullName)
+                        .Replace("{PartnerName}", emailData.PartnerName)
+                        .Replace("{CampaignName}", emailData.CampaignName)
+                        .Replace("{Description}", emailData.Description)
+                        .Replace("{Position}", emailData.Position)
+                        .Replace("{TargetQuantity}", emailData.TargetQuantity.ToString())
+                        .Replace("{StartDate}", emailData.StartDate)
+                        .Replace("{EndDate}", emailData.EndDate);
+
+                    var mailRequest = new MailRequest
+                    {
+                        ToEmail = crew.Email,
+                        Subject = $"🎉 Promotion Opportunity - {emailData.CampaignName}",
+                        Body = emailBody
+                    };
+
+                    emailTasks.Add(_emailService.SendEmailAsync(mailRequest));
+                }
+
+                // Gửi từng batch và delay một chút giữa các batch
+                try
+                {
+                    await Task.WhenAll(emailTasks);
+                }
+                catch (Exception)
+                {
+                    // Batch email sending failed, continue with next batch
+                }
+
+                // Delay 1s giữa các batch để tránh spam
+                if (batches.IndexOf(batch) < batches.Count - 1)
+                {
+                    await Task.Delay(1000);
+                }
+            }
         }
     }
 }

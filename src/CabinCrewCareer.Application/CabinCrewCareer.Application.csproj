@@ -37,7 +37,11 @@
 				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			</None>
 		</ItemGroup>
-
+		<ItemGroup>
+			<None Update="Common\Templates\PromotionAnnouncementTemplate.html">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			</None>
+		</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\CabinCrewCareer.Domain\CabinCrewCareer.Domain.csproj" />
 	</ItemGroup>

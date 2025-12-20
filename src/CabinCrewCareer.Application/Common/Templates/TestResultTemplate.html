@@ -2,13 +2,82 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Kết quả vòng thi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Round Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .footer {
+            background: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <p>Xin chào: <strong>{FullName}</strong>,</p>
-    <p>Bạn đã <strong>{Result}</strong> vòng <strong>{RoundName}</strong> trong chiến dịch: <strong>{CampaignName}</strong></p>
-    <p>{ExtraMessage}</p>
-    {NextRoundInfo}
-    <p>Trân trọng,<br>Hệ thống Cabin Crew Career</p>
+    <div class="header">
+        <h1>📊 Test Round Result</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{FullName}</strong>,</p>
+        
+        <p>You have <strong class="highlight">{Result}</strong> the <strong>{RoundName}</strong> round in the campaign: <strong>{CampaignName}</strong></p>
+        
+        <div class="info-box">
+            <p>{ExtraMessage}</p>
+            {NextRoundInfo}
+        </div>
+        
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="https://cabincrewcareer.vercel.app/" target="_blank" style="background: #667eea; color: white; padding: 12px 30px; display: inline-block; border-radius: 8px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
+                View Campaign Details
+            </a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Best regards,</strong></p>
+        <p><strong>Cabin Crew Career System</strong></p>
+        <p style="font-size: 12px; margin-top: 15px;">
+            This is an automated email. Please do not reply to this message.
+        </p>
+    </div>
 </body>
 </html>

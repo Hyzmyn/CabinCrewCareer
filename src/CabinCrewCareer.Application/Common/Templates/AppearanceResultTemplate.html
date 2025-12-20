@@ -2,15 +2,119 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Kết quả vòng Ngoại hình</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appearance Round Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .detail-item {
+            margin: 10px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .result-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .footer {
+            background: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <p>Xin chào: <strong>{FullName}</strong>,</p>
-    <p>Bạn đã <strong>{Result}</strong> vòng <strong>Ngoại hình</strong> trong quá trình chiến dịch: <strong>{CampaignName}</strong></p>
-    <p>Mã tham gia vòng thi nghe: <strong>{ListeningJoinCode}</strong></p>
-    <p>Thời gian vòng nghe: <strong>{ListeningStartDate}</strong> - <strong>{ListeningEndDate}</strong></p>
-    <p>Mã tham gia vòng thi nói: <strong>{SpeakingJoinCode}</strong></p>
-    <p>Thời gian vòng nói: <strong>{SpeakingStartDate}</strong> - <strong>{SpeakingEndDate}</strong></p>
-    <p>Trân trọng,<br>Hệ thống Cabin Crew Career</p>
+    <div class="header">
+        <h1>✨ Appearance Round Result</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{FullName}</strong>,</p>
+        
+        <p>You have <strong class="highlight">{Result}</strong> the <strong>Appearance Round</strong> in the campaign: <strong>{CampaignName}</strong></p>
+        
+        <div class="info-box">
+            <h3 style="color: #667eea; margin-top: 0;">📋 Next Round Details</h3>
+            
+            <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px;">
+                <h4 style="margin-top: 0; color: #555;">🎧 Listening Test</h4>
+                <div class="detail-item">
+                    <span class="detail-label">Join Code:</span> <span class="highlight">{ListeningJoinCode}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Test Period:</span> {ListeningStartDate} - {ListeningEndDate}
+                </div>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px;">
+                <h4 style="margin-top: 0; color: #555;">🗣️ Speaking Test</h4>
+                <div class="detail-item">
+                    <span class="detail-label">Join Code:</span> <span class="highlight">{SpeakingJoinCode}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Test Period:</span> {SpeakingStartDate} - {SpeakingEndDate}
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="https://cabincrewcareer.vercel.app/" target="_blank" style="background: #667eea; color: white; padding: 12px 30px; display: inline-block; border-radius: 8px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
+                Access System to Continue
+            </a>
+        </div>
+        
+        <p style="text-align: center; color: #666; font-size: 15px; margin-top: 30px;">
+            Good luck with your next rounds!
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Best regards,</strong></p>
+        <p><strong>Cabin Crew Career System</strong></p>
+        <p style="font-size: 12px; margin-top: 15px;">
+            This is an automated email. Please do not reply to this message.
+        </p>
+    </div>
 </body>
 </html>
