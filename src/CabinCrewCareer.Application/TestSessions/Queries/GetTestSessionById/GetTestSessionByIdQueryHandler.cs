@@ -5,6 +5,7 @@ using CabinCrewCareer.Application.TestSessions.Common;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById
 {
@@ -12,6 +13,15 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById
         IUnitOfWork unitOfWork) : IRequestHandler<GetTestSessionByIdQuery, Response<GetTestSessionResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+
+        /// <summary>
+        /// Converts enum name to a readable format by adding spaces between words
+        /// Example: "EnglishListening" -> "English Listening"
+        /// </summary>
+        private static string FormatEnumName(string enumValue)
+        {
+            return Regex.Replace(enumValue, "([a-z])([A-Z])", "$1 $2");
+        }
 
         public async Task<Response<GetTestSessionResponse>> Handle(GetTestSessionByIdQuery request, CancellationToken cancellationToken)
         {
@@ -43,7 +53,7 @@ namespace CabinCrewCareer.Application.TestSessions.Queries.GetTestSessionById
                 ImgURL = testSession.User?.ImgURL,
                 TestId = testSession.TestId ?? 0,
                 TestName = testSession.Test?.TestName ?? string.Empty,
-                TestType = testSession.Test?.TestType.ToString() ?? string.Empty,
+                TestType = FormatEnumName(testSession.Test?.TestType.ToString() ?? string.Empty),
                 StartTime = testSession.StartTime,
                 EndTime = testSession.EndTime,
                 Status = testSession.Status,
