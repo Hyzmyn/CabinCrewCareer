@@ -21,16 +21,23 @@ namespace CabinCrewCareer.Api.Controllers
         /// **Chức năng:**
         /// - Giao việc cho recruiters và examiners trong một campaign
         /// - Tự động gửi notification cho tất cả người được giao việc (realtime nếu có SignalR)
-        /// - Chuyển campaign status sang Published
+        /// - Chuyển campaign status sang Ongoing
         /// - Assignment status ban đầu: Assigned
         /// - Tự động chuyển sang InProgress khi campaign Ongoing
         /// - Tự động chuyển sang Completed khi campaign Ended
+        /// - **[MỚI]** Nếu là campaign Promotion: Gửi email thông báo broadcast đến tất cả Cabin Crew (RoleId=6) của hãng đó
         /// 
         /// **Business Rules:**
         /// - Campaign phải ở trạng thái Approved
         /// - Mỗi user chỉ được 1 campaign ongoing tại một thời điểm
         /// - Không được overlap thời gian với campaigns khác
         /// - Không thể từ chối task (tự động assigned)
+        /// 
+        /// **Promotion Campaign - Email Broadcast:**
+        /// - Tự động gửi email thông báo đến tất cả Cabin Crew của cùng hãng (PartnerId)
+        /// - Email chứa thông tin: Tên campaign, mô tả, số lượng tuyển, thời gian
+        /// - Gửi trong background task, không ảnh hưởng đến response time
+        /// - Batch processing: 50 emails/batch với delay 1s giữa các batch
         /// 
         /// **Sample request:**
         /// 

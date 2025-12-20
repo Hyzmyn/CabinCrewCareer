@@ -2,17 +2,120 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>TÀI KHOẢN ĐĂNG NHẬP PHẦN MỀM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Credentials</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        .credentials-box {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .credential-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .credential-label {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .credential-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <p>Xin chào: <strong>{FullName}</strong>,</p>
-    <p>Hệ thống gửi tài khoản để đăng nhập phần mềm:</p>
-    <ul>
-        <li>Username: <strong>{UserName}</strong></li>
-        <li>Password: <strong>{Password}</strong></li>
-    </ul>
-    <p>Hãy giữ kín việc này.</p>
-    <p>Nhập đúng ký tự hoa/thường.</p>
-    <p>Trân trọng,<br>Hệ thống Cabin Crew Career</p>
+    <div class="header">
+        <h1>🔐 Your Login Credentials</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{FullName}</strong>,</p>
+        
+        <p>Welcome to Cabin Crew Career System! Here are your login credentials:</p>
+        
+        <div class="credentials-box">
+            <div class="credential-item">
+                <span class="credential-label">Username:</span>
+                <span class="credential-value">{UserName}</span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Password:</span>
+                <span class="credential-value">{Password}</span>
+            </div>
+        </div>
+        
+        <div class="warning-box">
+            <p style="margin: 0; color: #856404;">
+                <strong>⚠️ Important Security Notes:</strong><br>
+                • Keep these credentials confidential<br>
+                • Passwords are case-sensitive<br>
+                • Do not share your account with others<br>
+                • Change your password after first login
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="https://cabincrewcareer.vercel.app/" target="_blank" style="background: #667eea; color: white; padding: 12px 30px; display: inline-block; border-radius: 8px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
+                Login to System
+            </a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Best regards,</strong></p>
+        <p><strong>Cabin Crew Career System</strong></p>
+        <p style="font-size: 12px; margin-top: 15px;">
+            This is an automated email. Please do not reply to this message.
+        </p>
+    </div>
 </body>
 </html>
