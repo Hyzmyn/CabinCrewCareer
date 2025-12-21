@@ -101,7 +101,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.CreateCampaignRe
                 PartnerName = createdRequest.AirlinePartner?.PartnerName,
                 DirectorName = createdRequest.Director?.FullName,
                 CreatedAt = (createdRequest.CreatedAt ?? _dateTimeProvider.UtcNow).GetFormatDateTime(),
-                DueDate = createdRequest.DueDate?.ToString()
+                DueDate = createdRequest.DueDate?.ToString("dd/MM/yyyy")
             };
 
             return new Response<GetCampaignRequestResponse>(
