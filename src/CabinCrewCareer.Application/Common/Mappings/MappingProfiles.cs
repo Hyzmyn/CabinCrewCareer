@@ -52,6 +52,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(cr => cr.DirectorName, cr => cr.MapFrom(cr => cr.DirectorId != null ? cr.Director.FullName : null))
                 .ForMember(cr => cr.ApprovedAt, cr => cr.MapFrom(cr => cr.ApprovedAt.HasValue ? cr.ApprovedAt.Value.GetFormatDateTime() : null))
                 .ForMember(cr => cr.RejectedAt, cr => cr.MapFrom(cr => cr.RejectedAt.HasValue ? cr.RejectedAt.Value.GetFormatDateTime() : null))
+                .ForMember(cr => cr.DueDate, cr => cr.MapFrom(cr => cr.DueDate.HasValue ? cr.DueDate.Value.ToString("dd/MM/yyyy") : null))
                 .ForMember(cr => cr.CreatedAt, cr => cr.MapFrom(cr => cr.CreatedAt ?? DateTime.MinValue));
 
             CreateMap<PaginatedList<CampaignRequest>, PaginatedList<GetCampaignRequestResponse>>();

@@ -126,7 +126,7 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateRejectedCa
                 PartnerName = updatedRequest.PartnerId != null ? updatedRequest.AirlinePartner?.PartnerName : null,
                 DirectorName = updatedRequest.DirectorId != null ? updatedRequest.Director?.FullName : null,
                 CreatedAt = (updatedRequest.CreatedAt ?? DateTime.UtcNow).GetFormatDateTime(),
-                DueDate = updatedRequest.DueDate?.ToString()
+                DueDate = updatedRequest.DueDate?.ToString("dd/MM/yyyy")
 
             };
 
