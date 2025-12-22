@@ -88,7 +88,7 @@ namespace CabinCrewCareer.Infrastructure.Services
 
                 // Tiêu đề bảng (thêm UserId và Pass/Fail)
                 ws.Cell(8, 1).Value = "STT";
-                ws.Cell(8, 2).Value = "UserId";
+                ws.Cell(8, 2).Value = "Mã Số Ứng Viên";
                 ws.Cell(8, 3).Value = "Họ và tên";
                 ws.Cell(8, 4).Value = "Ngày sinh";
                 ws.Cell(8, 5).Value = "Số CMND/HC";
