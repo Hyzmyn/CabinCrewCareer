@@ -10,5 +10,9 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
         Task<EvaluationForm> GetInterviewFormByIdAsync(int evaluationId);
 
         Task<List<EvaluationForm>> GetInterviewFormsAsync(int activityId);
+
+        Task<bool> HasEvaluatedRound(int activityId, int examinerId);
+
+        Task<bool> HasExistedAppearanceForm(int activityId);
     }
 }

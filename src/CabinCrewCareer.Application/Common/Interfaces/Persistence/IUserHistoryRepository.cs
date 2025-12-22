@@ -8,5 +8,7 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
         Task<UserHistory> GetUserOngoingCampaignAsync(int userId);
 
         Task<List<UserHistory>> GetUserCompletedCampaignsAsync(int userId);
+
+        Task<bool> HasAppliedToCampainRound(int userId, int campaignRoundId);
     }
 }

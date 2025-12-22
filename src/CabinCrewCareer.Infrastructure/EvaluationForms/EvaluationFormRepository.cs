@@ -119,5 +119,23 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
 
             return await query.ToListAsync();
         }
+
+        public async Task<bool> HasEvaluatedRound(int activityId, int examinerId)
+        {
+            var result = await _dbContext.EvaluationForms.Where(x => x.ActivityId == activityId && x.ExaminerId == examinerId).Select(x => x.EvaluationId).FirstOrDefaultAsync();
+
+            if (result > 0) return true;
+
+            return false;
+        }
+
+        public async Task<bool> HasExistedAppearanceForm(int activityId)
+        {
+            var result = await _dbContext.EvaluationForms.Where(x => x.ActivityId == activityId).Select(x => x.EvaluationId).FirstOrDefaultAsync();
+
+            if (result > 0) return true;
+
+            return false;
+        }
     }
 }
