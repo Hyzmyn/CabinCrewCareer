@@ -6,6 +6,7 @@ namespace CabinCrewCareer.Domain.Common
     {
         [Description("Admin")]
         Admin = 1,
+
         [Description("Director")]
         Director,
 

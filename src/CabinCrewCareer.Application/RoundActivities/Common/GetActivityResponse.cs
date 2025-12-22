@@ -20,6 +20,10 @@
 
         public string PhoneNumber { get; set; } = string.Empty;
 
+        public bool HasAppearanceEvaluated { get; set; } = false;
+
+        public bool HasInterviewEvaluated { get; set; } = false;
+
         public int ApplicationSnapshotId { get; set; }
     }
 }

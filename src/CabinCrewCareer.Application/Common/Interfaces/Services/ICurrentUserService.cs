@@ -10,6 +10,8 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Services
 
         public string? UserName { get; }
 
+        public string? Role { get; }
+
         public ClaimsPrincipal GetCurrentPrincipalFromToken(string token);
     }
 }
