@@ -7,14 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicationByUserId
 {
-    public class GetUserApplicationByUserIdQueryHandler : IRequestHandler<GetUserApplicationByUserIdQuery, Response<UserApplicationDetailResponse>>
+    public class GetUserApplicationByUserIdQueryHandler(IUnitOfWork unitOfWork) : IRequestHandler<GetUserApplicationByUserIdQuery, Response<UserApplicationDetailResponse>>
     {
-        private readonly IUnitOfWork _unitOfWork;
-
-        public GetUserApplicationByUserIdQueryHandler(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<Response<UserApplicationDetailResponse>> Handle(GetUserApplicationByUserIdQuery request, CancellationToken cancellationToken)
         {
@@ -35,6 +30,8 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
                 };
             }
 
+            double bmi = ((double)application.UserApplicationSnapshot.Weight / (((double)application.UserApplicationSnapshot.Height / 100) * ((double)application.UserApplicationSnapshot.Height / 100)));
+
             // Map to response
             var response = new UserApplicationDetailResponse
             {
@@ -50,6 +47,7 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
                 Gender = application.UserApplicationSnapshot.Gender.GetDescription(),
                 Height = application.UserApplicationSnapshot.Height,
                 Weight = application.UserApplicationSnapshot.Weight,
+                BMI = Math.Round(bmi, 1),
                 EnglishDegreeNumber = application.UserApplicationSnapshot.EnglishDegreeNumber,
                 EndDate = application.UserApplicationSnapshot.EndDate.HasValue ? application.UserApplicationSnapshot.EndDate.Value.ToString("dd/MM/yyyy") : null,
                 CitizenId = application.UserApplicationSnapshot.CitizenId,
@@ -63,7 +61,7 @@ namespace CabinCrewCareer.Application.UserApplications.Queries.GetUserApplicatio
                     DocumentURL = d.DocumentURL,
                     Type = d.Type.ToString(),
                     UploadDate = d.UploadDate.HasValue ? d.UploadDate.Value.ToString("dd/MM/yyyy") : null
-                }).ToList() ?? new List<DocumentResponse>()
+                }).ToList() ?? []
             };
 
             return new Response<UserApplicationDetailResponse>

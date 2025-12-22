@@ -79,7 +79,7 @@ namespace CabinCrewCareer.Infrastructure.Tests
 
             if (testType != null)
             {
-                testsQuery = testsQuery.Where(t => t.TestType == (TestType)testType);
+                testsQuery = testsQuery.OrderByDescending(t => t.TestId).Where(t => t.TestType == (TestType)testType);
             }
 
             return await testsQuery.ToListAsync();
