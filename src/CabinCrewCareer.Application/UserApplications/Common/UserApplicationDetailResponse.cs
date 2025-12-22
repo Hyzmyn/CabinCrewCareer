@@ -22,6 +22,7 @@ namespace CabinCrewCareer.Application.UserApplications.Common
         public string? Gender { get; set; }
         public int Height { get; set; }
         public int Weight { get; set; }
+        public double BMI { get; set; }
         public string? EnglishDegreeNumber { get; set; }
         public string? EndDate { get; set; }
         public string? CitizenId { get; set; }

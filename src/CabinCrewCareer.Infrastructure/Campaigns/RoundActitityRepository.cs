@@ -49,17 +49,16 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
                 Status = u.Status,
                 RoundId = u.RoundId,
                 UserId = u.UserId,
-                ApplicationSnapshotId = u.ApplicationSnapshotId,
                 Round = new Round
                 {
                     RoundType = u.Round.RoundType
                 },
-                User = new User
+                UserApplicationSnapshot = new UserApplicationSnapshot
                 {
-                    ImgURL = u.User.ImgURL,
-                    FullName = u.User.FullName,
-                    Email = u.User.Email,
-                    PhoneNumber = u.User.PhoneNumber
+                    ApplicationSnapshotId = u.UserApplicationSnapshot.ApplicationSnapshotId,
+                    FullName = u.UserApplicationSnapshot.FullName,
+                    Email = u.UserApplicationSnapshot.Email,
+                    PhoneNumber = u.UserApplicationSnapshot.PhoneNumber
                 }
             });
 

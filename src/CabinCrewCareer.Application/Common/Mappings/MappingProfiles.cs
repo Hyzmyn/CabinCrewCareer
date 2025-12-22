@@ -79,10 +79,10 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<RoundActivity, GetActivityResponse>()
                 .ForMember(u => u.Status, u => u.MapFrom(u => u.Status.GetDescription()))
-                .ForMember(u => u.ImgURL, u => u.MapFrom(u => u.User.ImgURL))
-                .ForMember(u => u.FullName, u => u.MapFrom(u => u.User.FullName))
-                .ForMember(u => u.Email, u => u.MapFrom(u => u.User.Email))
-                .ForMember(u => u.PhoneNumber, u => u.MapFrom(u => u.User.PhoneNumber))
+                .ForMember(u => u.FullName, u => u.MapFrom(u => u.UserApplicationSnapshot.FullName))
+                .ForMember(u => u.Email, u => u.MapFrom(u => u.UserApplicationSnapshot.Email))
+                .ForMember(u => u.PhoneNumber, u => u.MapFrom(u => u.UserApplicationSnapshot.PhoneNumber))
+                .ForMember(u => u.ApplicationSnapshotId, u => u.MapFrom(u => u.UserApplicationSnapshot.ApplicationSnapshotId))
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.Round.RoundType.GetDescription()));
 
             CreateMap<PaginatedList<RoundActivity>, PaginatedList<GetActivityResponse>>();
