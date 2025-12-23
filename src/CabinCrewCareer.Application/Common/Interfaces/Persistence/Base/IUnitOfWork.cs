@@ -67,6 +67,8 @@
 
         IScoringCriteriaDetailRepository ScoringCriteriaDetails { get; }
 
+        IAirlinePartnerRepository AirlinePartners { get; }
+
         Task CompleteAsync();
     }
 }

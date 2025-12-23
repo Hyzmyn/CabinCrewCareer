@@ -45,6 +45,7 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 DateOfBirth = request.DateOfBirth,
+                PartnerId = request.PartnerId,
                 Gender = Gender.Others,
                 IsActive = true,
                 ImgURL = DefaultAvatar.UserPicture,
