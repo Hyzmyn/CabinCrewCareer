@@ -84,8 +84,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                 if (form.IsPassed)
                 {
                     roundActivity.Status = ActivityStatus.Passed;
-                    resultText = "Đạt";
-                    extraMessage = "Chúc mừng bạn đã vượt qua vòng Ngoại hình.";
+                    resultText = "PASSED";
+                    extraMessage = "Congratulations! You have passed the Appearance round.";
 
                     // Lấy tên campaign
                     campaignName = roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "";
@@ -130,8 +130,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                 else
                 {
                     roundActivity.Status = ActivityStatus.Failed;
-                    resultText = "Không đạt";
-                    extraMessage = "Rất tiếc bạn chưa vượt qua vòng Ngoại hình.";
+                    resultText = "FAILED";
+                    extraMessage = "Unfortunately! You did not pass the Appearance round.";
 
                     var history = await _unitOfWork.UserHistories.GetAsync(x => x.UserId == (int)roundActivity.UserId && x.Type == HistoryType.Ongoing);
                     var rehe = await history.FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -152,16 +152,16 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                         templateBody = templateBody.Replace("{FullName}", user.FullName ?? "")
                                                  .Replace("{Result}", resultText)
                                                  .Replace("{CampaignName}", campaignName)
-                                                 .Replace("{ListeningJoinCode}", listeningJoinCode)
+                                                 //.Replace("{ListeningJoinCode}", listeningJoinCode)
                                                  .Replace("{ListeningStartDate}", listeningStartDate)
                                                  .Replace("{ListeningEndDate}", listeningEndDate)
-                                                 .Replace("{SpeakingJoinCode}", speakingJoinCode)
+                                                 //.Replace("{SpeakingJoinCode}", speakingJoinCode)
                                                  .Replace("{SpeakingStartDate}", speakingStartDate)
                                                  .Replace("{SpeakingEndDate}", speakingEndDate);
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,
-                            Subject = "Kết quả vòng Ngoại hình Cabin Crew",
+                            Subject = "Appearance result - Cabin Crew Career",
                             Body = templateBody
                         };
                         await _emailService.SendEmailAsync(mailRequest);

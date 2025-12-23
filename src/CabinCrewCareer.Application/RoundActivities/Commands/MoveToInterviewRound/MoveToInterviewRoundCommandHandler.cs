@@ -1,6 +1,5 @@
 using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Application.Common.Models.Requests;
@@ -66,7 +65,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
 
             // 4. Get Interview Round for later
             var interviewRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                expression: x => x.CampaignRoundId == round.CampaignRoundId 
+                expression: x => x.CampaignRoundId == round.CampaignRoundId
                               && x.RoundType == RoundType.Interview);
 
             var interviewRound = await interviewRoundQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -83,10 +82,10 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             foreach (var roundActivity in roundActivities)
             {
                 totalProcessed++;
-                
+
                 // Get all test sessions for this user in this test
                 var testSessions = await _unitOfWork.TestSessions.GetAllAsync(
-                    expression: ts => ts.UserId == roundActivity.UserId 
+                    expression: ts => ts.UserId == roundActivity.UserId
                                     && ts.TestId == round.TestId,
                     includeFunc: query => query.Include(ts => ts.Test)
                 );
@@ -115,7 +114,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 {
                     var isPassed = session.TotalScore >= requiredScore;
                     sessionScores.Add($"{session.TotalScore}/{maxScore}");
-                    
+
                     if (!isPassed)
                     {
                         allSessionsPassed = false;
@@ -124,16 +123,16 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
 
                 // For English tests, need to check BOTH Listening and Speaking rounds
                 bool canMoveToInterview = false;
-                
+
                 if (isEnglishTest && allSessionsPassed)
                 {
                     // Check the other English round (Listening or Speaking)
-                    var otherEnglishRoundType = round.RoundType == RoundType.EnglishListeningTest 
-                        ? RoundType.EnglishSpeakingTest 
+                    var otherEnglishRoundType = round.RoundType == RoundType.EnglishListeningTest
+                        ? RoundType.EnglishSpeakingTest
                         : RoundType.EnglishListeningTest;
 
                     var otherEnglishRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                        expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                        expression: r => r.CampaignRoundId == round.CampaignRoundId
                                       && r.RoundType == otherEnglishRoundType,
                         includeFunc: query => query.Include(r => r.RoundActivities)
                     );
@@ -183,7 +182,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                     {
                         // Check if interview round activity already exists
                         var existingInterviewActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
-                            expression: x => x.RoundId == interviewRound.RoundId 
+                            expression: x => x.RoundId == interviewRound.RoundId
                                           && x.UserId == roundActivity.UserId);
 
                         var existingInterviewActivity = await existingInterviewActivityQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -233,8 +232,8 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             await _unitOfWork.CompleteAsync();
 
             // 7. Build response message
-            string testTypeInfo = isEnglishTest 
-                ? "English Test Round (Both Listening and Speaking must pass)" 
+            string testTypeInfo = isEnglishTest
+                ? "English Test Round (Both Listening and Speaking must pass)"
                 : "Practical Test Round";
 
             string summaryMessage = $"Processed {totalProcessed} round activities in {testTypeInfo}:\n" +
@@ -278,28 +277,28 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             // Determine round name
             string roundName = round.RoundType switch
             {
-                RoundType.EnglishListeningTest => "Kiểm tra Tiếng Anh Nghe",
-                RoundType.EnglishSpeakingTest => "Kiểm tra Tiếng Anh Nói",
-                RoundType.PracticalTest => "Kiểm tra Thực hành",
-                _ => "Kiểm tra"
+                RoundType.EnglishListeningTest => "English Listening Test",
+                RoundType.EnglishSpeakingTest => "English Speaking Test",
+                RoundType.PracticalTest => "Practical Test",
+                _ => "Test"
             };
 
-            string resultText = isPassed ? "Đạt" : "Không đạt";
-            
+            string resultText = isPassed ? "PASSED" : "FAILED";
+
             // For English tests, add note if waiting for other test
             bool isEnglishTest = round.RoundType == RoundType.EnglishListeningTest || round.RoundType == RoundType.EnglishSpeakingTest;
             string extraMessage;
             if (isPassed && isEnglishTest && !canMoveToInterview)
             {
-                extraMessage = $"Chúc mừng bạn đã vượt qua vòng {roundName}. Bạn cần hoàn thành cả 2 vòng Tiếng Anh để tiến vào vòng Phỏng vấn.";
+                extraMessage = $"Congratulations! You have passed the {roundName}. You need to complete both English rounds to advance to the interview round.";
             }
             else if (isPassed)
             {
-                extraMessage = $"Chúc mừng bạn đã vượt qua vòng {roundName}.";
+                extraMessage = $"Congratulations! You have passed the {roundName}.";
             }
             else
             {
-                extraMessage = $"Rất tiếc bạn chưa vượt qua vòng {roundName}.";
+                extraMessage = $"Unfortunately! You did not pass the {roundName}.";
             }
 
             // Build next round info - Only show if user can actually move to next round
@@ -308,14 +307,14 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             {
                 string nextRoundName = nextRound.RoundType switch
                 {
-                    RoundType.Interview => "Phỏng vấn",
-                    RoundType.Final => "Hoàn tất",
-                    _ => "Vòng tiếp theo"
+                    RoundType.Interview => "Interview",
+                    RoundType.Final => "Final",
+                    _ => "Next round"
                 };
 
-                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
-                nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
-                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>";
+                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Undefined";
+                nextRoundInfo = $"<p><strong>Next round:</strong> {nextRoundName}</p>" +
+                               $"<p><strong>Start date:</strong> {startDate}</p>";
             }
 
             // Read template and replace placeholders
@@ -332,7 +331,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             var mailRequest = new MailRequest
             {
                 ToEmail = user.Email,
-                Subject = $"Kết quả {roundName} - Cabin Crew Career",
+                Subject = $"{roundName} result - Cabin Crew Career",
                 Body = templateBody
             };
 

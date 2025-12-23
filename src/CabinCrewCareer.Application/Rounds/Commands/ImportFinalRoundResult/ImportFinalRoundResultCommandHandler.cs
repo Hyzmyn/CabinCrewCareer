@@ -1,14 +1,10 @@
-using MediatR;
-using CabinCrewCareer.Domain.Wrappers;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
-using ClosedXML.Excel;
-using System.Text;
-using CabinCrewCareer.Domain.Common;
-using Microsoft.AspNetCore.Http;
 using CabinCrewCareer.Application.Common.Models.Requests;
+using CabinCrewCareer.Domain.Wrappers;
+using ClosedXML.Excel;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
 
 namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
 {
@@ -149,7 +145,7 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 // Tăng ActualQuantity của CampaignRound (sử dụng object đã load)
                 round.CampaignRound.ActualQuantiy += totalPassed;
                 await _unitOfWork.CampaignRounds.UpdateAsync(round.CampaignRound);
-                
+
                 // Cập nhật ActualQuantity của Campaign (tổng của tất cả các đợt)
                 if (round.CampaignRound.Campaign != null)
                 {
@@ -171,7 +167,7 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 code: 200,
                 data: $"Processed: {totalProcessed}, Passed: {totalPassed}, Failed: {totalFailed}, Auto-Failed: {totalAutoFailed}",
                 message: "Import completed successfully."
-                // message: $"{summaryMessage}\nDetails:\n{detailMessage}"
+            // message: $"{summaryMessage}\nDetails:\n{detailMessage}"
             );
         }
 
@@ -185,18 +181,18 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
             string templateBody = File.Exists(templatePath)
                 ? await File.ReadAllTextAsync(templatePath, cancellationToken)
-                : $"Kết quả vòng Final: {{Result}}";
+                : $"Final result: {{Result}}";
             templateBody = templateBody
                 .Replace("{FullName}", user.FullName ?? "")
-                .Replace("{Result}", isPassed ? "Đạt" : "Không đạt")
-                .Replace("{RoundName}", "Vòng Final")
+                .Replace("{Result}", isPassed ? "PASSED" : "FAILED")
+                .Replace("{RoundName}", "Final")
                 .Replace("{CampaignName}", "Cabin Crew Career")
-                .Replace("{ExtraMessage}", isPassed ? "Chúc mừng bạn đã vượt qua vòng Final." : "Rất tiếc bạn chưa vượt qua vòng Final.")
+                .Replace("{ExtraMessage}", isPassed ? "Congratulations! You have passed the Final round!" : "Unfortunately! You did not pass the Final round!")
                 .Replace("{NextRoundInfo}", "");
             var mailRequest = new MailRequest
             {
                 ToEmail = user.Email,
-                Subject = "Kết quả vòng Final - Cabin Crew Career",
+                Subject = "Final result - Cabin Crew Career",
                 Body = templateBody
             };
             await _emailService.SendEmailAsync(mailRequest);

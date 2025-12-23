@@ -14,7 +14,7 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
 {
     public class ImportFlightHoursCommandHandler(
         IUnitOfWork unitOfWork,
-        IEmailService emailService) 
+        IEmailService emailService)
         : IRequestHandler<ImportFlightHoursCommand, Response<string>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -46,7 +46,7 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
 
             // 2. Get next round (should be Practical Test round)
             var nextRoundQuery = await _unitOfWork.Rounds.GetAsync(
-                expression: r => r.CampaignRoundId == round.CampaignRoundId 
+                expression: r => r.CampaignRoundId == round.CampaignRoundId
                               && r.RoundType == RoundType.PracticalTest
             );
 
@@ -99,7 +99,7 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
                     if (nextRound != null)
                     {
                         var existingNextActivity = await _unitOfWork.RoundActivites.GetAsync(
-                            expression: x => x.RoundId == nextRound.RoundId 
+                            expression: x => x.RoundId == nextRound.RoundId
                                           && x.UserId == result.UserId
                         );
 
@@ -220,10 +220,10 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
             var roundData = await roundWithCampaign.FirstOrDefaultAsync(cancellationToken);
             string campaignName = roundData?.CampaignRound?.Campaign?.CampaignName ?? "";
 
-            string resultText = isPassed ? "Đạt" : "Không đạt";
+            string resultText = isPassed ? "PASSED" : "FAILED";
             string extraMessage = isPassed
-                ? "Chúc mừng bạn đã vượt qua vòng Xác nhận giờ bay và kinh nghiệm."
-                : "Rất tiếc bạn chưa vượt qua vòng Xác nhận giờ bay và kinh nghiệm.";
+                ? "Congratulations! You have passed the Flight hours confirmation round"
+                : "Unfortunately! You did not pass the Flight hours confirmatino round";
 
             // Build next round info
             string nextRoundInfo = "";
@@ -231,17 +231,17 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
             {
                 string nextRoundName = nextRound.RoundType switch
                 {
-                    RoundType.PracticalTest => "Kiểm tra Thực hành",
-                    RoundType.Interview => "Phỏng vấn",
-                    RoundType.Final => "Hoàn tất",
-                    _ => "Vòng tiếp theo"
+                    RoundType.PracticalTest => "Practical Test",
+                    RoundType.Interview => "Interview",
+                    RoundType.Final => "Final",
+                    _ => "Next round"
                 };
 
-                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
-                string endDate = nextRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
-                nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
-                               $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>" +
-                               $"<p><strong>Thời gian kết thúc:</strong> {endDate}</p>";
+                string startDate = nextRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Undefined";
+                string endDate = nextRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Undefined";
+                nextRoundInfo = $"<p><strong>Next round:</strong> {nextRoundName}</p>" +
+                               $"<p><strong>Start date:</strong> {startDate}</p>" +
+                               $"<p><strong>End date:</strong> {endDate}</p>";
             }
 
             // Read template and replace placeholders
@@ -257,7 +257,7 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
             var mailRequest = new MailRequest
             {
                 ToEmail = user.Email,
-                Subject = "Kết quả Xác nhận giờ bay - Cabin Crew Career",
+                Subject = "Flight Hours Confirmation result - Cabin Crew Career",
                 Body = templateBody
             };
 
@@ -296,7 +296,7 @@ namespace CabinCrewCareer.Application.FlightExperience.Commands.ImportFlightHour
 
                             // Parse Pass/Fail status
                             var passFailValue = passFailCell.GetValue<string>().Trim().ToLower();
-                            
+
                             bool? isPassed = null;
                             if (passFailValue == "pass" || passFailValue == "☑")
                             {
