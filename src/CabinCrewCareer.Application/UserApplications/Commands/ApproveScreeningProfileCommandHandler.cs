@@ -93,8 +93,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     if (user != null && !string.IsNullOrEmpty(user.Email))
                     {
                         var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                        string subject = "Kết quả vòng Sàng lọc hồ sơ";
-                        string extraMessage = "Chúc mừng bạn đã vượt qua vòng Sàng lọc hồ sơ.";
+                        string subject = "Screening result - Cabin Crew Career";
+                        string extraMessage = "Congratulations! you have passed the Screening round.";
                         string nextRoundInfo = "";
                         Round? nextRoundForInfo = null;
                         if (campaign.CampaignType == CampaignType.Recruitment)
@@ -113,23 +113,23 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         {
                             string nextRoundName = nextRoundForInfo.RoundType switch
                             {
-                                RoundType.PracticalTest => "Kiểm tra Thực hành",
-                                RoundType.Interview => "Phỏng vấn",
-                                RoundType.Final => "Hoàn tất",
-                                RoundType.Appearance => "Kiểm tra Ngoại hình",
-                                RoundType.FlightHoursConfirmation => "Xác nhận giờ bay",
-                                _ => "Vòng tiếp theo"
+                                RoundType.PracticalTest => "Practical Test",
+                                RoundType.Interview => "Interview",
+                                RoundType.Final => "Final",
+                                RoundType.Appearance => "Appearance",
+                                RoundType.FlightHoursConfirmation => "Flight Hours Confirmation",
+                                _ => "Next round"
                             };
-                            string startDate = nextRoundForInfo.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
-                            string endDate = nextRoundForInfo.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định";
-                            nextRoundInfo = $"<p><strong>Vòng tiếp theo:</strong> {nextRoundName}</p>" +
-                                           $"<p><strong>Thời gian bắt đầu:</strong> {startDate}</p>" +
-                                           $"<p><strong>Thời gian kết thúc:</strong> {endDate}</p>";
+                            string startDate = nextRoundForInfo.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "Undefined";
+                            string endDate = nextRoundForInfo.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Undefined";
+                            nextRoundInfo = $"<p><strong>Next round:</strong> {nextRoundName}</p>" +
+                                           $"<p><strong>Start date:</strong> {startDate}</p>" +
+                                           $"<p><strong>End date:</strong> {endDate}</p>";
                         }
                         string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                         body = body.Replace("{FullName}", user.FullName)
-                                   .Replace("{Result}", "Đậu (PASS)")
-                                   .Replace("{RoundName}", "Sàng lọc hồ sơ")
+                                   .Replace("{Result}", "PASSED")
+                                   .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
                                    .Replace("{NextRoundInfo}", nextRoundInfo);
@@ -169,12 +169,12 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     if (user != null && !string.IsNullOrEmpty(user.Email))
                     {
                         var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                        string subject = "Kết quả vòng Sàng lọc hồ sơ";
-                        string extraMessage = "Rất tiếc bạn chưa vượt qua vòng Sàng lọc hồ sơ.";
+                        string subject = "Screening round result";
+                        string extraMessage = "Unfortunately, you did not pass the screening round.";
                         string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                         body = body.Replace("{FullName}", user.FullName)
-                                   .Replace("{Result}", "Rớt (FAIL)")
-                                   .Replace("{RoundName}", "Sàng lọc hồ sơ")
+                                   .Replace("{Result}", "FAILED")
+                                   .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
                                    .Replace("{NextRoundInfo}", "");
