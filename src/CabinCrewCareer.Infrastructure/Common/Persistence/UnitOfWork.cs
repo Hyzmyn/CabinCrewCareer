@@ -1,5 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Infrastructure.AirlinePartners;
 using CabinCrewCareer.Infrastructure.CampaignAssignments;
 using CabinCrewCareer.Infrastructure.CampaignRequests;
 using CabinCrewCareer.Infrastructure.Campaigns;
@@ -90,6 +91,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IScoringCriteriaDetailRepository ScoringCriteriaDetails { get; private set; }
 
+        public IAirlinePartnerRepository AirlinePartners { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -161,6 +164,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             ScoringCriteriaItems = new ScoringCriteriaItemRepository(_dbContext, _logger);
 
             ScoringCriteriaDetails = new ScoringCriteriaDetailRepository(_dbContext, _logger);
+
+            AirlinePartners = new AirlinePartnerRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

@@ -40,6 +40,7 @@ namespace CabinCrewCareer.Api.Controllers
         ///       "phoneNumber": "0123456789",
         ///       "email": "hungphn@gmail.com",
         ///       "dateOfBirth": "2003-01-01",
+        ///       "partnerId": null,
         ///       "roleId": 4
         ///     }
         ///  

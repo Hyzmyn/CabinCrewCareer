@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CabinCrewCareer.Application.AirlinePartners.Common;
 using CabinCrewCareer.Application.CampaignRequests.Common;
 using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList;
@@ -156,6 +157,11 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.FinalScore, u => u.MapFrom(u => u.InterviewResults.Sum(x => x.Score)));
 
             CreateMap<InterviewResult, GetInterviewResultResponse>();
+            #endregion
+
+            #region Airline Partner
+            CreateMap<AirlinePartner, GetAirlinePartnerResponse>()
+                .ForMember(u => u.Address, u => u.MapFrom(u => $"{u.Address}, {u.Ward.WardName}, {u.Ward.City.CityName}"));
             #endregion
         }
     }
