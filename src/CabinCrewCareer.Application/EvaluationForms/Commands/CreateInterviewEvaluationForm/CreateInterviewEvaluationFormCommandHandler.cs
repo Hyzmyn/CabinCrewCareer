@@ -115,7 +115,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             // Lấy thông tin thời gian vòng final
                             string finalStartDate = finalRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
                             string finalEndDate = finalRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
-                            nextRoundInfo = $"Vòng tiếp theo: <strong>Final</strong><br>Thời gian: <strong>{finalStartDate}</strong> - <strong>{finalEndDate}</strong>";
+                            nextRoundInfo = $"Next round: <strong>Final</strong><br>Time: <strong>{finalStartDate}</strong> - <strong>{finalEndDate}</strong>";
                         }
                         await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
                         // Gửi email PASS
@@ -125,14 +125,15 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             if (user != null && !string.IsNullOrEmpty(user.Email))
                             {
                                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                                string subject = "Kết quả vòng Phỏng vấn";
-                                string extraMessage = "Chúc mừng bạn đã vượt qua vòng Phỏng vấn.";
+                                string subject = "Interview result";
+                                string extraMessage = "Congratulations! You have passed the Interview round";
                                 string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                                 body = body.Replace("{FullName}", user.FullName)
-                                           .Replace("{Result}", "Đậu (PASS)")
-                                           .Replace("{RoundName}", "Phỏng vấn")
+                                           .Replace("{Result}", "PASSED")
+                                           .Replace("{RoundName}", "Interview")
                                            .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                            .Replace("{ExtraMessage}", extraMessage)
+                                           .Replace("{Round}", "Interview")
                                            .Replace("{NextRoundInfo}", nextRoundInfo);
                                 var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                                 {
@@ -165,14 +166,15 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             if (user != null && !string.IsNullOrEmpty(user.Email))
                             {
                                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                                string subject = "Kết quả vòng Phỏng vấn";
-                                string extraMessage = "Rất tiếc bạn chưa vượt qua vòng Phỏng vấn.";
+                                string subject = "Interview result";
+                                string extraMessage = "Unfortunately! You did not pass the Interview round.";
                                 string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                                 body = body.Replace("{FullName}", user.FullName)
-                                           .Replace("{Result}", "Rớt (FAIL)")
-                                           .Replace("{RoundName}", "Phỏng vấn")
+                                           .Replace("{Result}", "FAILED")
+                                           .Replace("{RoundName}", "Interivew")
                                            .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                            .Replace("{ExtraMessage}", extraMessage)
+                                           .Replace("{Round}", "Interview")
                                            .Replace("{NextRoundInfo}", "");
                                 var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                                 {
@@ -228,7 +230,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         // Lấy thông tin thời gian vòng final
                         string finalStartDate = finalRound.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
                         string finalEndDate = finalRound.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "";
-                        nextRoundInfo = $"Vòng tiếp theo: <strong>Final</strong><br>Thời gian: <strong>{finalStartDate}</strong> - <strong>{finalEndDate}</strong>";
+                        nextRoundInfo = $"Next round: <strong>Final</strong><br>Time: <strong>{finalStartDate}</strong> - <strong>{finalEndDate}</strong>";
                     }
 
                     await _unitOfWork.RoundActivites.UpdateAsync(roundActivity);
@@ -239,14 +241,15 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         if (user != null && !string.IsNullOrEmpty(user.Email))
                         {
                             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                            string subject = "Kết quả vòng Phỏng vấn";
-                            string extraMessage = "Chúc mừng bạn đã vượt qua vòng Phỏng vấn.";
+                            string subject = "Interview result";
+                            string extraMessage = "Congratulations! You have passed the Interview round.";
                             string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                             body = body.Replace("{FullName}", user.FullName)
-                                       .Replace("{Result}", "Đậu (PASS)")
-                                       .Replace("{RoundName}", "Phỏng vấn")
+                                       .Replace("{Result}", "PASSED")
+                                       .Replace("{RoundName}", "Interview")
                                        .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                        .Replace("{ExtraMessage}", extraMessage)
+                                       .Replace("{Round}", "Interview")
                                        .Replace("{NextRoundInfo}", nextRoundInfo);
                             var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                             {
@@ -279,14 +282,15 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         if (user != null && !string.IsNullOrEmpty(user.Email))
                         {
                             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
-                            string subject = "Kết quả vòng Phỏng vấn";
-                            string extraMessage = "Rất tiếc bạn chưa vượt qua vòng Phỏng vấn.";
+                            string subject = "Interview result";
+                            string extraMessage = "Unfortunately! You did not pass the Interview round.";
                             string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
                             body = body.Replace("{FullName}", user.FullName)
-                                       .Replace("{Result}", "Rớt (FAIL)")
-                                       .Replace("{RoundName}", "Phỏng vấn")
+                                       .Replace("{Result}", "FAILED")
+                                       .Replace("{RoundName}", "Interview")
                                        .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                        .Replace("{ExtraMessage}", extraMessage)
+                                       .Replace("{Round}", "Interview")
                                        .Replace("{NextRoundInfo}", "");
                             var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                             {

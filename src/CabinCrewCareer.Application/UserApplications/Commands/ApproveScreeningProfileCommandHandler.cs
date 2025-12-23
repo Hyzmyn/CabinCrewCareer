@@ -132,7 +132,8 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                                    .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
-                                   .Replace("{NextRoundInfo}", nextRoundInfo);
+                                   .Replace("{NextRoundInfo}", nextRoundInfo)
+                                   .Replace("{Round}", "Screening");
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,
@@ -177,6 +178,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                                    .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
+                                   .Replace("{Round}", "Screening")
                                    .Replace("{NextRoundInfo}", "");
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
