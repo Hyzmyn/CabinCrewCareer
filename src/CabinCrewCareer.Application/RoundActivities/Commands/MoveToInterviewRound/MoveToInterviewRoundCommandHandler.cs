@@ -326,6 +326,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 .Replace("{RoundName}", roundName)
                 .Replace("{CampaignName}", campaignName)
                 .Replace("{ExtraMessage}", extraMessage)
+                .Replace("{Round}", "Test")
                 .Replace("{NextRoundInfo}", nextRoundInfo);
 
             var mailRequest = new MailRequest

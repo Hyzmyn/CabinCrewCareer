@@ -61,7 +61,7 @@ namespace CabinCrewCareer.Application.Users.Commands.CreateUser
             await _unitOfWork.CompleteAsync();
 
             mailRequest.ToEmail = user.Email;
-            mailRequest.Subject = "TÀI KHOẢN ĐĂNG NHẬP PHẦN MỀM";
+            mailRequest.Subject = "Welcome to Cabin Crew Career!";
 
             // Đọc template email và thay thế các tham số động
             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "EmailTemplate.html");

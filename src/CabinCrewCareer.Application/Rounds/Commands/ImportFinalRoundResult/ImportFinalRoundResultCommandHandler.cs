@@ -188,6 +188,7 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                 .Replace("{RoundName}", "Final")
                 .Replace("{CampaignName}", "Cabin Crew Career")
                 .Replace("{ExtraMessage}", isPassed ? "Congratulations! You have passed the Final round!" : "Unfortunately! You did not pass the Final round!")
+                .Replace("{Round}", "Final")
                 .Replace("{NextRoundInfo}", "");
             var mailRequest = new MailRequest
             {
