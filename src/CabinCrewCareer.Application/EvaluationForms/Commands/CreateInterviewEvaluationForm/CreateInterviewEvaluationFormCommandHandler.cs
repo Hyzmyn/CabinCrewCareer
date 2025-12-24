@@ -31,6 +31,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                 throw new ApiException(ResponseCode.FAILED_AUTHENTICATION);
             }
 
+            if (await _unitOfWork.EvaluationForms.HasEvaluatedRound(request.ActivityId, Int32.Parse(currentUserId))) throw new ApiException(ResponseCode.CANDIDATE_HAS_BEEN_EVALUATED);
+
             EvaluationForm form = new()
             {
                 ActivityId = request.ActivityId,
