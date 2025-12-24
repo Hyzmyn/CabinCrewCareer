@@ -22,7 +22,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
             var rolesQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
             var rolesList = await rolesQuery.ToListAsync(cancellationToken);
             var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
-            
+
             var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
             var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
 
@@ -32,11 +32,12 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
                 request.SortOrder,
                 request.CampaignType,
                 request.CampaignStatus,
+                request.PartnerId,
                 request.Page,
                 request.PageSize);
 
             var mappedData = _mapper.Map<PaginatedList<GetCampaignListDto>>(paginatedCampaigns);
-            
+
             // Set Position based on CampaignType and actual Role names
             foreach (var campaign in mappedData.Items)
             {

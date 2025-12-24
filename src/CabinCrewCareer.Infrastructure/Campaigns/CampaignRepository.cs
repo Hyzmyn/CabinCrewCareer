@@ -11,7 +11,7 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
 {
     public class CampaignRepository(CabinCrewCareerDbContext dbContext, ILogger logger) : Repository<Campaign>(dbContext, logger), ICampaignRepository
     {
-        public async Task<PaginatedList<Campaign>> PaginatedListAsync(string? searchTerm, string? sortColumn, string? sortOrder, int? campaignType, int? campaignStatus, int page, int pageSize)
+        public async Task<PaginatedList<Campaign>> PaginatedListAsync(string? searchTerm, string? sortColumn, string? sortOrder, int? campaignType, int? campaignStatus, int? partnerId, int page, int pageSize)
         {
             IQueryable<Campaign> usersQuery = _dbContext.Campaigns
                 .Include(c => c.CampaignRequest)
@@ -42,6 +42,11 @@ namespace CabinCrewCareer.Infrastructure.Campaigns
             if (campaignStatus != null)
             {
                 usersQuery = usersQuery.Where(c => c.CampaignStatus == (CampaignStatus)campaignStatus);
+            }
+
+            if (partnerId != null)
+            {
+                usersQuery = usersQuery.Where(c => c.CampaignRequest.PartnerId == partnerId);
             }
 
             if (sortOrder?.ToLower() == "asc")

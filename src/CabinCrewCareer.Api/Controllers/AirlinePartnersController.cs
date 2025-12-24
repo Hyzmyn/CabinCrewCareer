@@ -30,6 +30,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(Response<List<GetCityResponse>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAllAsync()
