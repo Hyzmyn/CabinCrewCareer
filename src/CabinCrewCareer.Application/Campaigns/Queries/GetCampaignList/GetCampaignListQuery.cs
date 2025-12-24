@@ -10,6 +10,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList
         string? SortOrder,
         int? CampaignType,
         int? CampaignStatus,
+        int? PartnerId,
         int Page,
         int PageSize) : IRequest<Response<PaginatedList<GetCampaignListDto>>>;
 }

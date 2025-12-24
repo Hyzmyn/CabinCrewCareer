@@ -27,6 +27,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <param name="sortOrder">"asc" or "desc"</param>
         /// <param name="campaignType">1: Recruitment, 2: Promotion</param>
         /// <param name="campaignStatus">0: Draft, 1: Pending, 2: Approved, 3: Rejected, 4: Cancelled, 5: Ongoing, 6: Upcoming, 7: Ended</param>
+        /// <param name="partnerId">1: VietJet Air, 3: Vietname Airlines, 4: Bamboo Airways, 5: SunPhuQuoc Airways</param>
         /// <param name="page">Current page</param>
         /// <param name="pageSize">Number of records of a specific page</param>
         /// <returns>A list of all campaigns</returns>
@@ -46,6 +47,7 @@ namespace CabinCrewCareer.Api.Controllers
         string? sortOrder,
         int? campaignType,
         int? campaignStatus,
+        int? partnerId,
         int page = 1,
         int pageSize = 5)
         {
@@ -58,6 +60,7 @@ namespace CabinCrewCareer.Api.Controllers
                         sortOrder,
                         campaignType,
                         campaignStatus,
+                        partnerId,
                         page,
                         pageSize)));
             }

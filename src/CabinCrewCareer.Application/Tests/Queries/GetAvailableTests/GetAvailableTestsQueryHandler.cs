@@ -17,9 +17,27 @@ namespace CabinCrewCareer.Application.Tests.Queries.GetAvailableTests
 
         public async Task<Response<List<GetAvailableTestResponse>>> Handle(GetAvailableTestsQuery request, CancellationToken cancellationToken)
         {
+            var temp = _mapper.Map<List<GetAvailableTestResponse>>(await _unitOfWork.Tests.GetTestsAsync(request.TestType));
+
+            List<GetAvailableTestResponse> tests = [];
+
+            foreach (var item in temp)
+            {
+                if (item.NumberOfQuestions > 0)
+                {
+                    tests.Add(new GetAvailableTestResponse
+                    {
+                        TestId = item.TestId,
+                        TestName = item.TestName,
+                        TestType = item.TestType,
+                        NumberOfQuestions = item.NumberOfQuestions
+                    });
+                }
+            }
+
             return new Response<List<GetAvailableTestResponse>>(
                 code: (int)ResponseCode.SUCCESS,
-                data: _mapper.Map<List<GetAvailableTestResponse>>(await _unitOfWork.Tests.GetTestsAsync(request.TestType)),
+                data: tests,
                 message: ResponseCode.SUCCESS.GetDescription());
         }
     }

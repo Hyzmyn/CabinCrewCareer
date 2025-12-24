@@ -12,6 +12,7 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
             , string? sortOrder
             , int? campaignType
             , int? campaignStatus
+            , int? partnerId
             , int page
             , int pageSize);
     }
