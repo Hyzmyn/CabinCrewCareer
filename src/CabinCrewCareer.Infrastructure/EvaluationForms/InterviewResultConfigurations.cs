@@ -13,7 +13,7 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
             builder.HasKey(n => n.InterviewResultId);
 
             builder.Property(n => n.Comment)
-                .HasMaxLength(50);
+                .HasMaxLength(150);
 
             builder.HasOne(n => n.EvaluationForm)
                 .WithMany(n => n.InterviewResults)

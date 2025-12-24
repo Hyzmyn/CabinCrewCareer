@@ -18,7 +18,7 @@ namespace CabinCrewCareer.Infrastructure.AirlinePartners
 
             builder.Property(u => u.Description)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(150);
 
             builder.Property(u => u.Address)
                 .HasMaxLength(50);
