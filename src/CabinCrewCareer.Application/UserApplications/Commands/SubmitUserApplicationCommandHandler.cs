@@ -2,11 +2,18 @@ using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Interfaces;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
+using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.UserApplications.Common;
 using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CabinCrewCareer.Application.UserApplications.Commands
 {
@@ -15,12 +22,15 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
         IUploadFileService uploadFileService,
         IHttpContextAccessor httpContextAccessor,
         IDateTimeProvider dateTimeProvider,
-        IOcrService ocrService) : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
+        IGeminiService geminiService,
+        ILogger<SubmitUserApplicationCommandHandler> logger) : IRequestHandler<SubmitUserApplicationCommand, Response<UserApplicationResponse>>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IUploadFileService _uploadFileService = uploadFileService;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IGeminiService _geminiService = geminiService;
+        private readonly ILogger<SubmitUserApplicationCommandHandler> _logger = logger;
 
         public async Task<Response<UserApplicationResponse>> Handle(SubmitUserApplicationCommand command, CancellationToken cancellationToken)
         {
@@ -60,6 +70,9 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             var profilePhotoUrl = request.ProfilePhoto != null ? await _uploadFileService.CloudinaryStorage(request.ProfilePhoto) : null;
             var educationDegreeUrl = request.EducationDegree != null ? await _uploadFileService.CloudinaryStorage(request.EducationDegree) : null;
             var englishCertificateUrl = request.EnglishCertificate != null ? await _uploadFileService.CloudinaryStorage(request.EnglishCertificate) : null;
+            var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
+            var passportOrIdBackUrl = request.PassportOrIDBack != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrIDBack) : null;
+
             string citizenId = string.Empty;
             DateOnly? englishTestDate = null;
             int listeningScore = 0;
@@ -67,144 +80,248 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             int totalScore = 0;
             DateOnly? endDate = null;
             string englishDegreeNumber = string.Empty;
-            var passportOrIdUrl = request.PassportOrID != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrID) : null;
-            var passportOrIdBackUrl = request.PassportOrIDBack != null ? await _uploadFileService.CloudinaryStorage(request.PassportOrIDBack) : null;
-            if (request.PassportOrID != null)
+
+            // === QUÉT CCCD BẰNG GEMINI ===
+            _logger.LogInformation("Bắt đầu quét CCCD cho userId: {UserId}", userId);
+            CccdInfo cccdInfo = null;
+            try
             {
-                var ocrResult = await ocrService.ExtractTextFromImageAsync(request.PassportOrID);
-                Console.WriteLine($"OCR TEXT: {ocrResult}");
-                var match = System.Text.RegularExpressions.Regex.Match(ocrResult, @"\b\d{12}\b");
-                if (match.Success)
+                cccdInfo = await _geminiService.ExtractCccdInfoAsync(request.PassportOrID);
+                _logger.LogInformation("Kết quả quét CCCD: CitizenId={CitizenId}, FullName={FullName}, DOB={DOB}", 
+                    cccdInfo.CitizenId, cccdInfo.FullName, cccdInfo.DateOfBirth);
+
+                // Validation số CCCD
+                if (string.IsNullOrWhiteSpace(cccdInfo.CitizenId) || cccdInfo.CitizenId.Length != 12)
                 {
-                    citizenId = match.Value;
+                    _logger.LogWarning("Số CCCD không hợp lệ: {CitizenId}", cccdInfo.CitizenId);
+                    return CreateErrorResponse("Không thể nhận diện số CCCD từ ảnh. Vui lòng chụp rõ nét và đảm bảo số CCCD không bị che.", "CCCD_INVALID");
+                }
+
+                if (string.IsNullOrWhiteSpace(cccdInfo.FullName))
+                {
+                    _logger.LogWarning("Không đọc được họ tên từ CCCD");
+                    return CreateErrorResponse("Không thể nhận diện họ tên từ CCCD. Vui lòng chụp ảnh rõ ràng hơn.", "CCCD_NAME_UNREADABLE");
+                }
+
+                if (cccdInfo.DateOfBirth == null)
+                {
+                    _logger.LogWarning("Không đọc được ngày sinh từ CCCD");
+                    return CreateErrorResponse("Không thể nhận diện ngày sinh từ CCCD. Vui lòng chụp ảnh rõ ràng hơn.", "CCCD_DOB_UNREADABLE");
+                }
+
+                citizenId = cccdInfo.CitizenId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi quét CCCD cho userId: {UserId}", userId);
+                return CreateErrorResponse($"Lỗi khi quét CCCD: {ex.Message}", "CCCD_SCAN_FAILED");
+            }
+
+            // === QUÉT CHỨNG CHỈ TOEIC BẰNG GEMINI ===
+            _logger.LogInformation("Bắt đầu quét TOEIC cho userId: {UserId}", userId);
+            ToeicInfo toeicInfo = null;
+            try
+            {
+                toeicInfo = await _geminiService.ExtractToeicInfoAsync(request.EnglishCertificate);
+                _logger.LogInformation("Kết quả quét TOEIC: Type={Type}, CitizenId={CitizenId}, FullName={FullName}, DOB={DOB}, TestDate={TestDate}, ValidUntil={ValidUntil}, Listening={Listening}, Reading={Reading}, Total={Total}",
+                    toeicInfo.CertificateType, toeicInfo.CitizenId, toeicInfo.FullName, toeicInfo.DateOfBirth,
+                    toeicInfo.TestDate, toeicInfo.ValidUntil, toeicInfo.ListeningScore, toeicInfo.ReadingScore, toeicInfo.TotalScore);
+
+                // Validation loại chứng chỉ
+                if (string.IsNullOrWhiteSpace(toeicInfo.CertificateType) || !toeicInfo.CertificateType.ToUpper().Contains("TOEIC"))
+                {
+                    _logger.LogWarning("File không phải chứng chỉ TOEIC: {Type}", toeicInfo.CertificateType);
+                    return CreateErrorResponse("File upload không phải là chứng chỉ TOEIC hợp lệ. Vui lòng upload đúng chứng chỉ TOEIC.", "NOT_TOEIC_CERTIFICATE");
+                }
+
+
+                // Validation các trường bắt buộc
+                if (toeicInfo.TestDate == null || toeicInfo.ValidUntil == null)
+                {
+                    _logger.LogWarning("Không đọc được ngày thi hoặc ngày hết hạn từ TOEIC");
+                    return CreateErrorResponse("Không đọc được ngày thi hoặc ngày hết hạn từ chứng chỉ TOEIC. Vui lòng chụp ảnh rõ nét.", "TOEIC_DATES_UNREADABLE");
+                }
+
+                if (toeicInfo.ListeningScore == 0 || toeicInfo.ReadingScore == 0)
+                {
+                    _logger.LogWarning("Không đọc được điểm Listening hoặc Reading");
+                    return CreateErrorResponse("Không đọc được điểm Listening hoặc Reading từ chứng chỉ TOEIC. Vui lòng chụp ảnh rõ nét.", "TOEIC_SCORES_UNREADABLE");
+                }
+
+                // --- VALIDATION ĐIỂM SỐ TOEIC ---
+                // Listening/Reading: 5-495, bội số của 5
+                if (toeicInfo.ListeningScore < 5 || toeicInfo.ListeningScore > 495 || toeicInfo.ListeningScore % 5 != 0)
+                {
+                    _logger.LogWarning("Điểm Listening không hợp lệ: {ListeningScore}", toeicInfo.ListeningScore);
+                    return CreateErrorResponse("Điểm Listening phải nằm trong khoảng 5-495 và là bội số của 5.", "TOEIC_LISTENING_INVALID");
+                }
+                if (toeicInfo.ReadingScore < 5 || toeicInfo.ReadingScore > 495 || toeicInfo.ReadingScore % 5 != 0)
+                {
+                    _logger.LogWarning("Điểm Reading không hợp lệ: {ReadingScore}", toeicInfo.ReadingScore);
+                    return CreateErrorResponse("Điểm Reading phải nằm trong khoảng 5-495 và là bội số của 5.", "TOEIC_READING_INVALID");
+                }
+                // Total: 10-990
+                if (toeicInfo.TotalScore < 10 || toeicInfo.TotalScore > 990)
+                {
+                    _logger.LogWarning("Tổng điểm TOEIC không hợp lệ: {TotalScore}", toeicInfo.TotalScore);
+                    return CreateErrorResponse("Tổng điểm TOEIC phải nằm trong khoảng 10-990.", "TOEIC_TOTAL_INVALID");
+                }
+
+                // BỔ SUNG: Validation số CCCD trên TOEIC
+                if (string.IsNullOrWhiteSpace(toeicInfo.CitizenId) || toeicInfo.CitizenId.Length != 12)
+                {
+                    _logger.LogWarning("Số CCCD không hợp lệ trên chứng chỉ TOEIC: {CitizenId}", toeicInfo.CitizenId);
+                    return CreateErrorResponse("Không thể nhận diện số CCCD từ chứng chỉ TOEIC. Vui lòng chụp rõ nét và đảm bảo số CCCD không bị che.", "TOEIC_CCCD_INVALID");
+                }
+
+                // ✅ VALIDATION NGHIÊM NGẶT: Total score PHẢI BẰNG listening + reading
+                int calculatedTotal = toeicInfo.ListeningScore + toeicInfo.ReadingScore;
+                if (toeicInfo.TotalScore != calculatedTotal)
+                {
+                    _logger.LogWarning("Tổng điểm không khớp. Trên chứng chỉ: {TotalOnCert}, Tính toán: {Calculated} (Listening: {Listening} + Reading: {Reading})",
+                        toeicInfo.TotalScore, calculatedTotal, toeicInfo.ListeningScore, toeicInfo.ReadingScore);
+                    return CreateErrorResponse(
+                        $"Tổng điểm trên chứng chỉ không khớp! Chứng chỉ hiển thị: {toeicInfo.TotalScore}, nhưng Listening ({toeicInfo.ListeningScore}) + Reading ({toeicInfo.ReadingScore}) = {calculatedTotal}. Vui lòng kiểm tra lại chứng chỉ hoặc chụp ảnh rõ hơn.",
+                        "TOEIC_TOTAL_SCORE_MISMATCH");
+                }
+
+                // Parse TestDate
+                if (!string.IsNullOrWhiteSpace(toeicInfo.TestDate))
+                {
+                    DateOnly parsedTestDate;
+                    if (DateOnly.TryParseExact(toeicInfo.TestDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out parsedTestDate)
+                        || DateOnly.TryParseExact(toeicInfo.TestDate, "yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out parsedTestDate))
+                    {
+                        englishTestDate = parsedTestDate;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Không parse được TestDate TOEIC với cả hai format: {TestDate}", toeicInfo.TestDate);
+                    }
                 }
                 else
                 {
-                    return new Response<UserApplicationResponse>
+                    _logger.LogWarning("TestDate TOEIC bị null hoặc rỗng");
+                }
+
+                // Parse ValidUntil
+                if (!string.IsNullOrWhiteSpace(toeicInfo.ValidUntil))
+                {
+                    DateOnly parsedValidUntil;
+                    if (DateOnly.TryParseExact(toeicInfo.ValidUntil, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out parsedValidUntil)
+                        || DateOnly.TryParseExact(toeicInfo.ValidUntil, "yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out parsedValidUntil))
                     {
-                        Code = (int)ResponseCode.FAIL,
-                        Message = "Không thể nhận diện số CCCD. Vui lòng kiểm tra lại ảnh (có thể số bị che hoặc ảnh bị mờ).",
-                        Data = null,
-                        Errors = "CCCD_FILE_INVALID"
-                    };
+                        endDate = parsedValidUntil;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Không parse được ValidUntil TOEIC với cả hai format: {ValidUntil}", toeicInfo.ValidUntil);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("ValidUntil TOEIC bị null hoặc rỗng");
+                }
+                listeningScore = toeicInfo.ListeningScore;
+                readingScore = toeicInfo.ReadingScore;
+                totalScore = toeicInfo.TotalScore;
+                // englishDegreeNumber = "TOEIC";
+                englishDegreeNumber = toeicInfo.CertificateType;
+
+                // --- VALIDATION NGÀY HẾT HẠN & NGÀY TEST TOEIC ---
+                if (englishTestDate.HasValue && endDate.HasValue)
+                {
+                    // Ngày hết hạn phải đúng bằng ngày test + 2 năm
+                    var expectedEndDate = englishTestDate.Value.AddYears(2);
+                    if (endDate.Value != expectedEndDate)
+                    {
+                        _logger.LogWarning("Ngày hết hạn TOEIC không đúng 2 năm sau ngày test. TestDate: {TestDate}, ValidUntil: {ValidUntil}", englishTestDate, endDate);
+                        return CreateErrorResponse($"Ngày hết hạn TOEIC phải đúng bằng ngày thi cộng 2 năm. Ngày thi: {englishTestDate:dd/MM/yyyy}, Ngày hết hạn: {endDate:dd/MM/yyyy}.", "TOEIC_DATE_INVALID");
+                    }
+                    // Ngày test không được lớn hơn ngày hiện tại
+                    if (englishTestDate.Value > _dateTimeProvider.Today)
+                    {
+                        _logger.LogWarning("Ngày test TOEIC lớn hơn ngày hiện tại. TestDate: {TestDate}, Today: {Today}", englishTestDate, _dateTimeProvider.Today);
+                        return CreateErrorResponse($"Ngày thi TOEIC không được lớn hơn ngày hiện tại. Ngày thi: {englishTestDate:dd/MM/yyyy}.", "TOEIC_TESTDATE_FUTURE");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi quét TOEIC cho userId: {UserId}", userId);
+                return CreateErrorResponse($"Lỗi khi quét chứng chỉ TOEIC: {ex.Message}", "TOEIC_SCAN_FAILED");
+            }
+
+            // === SO SÁNH THÔNG TIN GIỮA CCCD, TOEIC VÀ FORM ĐĂNG KÝ ===
+            _logger.LogInformation("Bắt đầu so sánh thông tin giữa các document");
+
+            // 1. So sánh họ tên (normalize để tránh lỗi dấu/khoảng trắng)
+            var normalizedFormName = NormalizeName(request.FullName);
+            var normalizedCccdName = NormalizeName(cccdInfo.FullName);
+            var normalizedToeicName = NormalizeName(toeicInfo.FullName);
+
+            if (!string.IsNullOrWhiteSpace(cccdInfo.FullName) && normalizedFormName != normalizedCccdName)
+            {
+                _logger.LogWarning("Họ tên không khớp. Form: '{FormName}', CCCD: '{CccdName}'", request.FullName, cccdInfo.FullName);
+                return CreateErrorResponse(
+                    $"Họ tên trên CCCD ({cccdInfo.FullName}) không khớp với thông tin đăng ký ({request.FullName}). Vui lòng kiểm tra lại.",
+                    "NAME_MISMATCH_CCCD");
+            }
+
+            if (!string.IsNullOrWhiteSpace(toeicInfo.FullName) && normalizedFormName != normalizedToeicName)
+            {
+                _logger.LogWarning("Họ tên không khớp. Form: '{FormName}', TOEIC: '{ToeicName}'", request.FullName, toeicInfo.FullName);
+                return CreateErrorResponse(
+                    $"Họ tên trên chứng chỉ TOEIC ({toeicInfo.FullName}) không khớp với thông tin đăng ký ({request.FullName}). Vui lòng kiểm tra lại.",
+                    "NAME_MISMATCH_TOEIC");
+            }
+
+            // 2. So sánh ngày sinh
+            // Parse string sang DateOnly để so sánh
+            DateOnly? cccdDob = null;
+            if (!string.IsNullOrWhiteSpace(cccdInfo.DateOfBirth))
+            {
+                if (DateOnly.TryParseExact(cccdInfo.DateOfBirth, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsedCccdDob))
+                {
+                    cccdDob = parsedCccdDob;
                 }
             }
 
-            // AI OCR cho chứng chỉ tiếng Anh
-            if (request.EnglishCertificate != null)
+            DateOnly? toeicDob = null;
+            if (!string.IsNullOrWhiteSpace(toeicInfo.DateOfBirth))
             {
-                var ocrText = await ocrService.ExtractTextFromImageAsync(request.EnglishCertificate);
-                Console.WriteLine($"ENGLISH CERT OCR: {ocrText}");
-                // Check if OCR result contains TOEIC keyword (handle OCR misreads like TOE/C, TOEJC, etc.)
-                var normalizedText = ocrText?.ToUpper().Replace("/", "I").Replace("J", "I") ?? "";
-                var isToeic = normalizedText.Contains("TOEIC") || 
-                              ocrText?.ToUpper().Contains("TOE") == true && 
-                              (ocrText.ToUpper().Contains("LISTENING") || ocrText.ToUpper().Contains("READING") || 
-                               ocrText.ToUpper().Contains("OFFICIAL SCORE"));
-                
-                if (string.IsNullOrWhiteSpace(ocrText) || !isToeic)
+                if (DateOnly.TryParseExact(toeicInfo.DateOfBirth, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsedToeicDob))
                 {
-                    return new Response<UserApplicationResponse>
-                    {
-                        Code = (int)ResponseCode.FAIL,
-                        Message = "File upload không phải là chứng chỉ tiếng Anh TOEIC . Vui lòng upload đúng chứng chỉ TOEIC rõ nét.",
-                        Data = null,
-                        Errors = "ENGLISH_CERTIFICATE_INVALID"
-                    };
-                }
-                // Ngày thi: yyyy/MM/dd
-                var dateMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})");
-                if (dateMatch.Success)
-                {
-                    if (DateOnly.TryParseExact(dateMatch.Value, "yyyy/MM/dd", out var testDate))
-                    {
-                        englishTestDate = testDate;
-                        Console.WriteLine($"✓ Test Date found: {testDate}");
-                    }
-                }
-                // Valid Until: yyyy/MM/dd (date may appear before or after 'Valid Until')
-                // Handle OCR typos: Uniil, Unlil, Untll, etc.
-                var validUntilMatchAfter = System.Text.RegularExpressions.Regex.Match(ocrText, @"Valid\s*U[nml][itl][itl][il]l?.*?(\d{4}/\d{2}/\d{2})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                var validUntilMatchBefore = System.Text.RegularExpressions.Regex.Match(ocrText, @"(\d{4}/\d{2}/\d{2})\s*Valid\s*U[nml][itl][itl][il]l?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                if (validUntilMatchAfter.Success)
-                {
-                    if (DateOnly.TryParseExact(validUntilMatchAfter.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
-                    {
-                        endDate = validUntilDate;
-                        Console.WriteLine($"✓ Valid Until found (after): {validUntilDate}");
-                    }
-                }
-                else if (validUntilMatchBefore.Success)
-                {
-                    if (DateOnly.TryParseExact(validUntilMatchBefore.Groups[1].Value, "yyyy/MM/dd", out var validUntilDate))
-                    {
-                        endDate = validUntilDate;
-                        Console.WriteLine($"✓ Valid Until found (before): {validUntilDate}");
-                    }
-                }
-                // Tìm tất cả số sau 'Your score'
-                // Điểm nghe - handle OCR errors like LISTENINGI, LISTENNG, etc.
-                var listenMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"LISTEN[ING]+[\s\S]{0,20}?(\d{2,4})[\s\S]{0,20}?Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                if (listenMatch.Success && int.TryParse(listenMatch.Groups[1].Value, out var listenScore))
-                {
-                    listeningScore = listenScore;
-                    Console.WriteLine($"✓ Listening Score found: {listenScore}");
-                }
-                else
-                {
-                    Console.WriteLine("✗ Listening Score NOT found");
-                }
-                // Điểm đọc - handle OCR errors like READNG, READINC, etc.
-                var readMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"READ[ING]+[\s\S]{0,20}?(\d{2,4})[\s\S]{0,20}?Your score", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                if (readMatch.Success && int.TryParse(readMatch.Groups[1].Value, out var readScore))
-                {
-                    readingScore = readScore;
-                    Console.WriteLine($"✓ Reading Score found: {readScore}");
-                }
-                else
-                {
-                    Console.WriteLine("✗ Reading Score NOT found");
-                }
-                // if (listeningScore > 0 && readingScore > 0)
-                //     totalScore = listeningScore + readingScore;
-                 // Tổng điểm
-                var totalScoreMatch = System.Text.RegularExpressions.Regex.Match(ocrText, @"TOTAL\s*.*?(\d{2,4})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                if (totalScoreMatch.Success && int.TryParse(totalScoreMatch.Groups[1].Value, out var tScore))
-                {
-                    totalScore = tScore;
-                    Console.WriteLine($"✓ Total Score found: {tScore}");
-                }
-                else
-                {
-                    Console.WriteLine("✗ Total Score NOT found");
-                }
-                
-                Console.WriteLine($"SUMMARY - TestDate: {englishTestDate}, ValidUntil: {endDate}, Listening: {listeningScore}, Reading: {readingScore}, Total: {totalScore}");
-                // EnglishDegreeNumber = TOEIC + totalScore
-                // Chỉ lấy loại chứng chỉ từ text OCR
-                if (!string.IsNullOrWhiteSpace(ocrText))
-                {
-                    var certType = "";
-                    var upperText = ocrText.ToUpper();
-                    if (upperText.Contains("TOEIC")) certType = "TOEIC";
-                    else if (upperText.Contains("IELTS")) certType = "IELTS";
-                    else if (upperText.Contains("TOEFL")) certType = "TOEFL";
-                    else if (upperText.Contains("CEFR")) certType = "CEFR";
-                    // Có thể bổ sung thêm các loại khác nếu cần
-                    englishDegreeNumber = certType;
-                }
-                // Nếu không lấy được ngày thi, ngày hết hạn, điểm nghe, điểm đọc thì báo lỗi
-                if (englishTestDate == null || endDate == null || listeningScore == 0 || readingScore == 0)
-                {
-                    return new Response<UserApplicationResponse>
-                    {
-                        Code = (int)ResponseCode.FAIL,
-                        Message = "Không thể nhận diện đủ thông tin từ ảnh chứng chỉ TOEIC hoặc ảnh có thể bị mờ. Vui lòng chụp lại ảnh rõ nét, không bị mờ hoặc thiếu thông tin.",
-                        Data = null,
-                        Errors = "ENGLISH_CERTIFICATE_UNREADABLE"
-                    };
+                    toeicDob = parsedToeicDob;
                 }
             }
+
+            if (cccdDob.HasValue && cccdDob != request.DateOfBirth)
+            {
+                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, CCCD: {CccdDOB}", request.DateOfBirth, cccdDob);
+                return CreateErrorResponse(
+                    $"Ngày sinh trên CCCD ({cccdDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({request.DateOfBirth:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
+                    "DOB_MISMATCH_CCCD");
+            }
+
+            if (toeicDob.HasValue && toeicDob != request.DateOfBirth)
+            {
+                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, TOEIC: {ToeicDOB}", request.DateOfBirth, toeicDob);
+                return CreateErrorResponse(
+                    $"Ngày sinh trên chứng chỉ TOEIC ({toeicDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({request.DateOfBirth:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
+                    "DOB_MISMATCH_TOEIC");
+            }
+
+            // 3. So sánh số CCCD giữa 2 file
+            if (!string.IsNullOrWhiteSpace(toeicInfo.CitizenId) && cccdInfo.CitizenId != toeicInfo.CitizenId)
+            {
+                _logger.LogWarning("Số CCCD không khớp giữa 2 file. CCCD: {CccdId}, TOEIC: {ToeicId}", cccdInfo.CitizenId, toeicInfo.CitizenId);
+                return CreateErrorResponse(
+                    $"Số CCCD trên 2 file không khớp nhau. CCCD: {cccdInfo.CitizenId}, TOEIC: {toeicInfo.CitizenId}. Vui lòng kiểm tra lại.",
+                    "CITIZENID_MISMATCH");
+            }
+
+            _logger.LogInformation("Validation thành công! Tiếp tục lưu hồ sơ cho userId: {UserId}", userId);
 
             // var application = new UserApplication
             // {
@@ -356,6 +473,56 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 Data = response,
                 Errors = null
             };
+        }
+
+        private Response<UserApplicationResponse> CreateErrorResponse(string message, string errorCode)
+        {
+            return new Response<UserApplicationResponse>
+            {
+                Code = (int)ResponseCode.FAIL,
+                Message = message,
+                Data = null,
+                Errors = errorCode
+            };
+        }
+
+        private string NormalizeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "";
+
+            // 1. Trim và uppercase
+            var normalized = name.Trim().ToUpperInvariant();
+            
+            // 2. Loại bỏ tất cả dấu tiếng Việt
+            normalized = normalized
+                // A
+                .Replace("Á", "A").Replace("À", "A").Replace("Ả", "A").Replace("Ã", "A").Replace("Ạ", "A")
+                .Replace("Ă", "A").Replace("Ắ", "A").Replace("Ằ", "A").Replace("Ẳ", "A").Replace("Ẵ", "A").Replace("Ặ", "A")
+                .Replace("Â", "A").Replace("Ấ", "A").Replace("Ầ", "A").Replace("Ẩ", "A").Replace("Ẫ", "A").Replace("Ậ", "A")
+                // E
+                .Replace("É", "E").Replace("È", "E").Replace("Ẻ", "E").Replace("Ẽ", "E").Replace("Ẹ", "E")
+                .Replace("Ê", "E").Replace("Ế", "E").Replace("Ề", "E").Replace("Ể", "E").Replace("Ễ", "E").Replace("Ệ", "E")
+                // I
+                .Replace("Í", "I").Replace("Ì", "I").Replace("Ỉ", "I").Replace("Ĩ", "I").Replace("Ị", "I")
+                // O
+                .Replace("Ó", "O").Replace("Ò", "O").Replace("Ỏ", "O").Replace("Õ", "O").Replace("Ọ", "O")
+                .Replace("Ô", "O").Replace("Ố", "O").Replace("Ồ", "O").Replace("Ổ", "O").Replace("Ỗ", "O").Replace("Ộ", "O")
+                .Replace("Ơ", "O").Replace("Ớ", "O").Replace("Ờ", "O").Replace("Ở", "O").Replace("Ỡ", "O").Replace("Ợ", "O")
+                // U
+                .Replace("Ú", "U").Replace("Ù", "U").Replace("Ủ", "U").Replace("Ũ", "U").Replace("Ụ", "U")
+                .Replace("Ư", "U").Replace("Ứ", "U").Replace("Ừ", "U").Replace("Ử", "U").Replace("Ữ", "U").Replace("Ự", "U")
+                // Y
+                .Replace("Ý", "Y").Replace("Ỳ", "Y").Replace("Ỷ", "Y").Replace("Ỹ", "Y").Replace("Ỵ", "Y")
+                // D
+                .Replace("Đ", "D");
+            
+            // 3. Loại bỏ tất cả khoảng trắng thừa (chỉ để 1 space giữa các từ)
+            while (normalized.Contains("  "))
+            {
+                normalized = normalized.Replace("  ", " ");
+            }
+            
+            return normalized.Trim();
         }
     }
 }

@@ -47,6 +47,8 @@ namespace CabinCrewCareer.Infrastructure
             services.AddScoped<IFirebaseStorageService, CloudinaryStorageService>();
             // Đăng ký dịch vụ AI OCR
             services.AddScoped<IOcrService, AzureOcrService>();
+            // Đăng ký dịch vụ Gemini AI
+            services.AddScoped<IGeminiService, GeminiService>();
             services.AddTransient<IUserExportService, UserExportService>();
 
             return services;
