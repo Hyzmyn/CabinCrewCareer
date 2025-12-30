@@ -94,7 +94,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 if (string.IsNullOrWhiteSpace(cccdInfo.CitizenId) || cccdInfo.CitizenId.Length != 12)
                 {
                     _logger.LogWarning("Số CCCD không hợp lệ: {CitizenId}", cccdInfo.CitizenId);
-                    return CreateErrorResponse("Không thể nhận diện số CCCD từ ảnh. Vui lòng chụp rõ nét và đảm bảo số CCCD không bị che.", "CCCD_INVALID");
+                    return CreateErrorResponse("Không thể nhận diện số CCCD từ ảnh hoặc không đủ 12 số. Vui lòng chụp rõ nét và đảm bảo số CCCD không bị che.", "CCCD_INVALID");
                 }
 
                 if (string.IsNullOrWhiteSpace(cccdInfo.FullName))
@@ -134,6 +134,23 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     return CreateErrorResponse("File upload không phải là chứng chỉ TOEIC hợp lệ. Vui lòng upload đúng chứng chỉ TOEIC.", "NOT_TOEIC_CERTIFICATE");
                 }
 
+                      if (string.IsNullOrWhiteSpace(toeicInfo.CitizenId) || toeicInfo.CitizenId.Length != 12)
+                {
+                    _logger.LogWarning("Số CCCD không hợp lệ: {CitizenId}", toeicInfo.CitizenId);
+                    return CreateErrorResponse("Không thể nhận diện số CCCD từ ảnh hoặc không đủ 12 số. Vui lòng chụp rõ nét và đảm bảo số CCCD không bị che.", "CCCD_INVALID");
+                }
+
+                if (string.IsNullOrWhiteSpace(toeicInfo.FullName))
+                {
+                    _logger.LogWarning("Không đọc được họ tên từ TOEIC");
+                    return CreateErrorResponse("Không thể nhận diện họ tên từ TOEIC. Vui lòng chụp ảnh rõ ràng hơn.", "TOEIC_NAME_UNREADABLE");
+                }
+
+                if (toeicInfo.DateOfBirth == null)
+                {
+                    _logger.LogWarning("Không đọc được ngày sinh từ TOEIC");
+                    return CreateErrorResponse("Không thể nhận diện ngày sinh từ TOEIC. Vui lòng chụp ảnh rõ ràng hơn.", "TOEIC_DOB_UNREADABLE");
+                }
 
                 // Validation các trường bắt buộc
                 if (toeicInfo.TestDate == null || toeicInfo.ValidUntil == null)
