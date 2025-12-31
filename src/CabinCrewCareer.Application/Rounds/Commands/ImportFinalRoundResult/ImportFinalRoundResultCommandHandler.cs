@@ -155,6 +155,12 @@ namespace CabinCrewCareer.Application.Rounds.Commands.ImportFinalRoundResult
                     await _unitOfWork.Campaigns.UpdateAsync(round.CampaignRound.Campaign);
                 }
             }
+                // Kết thúc CampaignRound sau khi import thành công
+                if (round.CampaignRound != null)
+                {
+                    round.CampaignRound.RoundStatus = Domain.Common.RoundStatus.Ended;
+                    await _unitOfWork.CampaignRounds.UpdateAsync(round.CampaignRound);
+                }
 
             await _unitOfWork.CompleteAsync();
             // string summaryMessage = $"Processed {totalProcessed} records:\n" +
