@@ -67,7 +67,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             // Gán IsPassed cho form trước khi tính toán pass/fail
             if (request.Type == (int)CampaignType.Recruitment)
             {
-                if (finalScore > 120)
+                if (finalScore > await _unitOfWork.RoundConfigurations.RecruitmentInterviewBenchmark())
                 {
                     form.IsPassed = true;
                 }
@@ -78,7 +78,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             }
             else
             {
-                if (finalScore > 70) form.IsPassed = true;
+                if (finalScore > await _unitOfWork.RoundConfigurations.PromotionInterviewBenchmark()) form.IsPassed = true;
                 else form.IsPassed = false;
             }
 
