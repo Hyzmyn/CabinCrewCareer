@@ -69,6 +69,8 @@
 
         IAirlinePartnerRepository AirlinePartners { get; }
 
+        IRoundConfigurationRepository RoundConfigurations { get; }
+
         Task CompleteAsync();
     }
 }

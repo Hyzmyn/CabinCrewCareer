@@ -90,6 +90,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<RequirementItem> RequirementItems { get; set; }
 
+        public DbSet<RoundConfiguration> RoundConfigurations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);

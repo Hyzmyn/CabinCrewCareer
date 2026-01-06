@@ -11,10 +11,6 @@ namespace CabinCrewCareer.Domain.Entities
 
         public string Description { get; set; } = string.Empty;
 
-        public string JobDescription { get; set; } = string.Empty;
-
-        public string JobRequirement { get; set; } = string.Empty;
-
         public int TargetQuantity { get; set; }
 
         public RequestStatus Status { get; set; } = RequestStatus.Pending;

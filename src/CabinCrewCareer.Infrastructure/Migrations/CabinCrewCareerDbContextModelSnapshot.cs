@@ -120,14 +120,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("JobDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JobRequirement")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("datetime2");
 
@@ -248,14 +240,6 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("JobDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JobRequirement")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PartnerId")
                         .HasColumnType("int");
@@ -479,6 +463,12 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InterviewCriteriaId"));
 
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -505,8 +495,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
                     b.Property<int?>("InterviewCriteriaId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("InterviewCriteriaItemId");
 
@@ -743,6 +739,31 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("RoundActivity", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundConfiguration", b =>
+                {
+                    b.Property<int>("RoundConfigurationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoundConfigurationId"));
+
+                    b.Property<int>("Benchmark")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CampaignType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConfigurationType")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("RoundConfigurationId");
+
+                    b.ToTable("RoundConfiguration", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteria", b =>
                 {
                     b.Property<int>("ScoringCriteriaId")
@@ -750,6 +771,12 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoringCriteriaId"));
+
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -774,8 +801,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
                     b.Property<int?>("ScoringCriteriaItemId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("ScoringCriteriaDetailId");
 
@@ -792,6 +825,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoringCriteriaItemId"));
 
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("EnglishText")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -804,6 +840,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
                     b.Property<int?>("ScoringCriteriaId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Text")
                         .IsRequired()
