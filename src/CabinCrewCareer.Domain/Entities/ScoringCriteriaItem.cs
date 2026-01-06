@@ -10,6 +10,10 @@
 
         public string EnglishText { get; set; } = string.Empty;
 
+        public bool Status { get; set; } = false;
+
+        public DateOnly? EffectiveDate { get; set; }
+
         // Foreign Keys
         public int? ScoringCriteriaId { get; set; }
         public virtual ScoringCriteria ScoringCriteria { get; set; } = null!;

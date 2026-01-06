@@ -73,8 +73,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 {
                     CampaignName = campaignRequest.CampaignName,
                     Description = campaignRequest.Description,
-                    JobDescription = campaignRequest.JobDescription,
-                    JobRequirement = campaignRequest.JobRequirement,
                     TargetQuantity = campaignRequest.TargetQuantity,
                     CampaignType = campaignRequest.RequestType,
                     CampaignStatus = CabinCrewCareer.Domain.Common.CampaignStatus.Draft,
@@ -124,8 +122,6 @@ namespace CabinCrewCareer.Application.CampaignRequests.Commands.UpdateCampaignRe
                 RequestId = updatedRequest.RequestId,
                 CampaignName = updatedRequest.CampaignName,
                 Description = updatedRequest.Description,
-                JobDescription = updatedRequest.JobDescription,
-                JobRequirement = updatedRequest.JobRequirement,
                 TargetQuantity = updatedRequest.TargetQuantity,
                 RequestType = updatedRequest.RequestType.ToString(),
                 Status = updatedRequest.Status.ToString(),

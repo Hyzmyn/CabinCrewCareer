@@ -6,6 +6,10 @@
 
         public string Criteria { get; set; } = string.Empty;
 
+        public bool Status { get; set; } = false;
+
+        public DateOnly? EffectiveDate { get; set; }
+
         // Foreign Keys
         public int? InterviewCriteriaId { get; set; }
         public virtual InterviewCriteria InterviewCriteria { get; set; } = null!;

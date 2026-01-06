@@ -10,6 +10,10 @@ namespace CabinCrewCareer.Domain.Entities
 
         public CampaignType Type { get; set; }
 
+        public bool Status { get; set; } = false;
+
+        public DateOnly? EffectiveDate { get; set; }
+
         // Foreign Keys
 
         // Navigation Properties
