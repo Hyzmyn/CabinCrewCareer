@@ -35,6 +35,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public bool HasApplied { get; set; } = false;
+        public bool HasOngoingCampaign { get; set; } = false;
         // Screening round specific dates (optional, only set for screening rounds)
         public string? ScreeningStartDate { get; set; }
         public string? ScreeningEndDate { get; set; }

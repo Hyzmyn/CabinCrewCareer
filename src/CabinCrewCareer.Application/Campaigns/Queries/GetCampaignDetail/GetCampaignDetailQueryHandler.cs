@@ -82,6 +82,7 @@ namespace CabinCrewCareer.Application.Campaigns.Queries.GetCampaignDetail
             foreach (var item in result.Rounds)
             {
                 item.HasApplied = await _unitOfWork.UserHistories.HasAppliedToCampainRound(userId, item.CampaignRoundId);
+                item.HasOngoingCampaign = await _unitOfWork.UserHistories.HasOngoingCampainRound(userId);
             }
 
             return result;
