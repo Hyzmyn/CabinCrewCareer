@@ -67,7 +67,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                 if (item.IsPassed) count++;
             }
 
-            if (count > 7) form.IsPassed = true;
+            if (count > await _unitOfWork.RoundConfigurations.RecruitmentAppearanceBenchmark()) form.IsPassed = true;
             // Lấy thông tin user để gửi email (sẽ lấy sau khi roundActivity đã khởi tạo)
 
             var roundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
