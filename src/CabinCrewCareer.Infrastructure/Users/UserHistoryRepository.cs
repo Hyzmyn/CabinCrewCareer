@@ -89,5 +89,14 @@ namespace CabinCrewCareer.Infrastructure.Users
 
             return false;
         }
+
+        public async Task<bool> HasOngoingCampainRound(int userId)
+        {
+            var result = await _dbContext.UserHistories.Where(x => x.UserId == userId && x.Type == HistoryType.Ongoing).Select(x => x.HistoryId).FirstOrDefaultAsync();
+
+            if (result > 0) return true;
+
+            return false;
+        }
     }
 }
