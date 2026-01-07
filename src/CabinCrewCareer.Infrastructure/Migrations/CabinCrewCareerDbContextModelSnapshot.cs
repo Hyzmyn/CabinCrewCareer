@@ -434,6 +434,9 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<int?>("ConfigurationId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EvaluatedDate")
                         .HasColumnType("datetime2");
 
@@ -449,6 +452,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.HasKey("EvaluationId");
 
                     b.HasIndex("ActivityId");
+
+                    b.HasIndex("ConfigurationId");
 
                     b.HasIndex("ExaminerId");
 
@@ -1438,10 +1443,17 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CabinCrewCareer.Domain.Entities.RoundConfiguration", "Configuration")
+                        .WithMany("EvaluationForms")
+                        .HasForeignKey("ConfigurationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("CabinCrewCareer.Domain.Entities.User", "Examiner")
                         .WithMany("EvaluationForms")
                         .HasForeignKey("ExaminerId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Configuration");
 
                     b.Navigation("Examiner");
 
@@ -1756,6 +1768,11 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundActivity", b =>
+                {
+                    b.Navigation("EvaluationForms");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundConfiguration", b =>
                 {
                     b.Navigation("EvaluationForms");
                 });

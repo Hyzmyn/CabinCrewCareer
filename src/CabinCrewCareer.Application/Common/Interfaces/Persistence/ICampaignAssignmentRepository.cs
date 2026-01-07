@@ -1,4 +1,5 @@
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Entities;
 
 namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
@@ -10,5 +11,15 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
         Task<bool> HasAssignmentsForCampaignAsync(int campaignId);
         Task<int> GetOngoingCampaignsCountByUserIdAsync(int userId);
         Task<bool> HasOverlappingCampaignAsync(int userId, int campaignId);
+        Task<PaginatedList<CampaignAssignment>> PaginatedListAsync
+            (string? searchTerm
+            , string? sortColumn
+            , string? sortOrder
+            , int? campaignType
+            , int? campaignStatus
+            , int? partnerId
+            , int page
+            , int pageSize
+            , int userId);
     }
 }

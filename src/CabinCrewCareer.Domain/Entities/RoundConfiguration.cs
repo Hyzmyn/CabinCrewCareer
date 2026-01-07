@@ -13,5 +13,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int Benchmark { get; set; }
 
         public DateOnly? EffectiveDate { get; set; }
+        // Foreign Keys
+
+        // Navigation Properties
+        public virtual ICollection<EvaluationForm> EvaluationForms { get; set; } = [];
     }
 }
