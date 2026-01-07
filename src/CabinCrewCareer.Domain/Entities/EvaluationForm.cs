@@ -21,6 +21,9 @@ namespace CabinCrewCareer.Domain.Entities
         public int? ExaminerId { get; set; }
         public virtual User Examiner { get; set; } = null!;
 
+        public int? ConfigurationId { get; set; }
+        public virtual RoundConfiguration Configuration { get; set; } = null!;
+
         // Navigation Properties
         public virtual ICollection<AppearanceResult> AppearanceResults { get; set; } = [];
 

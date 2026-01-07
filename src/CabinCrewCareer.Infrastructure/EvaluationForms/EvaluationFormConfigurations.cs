@@ -24,6 +24,11 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
                 .WithMany(n => n.EvaluationForms)
                 .HasForeignKey(n => n.ExaminerId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(n => n.Configuration)
+                .WithMany(n => n.EvaluationForms)
+                .HasForeignKey(n => n.ConfigurationId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

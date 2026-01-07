@@ -147,6 +147,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Campaign round not found")]
         CAMPAIGN_ROUND_NOT_FOUND_ALT = 46,
 
+        [Description("Invalid benchmark")]
+        INVALID_BENCHMARK = 47,
+
         #endregion
     }
 }

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using CabinCrewCareer.Application.AirlinePartners.Common;
+using CabinCrewCareer.Application.CampaignAssignments.Common;
 using CabinCrewCareer.Application.CampaignRequests.Common;
 using CabinCrewCareer.Application.CampaignRounds.Common;
 using CabinCrewCareer.Application.Campaigns.Queries.GetCampaignList;
 using CabinCrewCareer.Application.Cities.Common;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Models;
+using CabinCrewCareer.Application.Configurations.Common;
 using CabinCrewCareer.Application.EvaluationForms.Common;
 using CabinCrewCareer.Application.InterviewCriterias.Common;
 using CabinCrewCareer.Application.Roles.Common;
@@ -130,6 +132,18 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.CreatedAt, u => u.MapFrom(u => u.CreatedAt.HasValue ? u.CreatedAt.Value.GetFormatDateTime() : null))
                 .ForMember(u => u.PartnerName, u => u.MapFrom(u => u.CampaignRequest != null && u.CampaignRequest.AirlinePartner != null ? u.CampaignRequest.AirlinePartner.PartnerName : null));
 
+            CreateMap<CampaignAssignment, SimpleCampaignDto>()
+                .ForMember(u => u.Status, u => u.MapFrom(u => u.Campaign.CampaignStatus.ToString()))
+                .ForMember(u => u.CampaignId, u => u.MapFrom(u => u.Campaign.CampaignId))
+                .ForMember(u => u.CampaignName, u => u.MapFrom(u => u.Campaign.CampaignName))
+                .ForMember(u => u.Description, u => u.MapFrom(u => u.Campaign.Description))
+                .ForMember(u => u.StartDate, u => u.MapFrom(u => u.Campaign.StartDate))
+                .ForMember(u => u.EndDate, u => u.MapFrom(u => u.Campaign.EndDate))
+                .ForMember(u => u.PartnerName, u => u.MapFrom(u => u.Campaign.CampaignRequest.AirlinePartner.PartnerName))
+                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.Campaign.CampaignType.ToString()));
+
+            CreateMap<PaginatedList<CampaignAssignment>, PaginatedList<SimpleCampaignDto>>();
+
             CreateMap<PaginatedList<Campaign>, PaginatedList<GetCampaignListDto>>();
             #endregion
 
@@ -157,6 +171,11 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.FinalScore, u => u.MapFrom(u => u.InterviewResults.Sum(x => x.Score)));
 
             CreateMap<InterviewResult, GetInterviewResultResponse>();
+
+            CreateMap<RoundConfiguration, GetConfigurationResponse>()
+                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.CampaignType.ToString()))
+                .ForMember(u => u.ConfigurationType, u => u.MapFrom(u => u.ConfigurationType.ToString()))
+                .ForMember(u => u.EffectiveDate, u => u.MapFrom(u => u.EffectiveDate.HasValue ? u.EffectiveDate.Value.GetFormatDate() : null));
             #endregion
 
             #region Airline Partner
