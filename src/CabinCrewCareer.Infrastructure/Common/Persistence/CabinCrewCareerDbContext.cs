@@ -92,6 +92,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public DbSet<RoundConfiguration> RoundConfigurations { get; set; }
 
+        public DbSet<Location> Locations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CabinCrewCareerDbContext).Assembly);

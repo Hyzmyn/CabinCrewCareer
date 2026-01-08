@@ -547,6 +547,32 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.ToTable("InterviewResult", (string)null);
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Location", b =>
+                {
+                    b.Property<int>("LocationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LocationId"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("CampaignType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LocationId");
+
+                    b.HasIndex("WardId");
+
+                    b.ToTable("Location", (string)null);
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Notification", b =>
                 {
                     b.Property<int>("NotificationId")
@@ -755,16 +781,15 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<int>("Benchmark")
                         .HasColumnType("int");
 
-                    b.Property<int>("CampaignType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ConfigurationType")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly?>("EffectiveDate")
                         .HasColumnType("date");
 
+                    b.Property<int?>("RoundTypeId")
+                        .HasColumnType("int");
+
                     b.HasKey("RoundConfigurationId");
+
+                    b.HasIndex("RoundTypeId");
 
                     b.ToTable("RoundConfiguration", (string)null);
                 });
@@ -1487,6 +1512,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("InterviewCriteriaItem");
                 });
 
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Location", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.Ward", "Ward")
+                        .WithMany("Locations")
+                        .HasForeignKey("WardId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Ward");
+                });
+
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Notification", b =>
                 {
                     b.HasOne("CabinCrewCareer.Domain.Entities.NotificationType", "NotificationType")
@@ -1560,6 +1595,16 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Navigation("User");
 
                     b.Navigation("UserApplicationSnapshot");
+                });
+
+            modelBuilder.Entity("CabinCrewCareer.Domain.Entities.RoundConfiguration", b =>
+                {
+                    b.HasOne("CabinCrewCareer.Domain.Entities.TypeRound", "RoundType")
+                        .WithMany("RoundConfigurations")
+                        .HasForeignKey("RoundTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("RoundType");
                 });
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.ScoringCriteriaDetail", b =>
@@ -1817,6 +1862,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
 
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.TypeRound", b =>
                 {
+                    b.Navigation("RoundConfigurations");
+
                     b.Navigation("Rounds");
                 });
 
@@ -1856,6 +1903,8 @@ namespace CabinCrewCareer.Infrastructure.Migrations
             modelBuilder.Entity("CabinCrewCareer.Domain.Entities.Ward", b =>
                 {
                     b.Navigation("AirlinePartners");
+
+                    b.Navigation("Locations");
 
                     b.Navigation("Users");
                 });

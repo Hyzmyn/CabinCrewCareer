@@ -10,6 +10,7 @@ using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Application.Configurations.Common;
 using CabinCrewCareer.Application.EvaluationForms.Common;
 using CabinCrewCareer.Application.InterviewCriterias.Common;
+using CabinCrewCareer.Application.Locations.Common;
 using CabinCrewCareer.Application.Roles.Common;
 using CabinCrewCareer.Application.RoundActivities.Common;
 using CabinCrewCareer.Application.ScoringCriterias.Common;
@@ -173,9 +174,15 @@ namespace CabinCrewCareer.Application.Common.Mappings
             CreateMap<InterviewResult, GetInterviewResultResponse>();
 
             CreateMap<RoundConfiguration, GetConfigurationResponse>()
-                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.CampaignType.ToString()))
-                .ForMember(u => u.ConfigurationType, u => u.MapFrom(u => u.ConfigurationType.ToString()))
+                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.RoundType.CampaignType.ToString()))
+                .ForMember(u => u.RoundType, u => u.MapFrom(u => u.RoundType.RoundTypeName))
                 .ForMember(u => u.EffectiveDate, u => u.MapFrom(u => u.EffectiveDate.HasValue ? u.EffectiveDate.Value.GetFormatDate() : null));
+
+            CreateMap<PaginatedList<RoundConfiguration>, PaginatedList<GetConfigurationResponse>>();
+
+            CreateMap<Location, GetLocationResponse>()
+                .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.CampaignType.ToString()))
+                .ForMember(u => u.Address, u => u.MapFrom(u => $"{u.Address}, {u.Ward.WardName}, {u.Ward.City.CityName}"));
             #endregion
 
             #region Airline Partner

@@ -11,5 +11,7 @@ namespace CabinCrewCareer.Domain.Entities
         public CampaignType CampaignType { get; set; }
 
         public virtual ICollection<Round> Rounds { get; set; } = [];
+
+        public virtual ICollection<RoundConfiguration> RoundConfigurations { get; set; } = [];
     }
 }

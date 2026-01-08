@@ -4,7 +4,7 @@
     {
         public int RoundConfigurationId { get; set; }
 
-        public string ConfigurationType { get; set; } = string.Empty;
+        public string RoundType { get; set; } = string.Empty;
 
         public string CampaignType { get; set; } = string.Empty;
 

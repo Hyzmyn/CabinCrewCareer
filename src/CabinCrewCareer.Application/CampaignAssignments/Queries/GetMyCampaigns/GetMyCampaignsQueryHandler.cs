@@ -1,6 +1,5 @@
 using CabinCrewCareer.Application.CampaignAssignments.Common;
 using CabinCrewCareer.Application.Common.Enums;
-using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
 using CabinCrewCareer.Domain.Wrappers;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
 {
-    public class GetMyCampaignsQueryHandler 
+    public class GetMyCampaignsQueryHandler
         : IRequestHandler<GetMyCampaignsQuery, Response<List<SimpleCampaignDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -22,14 +21,14 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
         }
 
         public async Task<Response<List<SimpleCampaignDto>>> Handle(
-            GetMyCampaignsQuery request, 
+            GetMyCampaignsQuery request,
             CancellationToken cancellationToken)
         {
             // Get both role names from database in a single query
             var rolesQuery = await _unitOfWork.Roles.GetAsync(r => r.RoleId == 6 || r.RoleId == 9);
             var rolesList = await rolesQuery.ToListAsync(cancellationToken);
             var roles = rolesList.ToDictionary(r => r.RoleId, r => r.RoleName);
-            
+
             var cabinCrewRoleName = roles.GetValueOrDefault(6, string.Empty);
             var purserRoleName = roles.GetValueOrDefault(9, string.Empty);
 
@@ -85,6 +84,7 @@ namespace CabinCrewCareer.Application.CampaignAssignments.Queries.GetMyCampaigns
                     CampaignId = campaign.CampaignId,
                     CampaignName = campaign.CampaignName,
                     Description = campaign.Description,
+                    Status = campaign.CampaignStatus.ToString(),
                     StartDate = campaign.StartDate,
                     EndDate = campaign.EndDate,
                     PartnerName = partnerName,

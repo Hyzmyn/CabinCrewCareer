@@ -1,4 +1,5 @@
 ﻿using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
+using CabinCrewCareer.Application.Common.Models;
 using CabinCrewCareer.Domain.Entities;
 
 namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
@@ -10,5 +11,19 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
         Task<int> RecruitmentInterviewBenchmark();
 
         Task<int> PromotionInterviewBenchmark();
+
+        Task<int> EnglishListeningTestBenchmark();
+
+        Task<int> EnglishSpeakingTestBenchmark();
+
+        Task<int> PracticalTestBenchmark();
+
+        Task<PaginatedList<RoundConfiguration>> PaginatedListAsync
+            (string? sortColumn
+            , string? sortOrder
+            , int? campaignType
+            , int? roundTypeId
+            , int page
+            , int pageSize);
     }
 }

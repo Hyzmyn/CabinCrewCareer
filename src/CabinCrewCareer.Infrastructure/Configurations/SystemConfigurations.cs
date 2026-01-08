@@ -11,6 +11,11 @@ namespace CabinCrewCareer.Infrastructure.Configurations
             builder.ToTable("RoundConfiguration");
 
             builder.HasKey(c => c.RoundConfigurationId);
+
+            builder.HasOne(w => w.RoundType)
+                .WithMany(w => w.RoundConfigurations)
+                .HasForeignKey(w => w.RoundTypeId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
