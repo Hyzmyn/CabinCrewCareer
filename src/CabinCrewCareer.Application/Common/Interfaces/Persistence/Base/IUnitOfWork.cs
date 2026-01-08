@@ -71,6 +71,8 @@
 
         IRoundConfigurationRepository RoundConfigurations { get; }
 
+        ILocationRepository Locations { get; }
+
         Task CompleteAsync();
     }
 }

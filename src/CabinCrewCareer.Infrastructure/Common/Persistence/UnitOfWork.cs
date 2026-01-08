@@ -96,6 +96,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
 
         public IRoundConfigurationRepository RoundConfigurations { get; private set; }
 
+        public ILocationRepository Locations { get; private set; }
+
         public UnitOfWork(
             CabinCrewCareerDbContext dbContext,
             ILoggerFactory loggerFactory)
@@ -171,6 +173,8 @@ namespace CabinCrewCareer.Infrastructure.Common.Persistence
             AirlinePartners = new AirlinePartnerRepository(_dbContext, _logger);
 
             RoundConfigurations = new RoundConfigurationRepository(_dbContext, _logger);
+
+            Locations = new LocationRepository(_dbContext, _logger);
         }
 
         public async Task CompleteAsync() => await _dbContext.SaveChangesAsync();

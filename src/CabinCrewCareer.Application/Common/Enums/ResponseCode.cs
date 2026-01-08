@@ -150,6 +150,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Invalid benchmark")]
         INVALID_BENCHMARK = 47,
 
+        [Description("Location not found")]
+        LOCATION_NOT_FOUND = 48,
+
         #endregion
     }
 }

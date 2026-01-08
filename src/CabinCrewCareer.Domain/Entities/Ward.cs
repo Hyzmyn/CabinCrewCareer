@@ -12,5 +12,6 @@
         // Navigation
         public virtual ICollection<User> Users { get; set; } = [];
         public virtual ICollection<AirlinePartner> AirlinePartners { get; set; } = [];
+        public virtual ICollection<Location> Locations { get; set; } = [];
     }
 }

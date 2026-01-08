@@ -3,6 +3,7 @@ using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Application.Common.Interfaces.Services;
+using CabinCrewCareer.Domain.Common;
 using CabinCrewCareer.Domain.Entities;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -18,17 +19,34 @@ namespace CabinCrewCareer.Application.Configurations.Commands.CreateConfiguratio
 
         public async Task<Response<string>> Handle(CreateConfigurationCommand request, CancellationToken cancellationToken)
         {
-            var userQuery = await _unitOfWork.RoundConfigurations.GetAsync(user => user.RoundConfigurationId == request.ConfigurationId);
+            var roundType = await _unitOfWork.RoundTypes.GetByIdAsync(request.RoundTypeId) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
 
-            var user = userQuery
-                .FirstOrDefault() ?? throw new ApiException(ResponseCode.USER_NOT_FOUND);
-
-            if (user.Benchmark == request.Benchmark) throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+            switch ((RoundConfigurationType)roundType.RoundTypeId)
+            {
+                case RoundConfigurationType.Appearance:
+                    if (await _unitOfWork.RoundConfigurations.RecruitmentAppearanceBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                case RoundConfigurationType.EnglishListeningTest:
+                    if (await _unitOfWork.RoundConfigurations.EnglishListeningTestBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                case RoundConfigurationType.EnglishSpeakingTest:
+                    if (await _unitOfWork.RoundConfigurations.EnglishSpeakingTestBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                case RoundConfigurationType.RecruitmentInterview:
+                    if (await _unitOfWork.RoundConfigurations.RecruitmentInterviewBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                case RoundConfigurationType.PracticalTest:
+                    if (await _unitOfWork.RoundConfigurations.PracticalTestBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                case RoundConfigurationType.PromotionInterview:
+                    if (await _unitOfWork.RoundConfigurations.PromotionInterviewBenchmark() != request.Benchmark) break;
+                    throw new ApiException(ResponseCode.INVALID_BENCHMARK);
+                default: break;
+            }
 
             RoundConfiguration ward = new()
             {
-                CampaignType = request.CampaignType,
-                ConfigurationType = request.ConfigurationType,
+                RoundTypeId = request.RoundTypeId,
                 Benchmark = request.Benchmark,
                 EffectiveDate = _dateTimeProvider.Today.AddDays(1)
             };
