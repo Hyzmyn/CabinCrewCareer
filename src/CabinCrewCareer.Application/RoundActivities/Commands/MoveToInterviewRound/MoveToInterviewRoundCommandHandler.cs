@@ -320,6 +320,10 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             // Read template and replace placeholders
             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
             string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
+            
+            // Get Location Info
+            string locationInfo = await GetLocationInfoAsync(round, cancellationToken);
+            
             templateBody = templateBody
                 .Replace("{FullName}", user.FullName ?? "")
                 .Replace("{Result}", resultText)
@@ -327,7 +331,8 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 .Replace("{CampaignName}", campaignName)
                 .Replace("{ExtraMessage}", extraMessage)
                 .Replace("{Round}", "Test")
-                .Replace("{NextRoundInfo}", nextRoundInfo);
+                .Replace("{NextRoundInfo}", nextRoundInfo)
+                .Replace("{LocationInfo}", locationInfo);
 
             var mailRequest = new MailRequest
             {
@@ -337,6 +342,34 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
             };
 
             await _emailService.SendEmailAsync(mailRequest);
+        }
+
+        private async Task<string> GetLocationInfoAsync(Round round, CancellationToken cancellationToken)
+        {
+            string locationInfo = "";
+            if (round?.CampaignRound?.Campaign != null)
+            {
+                var campaignType = round.CampaignRound.Campaign.CampaignType;
+                var locationQuery = await _unitOfWork.Locations.GetAsync(
+                    expression: x => x.CampaignType == campaignType,
+                    includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
+                var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                
+                if (location != null)
+                {
+                    string fullAddress = location.Address;
+                    if (location.Ward != null)
+                    {
+                        fullAddress += $", {location.Ward.WardName}";
+                        if (location.Ward.City != null)
+                        {
+                            fullAddress += $", {location.Ward.City.CityName}";
+                        }
+                    }
+                    locationInfo = $"<p><strong>📍 Location:</strong> {fullAddress}</p>";
+                }
+            }
+            return locationInfo;
         }
     }
 }
