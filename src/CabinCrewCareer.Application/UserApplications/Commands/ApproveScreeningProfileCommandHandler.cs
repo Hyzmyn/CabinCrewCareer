@@ -127,13 +127,18 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                                            $"<p><strong>End date:</strong> {endDate}</p>";
                         }
                         string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                        
+                        // Get Location Info
+                        string locationInfo = await GetLocationInfoAsync(campaign.CampaignType, cancellationToken);
+                        
                         body = body.Replace("{FullName}", user.FullName)
                                    .Replace("{Result}", "PASSED")
                                    .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
                                    .Replace("{NextRoundInfo}", nextRoundInfo)
-                                   .Replace("{Round}", "Screening");
+                                   .Replace("{Round}", "Screening")
+                                   .Replace("{LocationInfo}", locationInfo);
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,
@@ -173,13 +178,18 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                         string subject = "Screening round result";
                         string extraMessage = "Unfortunately, you did not pass the screening round.";
                         string body = await System.IO.File.ReadAllTextAsync(templatePath, cancellationToken);
+                        
+                        // Get Location Info
+                        string locationInfo = await GetLocationInfoAsync(campaign.CampaignType, cancellationToken);
+                        
                         body = body.Replace("{FullName}", user.FullName)
                                    .Replace("{Result}", "FAILED")
                                    .Replace("{RoundName}", "Screening")
                                    .Replace("{CampaignName}", campaign.CampaignName ?? "")
                                    .Replace("{ExtraMessage}", extraMessage)
                                    .Replace("{Round}", "Screening")
-                                   .Replace("{NextRoundInfo}", "");
+                                   .Replace("{NextRoundInfo}", "")
+                                   .Replace("{LocationInfo}", locationInfo);
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,
@@ -199,6 +209,30 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
             {
                 return new Response<int?>(null, "Chỉ được chuyển sang Passed hoặc Failed", (int)ResponseCode.FAIL);
             }
+        }
+
+        private async Task<string> GetLocationInfoAsync(CampaignType campaignType, CancellationToken cancellationToken)
+        {
+            string locationInfo = "";
+            var locationQuery = await _unitOfWork.Locations.GetAsync(
+                expression: x => x.CampaignType == campaignType,
+                includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
+            var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            
+            if (location != null)
+            {
+                string fullAddress = location.Address;
+                if (location.Ward != null)
+                {
+                    fullAddress += $", {location.Ward.WardName}";
+                    if (location.Ward.City != null)
+                    {
+                        fullAddress += $", {location.Ward.City.CityName}";
+                    }
+                }
+                locationInfo = $"<p><strong>📍 Location:</strong> {fullAddress}</p>";
+            }
+            return locationInfo;
         }
     }
 }

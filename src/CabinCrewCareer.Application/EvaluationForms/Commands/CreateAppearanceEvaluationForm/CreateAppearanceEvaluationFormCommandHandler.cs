@@ -147,6 +147,34 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                     var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
                     if (user is not null && !string.IsNullOrEmpty(user.Email))
                     {
+                        // Get Location based on CampaignType
+                        string locationInfo = "";
+                        if (roundActivity.Round?.CampaignRound?.Campaign != null)
+                        {
+                            var campaignType = roundActivity.Round.CampaignRound.Campaign.CampaignType;
+                            var locationQuery = await _unitOfWork.Locations.GetAsync(
+                                expression: x => x.CampaignType == campaignType,
+                                includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
+                            var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                            
+                            if (location != null)
+                            {
+                                string fullAddress = location.Address;
+                                if (location.Ward != null)
+                                {
+                                    fullAddress += $", {location.Ward.WardName}";
+                                    if (location.Ward.City != null)
+                                    {
+                                        fullAddress += $", {location.Ward.City.CityName}";
+                                    }
+                                }
+                                locationInfo = $"<div style=\"background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px;\">" +
+                                             $"<h4 style=\"margin-top: 0; color: #555;\">📍 Interview Location</h4>" +
+                                             $"<p>{fullAddress}</p>" +
+                                             $"</div>";
+                            }
+                        }
+                        
                         var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "AppearanceResultTemplate.html");
                         string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
                         templateBody = templateBody.Replace("{FullName}", user.FullName ?? "")
@@ -157,7 +185,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                                  .Replace("{ListeningEndDate}", listeningEndDate)
                                                  //.Replace("{SpeakingJoinCode}", speakingJoinCode)
                                                  .Replace("{SpeakingStartDate}", speakingStartDate)
-                                                 .Replace("{SpeakingEndDate}", speakingEndDate);
+                                                 .Replace("{SpeakingEndDate}", speakingEndDate)
+                                                 .Replace("{LocationInfo}", locationInfo);
                         var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                         {
                             ToEmail = user.Email,

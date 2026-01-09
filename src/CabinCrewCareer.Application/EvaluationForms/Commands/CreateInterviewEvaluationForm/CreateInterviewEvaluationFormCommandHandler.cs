@@ -126,6 +126,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
                             if (user != null && !string.IsNullOrEmpty(user.Email))
                             {
+                                string locationInfo = await GetLocationInfoAsync(roundActivity, cancellationToken);
                                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
                                 string subject = "Interview result";
                                 string extraMessage = "Congratulations! You have passed the Interview round";
@@ -136,7 +137,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                            .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                            .Replace("{ExtraMessage}", extraMessage)
                                            .Replace("{Round}", "Interview")
-                                           .Replace("{NextRoundInfo}", nextRoundInfo);
+                                           .Replace("{NextRoundInfo}", nextRoundInfo)
+                                           .Replace("{LocationInfo}", locationInfo);
                                 var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                                 {
                                     ToEmail = user.Email,
@@ -167,6 +169,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                             var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
                             if (user != null && !string.IsNullOrEmpty(user.Email))
                             {
+                                string locationInfo = await GetLocationInfoAsync(roundActivity, cancellationToken);
                                 var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
                                 string subject = "Interview result";
                                 string extraMessage = "Unfortunately! You did not pass the Interview round.";
@@ -177,7 +180,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                            .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                            .Replace("{ExtraMessage}", extraMessage)
                                            .Replace("{Round}", "Interview")
-                                           .Replace("{NextRoundInfo}", "");
+                                           .Replace("{NextRoundInfo}", "")
+                                           .Replace("{LocationInfo}", locationInfo);
                                 var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                                 {
                                     ToEmail = user.Email,
@@ -242,6 +246,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
                         if (user != null && !string.IsNullOrEmpty(user.Email))
                         {
+                            string locationInfo = await GetLocationInfoAsync(roundActivity, cancellationToken);
                             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
                             string subject = "Interview result";
                             string extraMessage = "Congratulations! You have passed the Interview round.";
@@ -252,7 +257,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                        .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                        .Replace("{ExtraMessage}", extraMessage)
                                        .Replace("{Round}", "Interview")
-                                       .Replace("{NextRoundInfo}", nextRoundInfo);
+                                       .Replace("{NextRoundInfo}", nextRoundInfo)
+                                       .Replace("{LocationInfo}", locationInfo);
                             var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                             {
                                 ToEmail = user.Email,
@@ -283,6 +289,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                         var user = await _unitOfWork.Users.GetByIdAsync(roundActivity.UserId);
                         if (user != null && !string.IsNullOrEmpty(user.Email))
                         {
+                            string locationInfo = await GetLocationInfoAsync(roundActivity, cancellationToken);
                             var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "TestResultTemplate.html");
                             string subject = "Interview result";
                             string extraMessage = "Unfortunately! You did not pass the Interview round.";
@@ -293,7 +300,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                                        .Replace("{CampaignName}", roundActivity.Round?.CampaignRound?.Campaign?.CampaignName ?? "")
                                        .Replace("{ExtraMessage}", extraMessage)
                                        .Replace("{Round}", "Interview")
-                                       .Replace("{NextRoundInfo}", "");
+                                       .Replace("{NextRoundInfo}", "")
+                                       .Replace("{LocationInfo}", locationInfo);
                             var mailRequest = new CabinCrewCareer.Application.Common.Models.Requests.MailRequest
                             {
                                 ToEmail = user.Email,
@@ -321,6 +329,34 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                     code: (int)ResponseCode.CREATED_SUCCESS,
                     data: ResponseCode.CREATED_SUCCESS.ToString(),
                     message: ResponseCode.CREATED_SUCCESS.GetDescription());
+        }
+
+        private async Task<string> GetLocationInfoAsync(RoundActivity roundActivity, CancellationToken cancellationToken)
+        {
+            string locationInfo = "";
+            if (roundActivity.Round?.CampaignRound?.Campaign != null)
+            {
+                var campaignType = roundActivity.Round.CampaignRound.Campaign.CampaignType;
+                var locationQuery = await _unitOfWork.Locations.GetAsync(
+                    expression: x => x.CampaignType == campaignType,
+                    includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
+                var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                
+                if (location != null)
+                {
+                    string fullAddress = location.Address;
+                    if (location.Ward != null)
+                    {
+                        fullAddress += $", {location.Ward.WardName}";
+                        if (location.Ward.City != null)
+                        {
+                            fullAddress += $", {location.Ward.City.CityName}";
+                        }
+                    }
+                    locationInfo = $"<p><strong>📍 Interview Location:</strong> {fullAddress}</p>";
+                }
+            }
+            return locationInfo;
         }
     }
 }
