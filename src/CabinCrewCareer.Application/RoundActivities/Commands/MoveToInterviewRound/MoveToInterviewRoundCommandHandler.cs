@@ -104,10 +104,17 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                     continue;
                 }
 
-                // Check if all test sessions meet 80% threshold
+                // Check if all test sessions meet benchmark threshold from database
                 bool allSessionsPassed = true;
                 var maxScore = round.Test.MaxScore;
-                var requiredScore = maxScore * 0.8;
+                int benchmarkPercentage = round.RoundType switch
+                {
+                    RoundType.EnglishListeningTest => await _unitOfWork.RoundConfigurations.EnglishListeningTestBenchmark(),
+                    RoundType.EnglishSpeakingTest => await _unitOfWork.RoundConfigurations.EnglishSpeakingTestBenchmark(),
+                    RoundType.PracticalTest => await _unitOfWork.RoundConfigurations.PracticalTestBenchmark(),
+                    _ => 0
+                };
+                var requiredScore = (maxScore * benchmarkPercentage) / 100;
                 List<string> sessionScores = new();
 
                 foreach (var session in testSessions)
@@ -168,7 +175,7 @@ namespace CabinCrewCareer.Application.RoundActivities.Commands.MoveToInterviewRo
                 }
                 else if (!allSessionsPassed)
                 {
-                    detailResults.Add($"User {roundActivity.UserId}: FAILED ({string.Join(", ", sessionScores)}) - Below 80% threshold");
+                    detailResults.Add($"User {roundActivity.UserId}: FAILED ({string.Join(", ", sessionScores)}) - Below benchmark threshold");
                 }
 
                 // Update RoundActivity status

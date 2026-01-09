@@ -283,8 +283,8 @@ namespace CabinCrewCareer.Api.Controllers
         /// 
         /// **Activity Status Logic:**
         /// - "Ongoing": User is still in this round (default state)
-        /// - "Passed": User has passed this round (score >= 80%)
-        /// - "Failed": User has failed this round (score less than 80%)
+        /// - "Passed": User has passed this round (score >= benchmark from RoundConfiguration)
+        /// - "Failed": User has failed this round (score < benchmark from RoundConfiguration)
         /// 
         /// **Example:**
         /// ```
@@ -383,8 +383,8 @@ namespace CabinCrewCareer.Api.Controllers
         /// 
         /// **Activity Status:**
         /// - "Ongoing": Test session exists but not yet evaluated
-        /// - "Passed": Score greater than or equal to 80% of MaxScore
-        /// - "Failed": Score less than 80% of MaxScore
+        /// - "Passed": Score greater than or equal to benchmark from RoundConfiguration
+        /// - "Failed": Score less than benchmark from RoundConfiguration
         /// 
         /// **Use Case:**
         /// Candidates can view their English test results and see if they passed/failed
@@ -474,8 +474,8 @@ namespace CabinCrewCareer.Api.Controllers
         /// 
         /// **Activity Status:**
         /// - "Ongoing": Test session exists but not yet evaluated
-        /// - "Passed": Score greater than or equal to 80% of MaxScore
-        /// - "Failed": Score less than 80% of MaxScore
+        /// - "Passed": Score greater than or equal to benchmark from RoundConfiguration
+        /// - "Failed": Score less than benchmark from RoundConfiguration
         /// 
         /// **Use Case:**
         /// Cabin crew applicants can view their practical test results and see if 

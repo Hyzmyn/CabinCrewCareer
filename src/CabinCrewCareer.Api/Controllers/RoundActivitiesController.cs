@@ -33,16 +33,16 @@ namespace CabinCrewCareer.Api.Controllers
         /// 3. For each candidate (RoundActivity):
         ///    - Gets all their test sessions for this test
         ///    - Validates all sessions have Status = true (finalized/scored)
-        ///    - Checks if each session's TotalScore >= 80% of Test MaxScore
+        ///    - Checks if each session's TotalScore >= benchmark from RoundConfiguration table
         /// 
         /// **Test-specific Rules:**
         /// 
         /// **Practical Test:**
-        /// - If pass (greater than or equal to 80%): Immediately moves to Interview round
-        /// - If fail (less than 80%): Status = Failed
+        /// - If pass (greater than or equal to benchmark): Immediately moves to Interview round
+        /// - If fail (less than benchmark): Status = Failed
         /// 
         /// **English Test (Listening or Speaking):**
-        /// - If pass (greater than or equal to 80%): Marks as Passed, but waits for the OTHER English test
+        /// - If pass (greater than or equal to benchmark): Marks as Passed, but waits for the OTHER English test
         /// - Only creates Interview RoundActivity when BOTH Listening AND Speaking are Passed
         /// - If either test fails: Status = Failed, no interview round
         /// 
@@ -92,7 +92,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// {
         ///   "code": 200,
         ///   "data": "Passed: 10, Failed: 5",
-        ///   "message": "Processed 15 round activities in English Test Round (Both Listening and Speaking must pass):\n- Passed: 10\n- Failed: 5\n\nDetails:\nUser 10: PASSED (90/100) - Both English tests passed, moved to Interview\nUser 12: PASSED (85/100) - Waiting for other English test\nUser 15: FAILED (70/100) - Below 80% threshold"
+        ///   "message": "Processed 15 round activities in English Test Round (Both Listening and Speaking must pass):\n- Passed: 10\n- Failed: 5\n\nDetails:\nUser 10: PASSED (90/100) - Both English tests passed, moved to Interview\nUser 12: PASSED (85/100) - Waiting for other English test\nUser 15: FAILED (70/100) - Below benchmark threshold"
         /// }
         /// ```
         /// </remarks>

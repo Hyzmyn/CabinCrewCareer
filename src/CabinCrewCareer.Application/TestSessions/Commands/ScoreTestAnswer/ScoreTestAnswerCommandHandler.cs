@@ -138,9 +138,17 @@ namespace CabinCrewCareer.Application.TestSessions.Commands.ScoreTestAnswer
             testSession.TotalScore = totalScore;
             await _unitOfWork.TestSessions.UpdateAsync(testSession);
 
-            // Determine pass/fail status (80% threshold)
+            // Determine pass/fail status based on benchmark percentage from database
             var maxScore = testSession.Test.MaxScore;
-            var isPassed = totalScore >= (maxScore * 0.8);
+            int benchmarkPercentage = testSession.Test.TestType switch
+            {
+                TestType.EnglishListening => await _unitOfWork.RoundConfigurations.EnglishListeningTestBenchmark(),
+                TestType.EnglishSpeaking => await _unitOfWork.RoundConfigurations.EnglishSpeakingTestBenchmark(),
+                TestType.Practical => await _unitOfWork.RoundConfigurations.PracticalTestBenchmark(),
+                _ => 0
+            };
+            var requiredScore = (maxScore * benchmarkPercentage) / 100;
+            var isPassed = totalScore >= requiredScore;
 
             // Find the correct round based on user's current RoundActivity
             // A user should have an Ongoing RoundActivity for the current round they're in
