@@ -26,7 +26,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <param name="sortColumn">Sort on a specifice column. Example: "date"</param>
         /// <param name="sortOrder">"asc" or "desc"</param>
         /// <param name="campaignType">1: Recruitment, 2: Promotion</param>
-        /// <param name="roundTypeId">Round type Id</param>
+        /// <param name="roundTypeId">2: Appearance, 3: English Listening Test, 4: English Speaking Test, 5: Recruitment Interview, 9: Practical Test, 10: Promotion Interview</param>
         /// <param name="page">Current page</param>
         /// <param name="pageSize">Number of records of a specific page</param>
         /// <returns>A list of all configurations</returns>
@@ -107,7 +107,14 @@ namespace CabinCrewCareer.Api.Controllers
         ///       "roundTypeId": 1,     
         ///       "benchmark": 80
         ///     }
-        ///  
+        ///     
+        /// roundTypeIds:
+        /// - 2: Appearance
+        /// - 3: English Listening Test
+        /// - 4: English Speaking Test
+        /// - 5: Recruitment Interview
+        /// - 9: Practical Test
+        /// - 10: Promotion Interview
         /// </remarks> 
         /// <returns>Successful code</returns>
         /// <response code="200">Ok</response>

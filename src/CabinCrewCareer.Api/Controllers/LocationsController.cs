@@ -87,9 +87,9 @@ namespace CabinCrewCareer.Api.Controllers
         #region Edit location
         /// <summary>
         /// Admin edit a location
+        /// </summary>
         /// <param name="id">Id of a specific location</param>
         /// <param name="request">Request body</param>
-        /// </summary>
         /// <remarks>
         /// Sample request:
         /// 
@@ -107,7 +107,7 @@ namespace CabinCrewCareer.Api.Controllers
         /// <response code="500">Internal Server Error</response>
         [HttpPut("{id}")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(Response<GetLocationResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Response<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> LoginAsync(int id, [FromBody] EditLocationRequest request)
         {
@@ -115,13 +115,13 @@ namespace CabinCrewCareer.Api.Controllers
             {
                 return Ok(await mediator.Send(new EditLocationCommand(id, request)));
             }
-            catch (ValidationException e)
+            catch (ApiException e)
             {
                 return BadRequest(new
                 {
                     errorCode = e.ErrorCode,
                     errorMessage = e.ErrorMessage,
-                    errors = e.Errors
+                    error = e.Error
                 });
             }
         }
