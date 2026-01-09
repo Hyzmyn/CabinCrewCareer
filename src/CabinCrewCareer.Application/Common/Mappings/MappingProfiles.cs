@@ -180,10 +180,11 @@ namespace CabinCrewCareer.Application.Common.Mappings
 
             CreateMap<PaginatedList<RoundConfiguration>, PaginatedList<GetConfigurationResponse>>();
 
+            CreateMap<Location, GetLocationDetailResponse>()
+                .ForMember(u => u.CityId, u => u.MapFrom(u => u.Ward.CityId));
+
             CreateMap<Location, GetLocationResponse>()
                 .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.CampaignType.ToString()))
-                .ForMember(u => u.WardId, u => u.MapFrom(u => u.WardId))
-                .ForMember(u => u.CityId, u => u.MapFrom(u => u.Ward.CityId))
                 .ForMember(u => u.Address, u => u.MapFrom(u => $"{u.Address}, {u.Ward.WardName}, {u.Ward.City.CityName}"));
             #endregion
 
