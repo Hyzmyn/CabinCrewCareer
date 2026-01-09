@@ -24,6 +24,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
         public async Task<Response<string>> Handle(CreateInterviewEvaluationFormCommand request, CancellationToken cancellationToken)
         {
             var finalScore = 0;
+            var totalCriteriasScore = request.Choices.Count * 10;
 
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId))
@@ -54,6 +55,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                 finalScore += item.Score;
             }
 
+            double finalScorePercentage = (finalScore / totalCriteriasScore) * 100;
+
             var roundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
                 expression: x => x.ActivityId == request.ActivityId,
                 includeFunc: x => x.Include(x => x.Round));
@@ -67,7 +70,13 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             // Gán IsPassed cho form trước khi tính toán pass/fail
             if (request.Type == (int)CampaignType.Recruitment)
             {
-                if (finalScore > await _unitOfWork.RoundConfigurations.RecruitmentInterviewBenchmark())
+                var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration((int)RoundConfigurationType.RecruitmentInterview) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
+
+                form.ConfigurationId = round.RoundConfigurationId;
+
+
+
+                if (finalScorePercentage > await _unitOfWork.RoundConfigurations.RecruitmentInterviewBenchmark())
                 {
                     form.IsPassed = true;
                 }
@@ -78,7 +87,11 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
             }
             else
             {
-                if (finalScore > await _unitOfWork.RoundConfigurations.PromotionInterviewBenchmark()) form.IsPassed = true;
+                var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration((int)RoundConfigurationType.PromotionInterview) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
+
+                form.ConfigurationId = round.RoundConfigurationId;
+
+                if (finalScorePercentage > await _unitOfWork.RoundConfigurations.PromotionInterviewBenchmark()) form.IsPassed = true;
                 else form.IsPassed = false;
             }
 
@@ -341,7 +354,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                     expression: x => x.CampaignType == campaignType,
                     includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
                 var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                
+
                 if (location != null)
                 {
                     string fullAddress = location.Address;

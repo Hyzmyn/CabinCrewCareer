@@ -153,6 +153,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.EvaluatedDate, u => u.MapFrom(u => u.EvaluatedDate.GetFormatDateTime()))
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
                 .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
+                .ForMember(u => u.Benchmark, u => u.MapFrom(u => $"{u.Configuration.Benchmark}%"))
                 .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName));
 
             CreateMap<AppearanceResult, GetAppearanceResultResponse>();
@@ -169,6 +170,7 @@ namespace CabinCrewCareer.Application.Common.Mappings
                 .ForMember(u => u.RoundName, u => u.MapFrom(u => u.RoundActivity.Round.RoundType.ToString()))
                 .ForMember(u => u.Candidate, u => u.MapFrom(u => u.RoundActivity.User.FullName))
                 .ForMember(u => u.Examiner, u => u.MapFrom(u => u.Examiner.FullName))
+                .ForMember(u => u.Benchmark, u => u.MapFrom(u => $"{u.Configuration.Benchmark}%"))
                 .ForMember(u => u.FinalScore, u => u.MapFrom(u => u.InterviewResults.Sum(x => x.Score)));
 
             CreateMap<InterviewResult, GetInterviewResultResponse>();
@@ -176,7 +178,9 @@ namespace CabinCrewCareer.Application.Common.Mappings
             CreateMap<RoundConfiguration, GetConfigurationResponse>()
                 .ForMember(u => u.CampaignType, u => u.MapFrom(u => u.RoundType.CampaignType.ToString()))
                 .ForMember(u => u.RoundType, u => u.MapFrom(u => u.RoundType.RoundTypeName))
-                .ForMember(u => u.EffectiveDate, u => u.MapFrom(u => u.EffectiveDate.HasValue ? u.EffectiveDate.Value.GetFormatDate() : null));
+                .ForMember(u => u.Status, u => u.MapFrom(u => u.Status ? "Active" : "Inactive"))
+                .ForMember(u => u.EffectiveDate, u => u.MapFrom(u => u.EffectiveDate.HasValue ? u.EffectiveDate.Value.GetFormatDate() : "Not available"))
+                .ForMember(u => u.ExpiredDate, u => u.MapFrom(u => u.ExpiredDate.HasValue ? u.ExpiredDate.Value.GetFormatDate() : "Not available"));
 
             CreateMap<PaginatedList<RoundConfiguration>, PaginatedList<GetConfigurationResponse>>();
 

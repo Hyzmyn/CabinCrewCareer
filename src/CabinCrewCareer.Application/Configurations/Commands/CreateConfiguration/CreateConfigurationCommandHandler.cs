@@ -44,6 +44,13 @@ namespace CabinCrewCareer.Application.Configurations.Commands.CreateConfiguratio
                 default: break;
             }
 
+            var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration(request.RoundTypeId) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
+
+            round.Status = false;
+            round.ExpiredDate = _dateTimeProvider.Today;
+
+            await _unitOfWork.RoundConfigurations.UpdateAsync(round);
+
             RoundConfiguration ward = new()
             {
                 RoundTypeId = request.RoundTypeId,

@@ -65,5 +65,8 @@ namespace CabinCrewCareer.Infrastructure.Configurations
 
         public async Task<int> PracticalTestBenchmark() =>
             await _dbContext.RoundConfigurations.Where(x => x.RoundTypeId == (int?)RoundConfigurationType.PracticalTest).OrderByDescending(x => x.RoundConfigurationId).Select(x => x.Benchmark).FirstOrDefaultAsync();
+
+        public async Task<RoundConfiguration?> GetCurrentlyEffectiveConfiguration(int roundTypeId)
+            => await _dbContext.RoundConfigurations.Where(x => x.RoundTypeId == roundTypeId && x.Status).FirstOrDefaultAsync();
     }
 }

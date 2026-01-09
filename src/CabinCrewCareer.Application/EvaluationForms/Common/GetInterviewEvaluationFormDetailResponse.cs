@@ -16,6 +16,8 @@
 
         public string Examiner { get; set; } = string.Empty;
 
+        public string Benchmark { get; set; } = string.Empty;
+
         public int FinalScore { get; set; } = 0;
 
         public List<GetInterviewResultResponse> InterviewResults { get; set; } = [];
