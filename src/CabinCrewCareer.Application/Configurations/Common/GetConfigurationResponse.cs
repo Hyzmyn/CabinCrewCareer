@@ -10,6 +10,10 @@
 
         public int Benchmark { get; set; }
 
+        public string Status { get; set; } = string.Empty;
+
         public string EffectiveDate { get; set; } = string.Empty;
+
+        public string ExpiredDate { get; set; } = string.Empty;
     }
 }

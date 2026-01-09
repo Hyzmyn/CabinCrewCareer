@@ -16,6 +16,8 @@
 
         public string Examiner { get; set; } = string.Empty;
 
+        public string Benchmark { get; set; } = string.Empty;
+
         public List<GetAppearanceResultResponse> AppearanceResults { get; set; } = [];
     }
 

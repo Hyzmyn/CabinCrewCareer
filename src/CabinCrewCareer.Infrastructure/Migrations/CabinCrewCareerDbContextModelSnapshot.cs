@@ -784,8 +784,14 @@ namespace CabinCrewCareer.Infrastructure.Migrations
                     b.Property<DateOnly?>("EffectiveDate")
                         .HasColumnType("date");
 
+                    b.Property<DateOnly?>("ExpiredDate")
+                        .HasColumnType("date");
+
                     b.Property<int?>("RoundTypeId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("RoundConfigurationId");
 

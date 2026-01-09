@@ -18,6 +18,8 @@ namespace CabinCrewCareer.Application.Common.Interfaces.Persistence
 
         Task<int> PracticalTestBenchmark();
 
+        Task<RoundConfiguration?> GetCurrentlyEffectiveConfiguration(int roundTypeId);
+
         Task<PaginatedList<RoundConfiguration>> PaginatedListAsync
             (string? sortColumn
             , string? sortOrder

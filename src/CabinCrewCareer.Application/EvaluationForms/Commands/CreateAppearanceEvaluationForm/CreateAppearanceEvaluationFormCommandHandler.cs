@@ -25,6 +25,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
         public async Task<Response<string>> Handle(CreateAppearanceEvaluationFormCommand request, CancellationToken cancellationToken)
         {
             int count = 0;
+            int totalCriterias = request.Choices.Count;
             string resultText = "Không đạt";
             string listeningJoinCode = "";
             string speakingJoinCode = "";
@@ -47,11 +48,14 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
 
             if (evaluation is not null) throw new ApiException(ResponseCode.CANDIDATE_HAS_BEEN_EVALUATED);
 
+            var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration((int)RoundConfigurationType.Appearance) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
+
             EvaluationForm form = new()
             {
                 ActivityId = request.ActivityId,
                 Comment = request.Comment,
                 ExaminerId = Int32.Parse(currentUserId),
+                ConfigurationId = round.RoundConfigurationId,
                 Type = EvaluationType.Appearance,
                 EvaluatedDate = _dateTimeProvider.UtcNow
             };
@@ -67,7 +71,9 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                 if (item.IsPassed) count++;
             }
 
-            if (count > await _unitOfWork.RoundConfigurations.RecruitmentAppearanceBenchmark()) form.IsPassed = true;
+            double passedPercentage = (count / totalCriterias) * 100;
+
+            if (passedPercentage > await _unitOfWork.RoundConfigurations.RecruitmentAppearanceBenchmark()) form.IsPassed = true;
             // Lấy thông tin user để gửi email (sẽ lấy sau khi roundActivity đã khởi tạo)
 
             var roundActivityQuery = await _unitOfWork.RoundActivites.GetAsync(
@@ -156,7 +162,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                 expression: x => x.CampaignType == campaignType,
                                 includeFunc: x => x.Include(l => l.Ward).ThenInclude(w => w.City));
                             var location = await locationQuery.FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                            
+
                             if (location != null)
                             {
                                 string fullAddress = location.Address;
@@ -174,7 +180,7 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
                                              $"</div>";
                             }
                         }
-                        
+
                         var templatePath = Path.Combine(AppContext.BaseDirectory, "Common", "Templates", "AppearanceResultTemplate.html");
                         string templateBody = await File.ReadAllTextAsync(templatePath, cancellationToken);
                         templateBody = templateBody.Replace("{FullName}", user.FullName ?? "")

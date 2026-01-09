@@ -18,6 +18,10 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
                 EvaluatedDate = x.EvaluatedDate,
                 Comment = x.Comment,
                 IsPassed = x.IsPassed,
+                Configuration = new RoundConfiguration
+                {
+                    Benchmark = x.Configuration.Benchmark
+                },
                 RoundActivity = new RoundActivity
                 {
                     Round = new Round
@@ -56,6 +60,10 @@ namespace CabinCrewCareer.Infrastructure.EvaluationForms
                 EvaluationId = x.EvaluationId,
                 EvaluatedDate = x.EvaluatedDate,
                 IsPassed = x.IsPassed,
+                Configuration = new RoundConfiguration
+                {
+                    Benchmark = x.Configuration.Benchmark
+                },
                 RoundActivity = new RoundActivity
                 {
                     Round = new Round

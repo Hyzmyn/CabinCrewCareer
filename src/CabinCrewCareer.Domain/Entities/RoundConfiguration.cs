@@ -10,7 +10,11 @@
 
         public int Benchmark { get; set; }
 
+        public bool Status { get; set; } = true;
+
         public DateOnly? EffectiveDate { get; set; }
+
+        public DateOnly? ExpiredDate { get; set; }
         // Foreign Keys
         public int? RoundTypeId { get; set; }
         public virtual TypeRound RoundType { get; set; } = null!;
