@@ -1,5 +1,6 @@
 ﻿using CabinCrewCareer.Application.Common.Enums;
 using CabinCrewCareer.Application.Common.Exceptions;
+using CabinCrewCareer.Application.Common.Extensions;
 using CabinCrewCareer.Application.Common.Interfaces.Persistence.Base;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -22,7 +23,10 @@ namespace CabinCrewCareer.Application.Locations.Commands.EditLocation
 
             await _unitOfWork.CompleteAsync();
 
-            throw new NotImplementedException();
+            return new Response<string>(
+                code: (int)ResponseCode.UPDATED_SUCCESS,
+                data: ResponseCode.UPDATED_SUCCESS.ToString(),
+                message: ResponseCode.UPDATED_SUCCESS.GetDescription());
         }
     }
 }
