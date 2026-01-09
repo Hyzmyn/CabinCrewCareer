@@ -2,6 +2,7 @@
 using CabinCrewCareer.Application.Common.Exceptions;
 using CabinCrewCareer.Application.Locations.Commands.EditLocation;
 using CabinCrewCareer.Application.Locations.Common;
+using CabinCrewCareer.Application.Locations.Queries.GetLocationById;
 using CabinCrewCareer.Application.Locations.Queries.GetLocations;
 using CabinCrewCareer.Domain.Wrappers;
 using MediatR;
@@ -41,6 +42,39 @@ namespace CabinCrewCareer.Api.Controllers
             catch (ApiException e)
             {
                 return BadRequest(new
+                {
+                    errorCode = e.ErrorCode,
+                    error = e.Error,
+                    errorMessage = e.ErrorMessage
+                });
+            }
+        }
+        #endregion
+
+        #region Get Location
+        /// <summary>
+        /// Get location
+        /// </summary>
+        /// <param name="id">Id of a specific location</param>
+        /// <returns>Location</returns>
+        /// <response code="200">Ok</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Response<GetLocationResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetByIdAsync(int id)
+        {
+            try
+            {
+                return Ok(await mediator.Send(new GetLocationByIdQuery(id)));
+            }
+            catch (ApiException e)
+            {
+                return NotFound(new
                 {
                     errorCode = e.ErrorCode,
                     error = e.Error,
