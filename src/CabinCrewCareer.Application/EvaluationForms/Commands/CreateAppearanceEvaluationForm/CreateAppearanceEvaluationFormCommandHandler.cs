@@ -24,8 +24,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateAppearanceE
 
         public async Task<Response<string>> Handle(CreateAppearanceEvaluationFormCommand request, CancellationToken cancellationToken)
         {
-            int count = 0;
-            int totalCriterias = request.Choices.Count;
+            double count = 0;
+            double totalCriterias = request.Choices.Count;
             string resultText = "Không đạt";
             string listeningJoinCode = "";
             string speakingJoinCode = "";

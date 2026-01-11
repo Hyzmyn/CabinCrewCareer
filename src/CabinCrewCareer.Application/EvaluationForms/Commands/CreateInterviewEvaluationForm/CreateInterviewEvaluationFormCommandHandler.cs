@@ -23,8 +23,8 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
 
         public async Task<Response<string>> Handle(CreateInterviewEvaluationFormCommand request, CancellationToken cancellationToken)
         {
-            var finalScore = 0;
-            var totalCriteriasScore = request.Choices.Count * 10;
+            double finalScore = 0;
+            double totalCriteriasScore = request.Choices.Count * 10;
 
             var currentUserId = _currentUserService.CurrentPrincipal;
             if (string.IsNullOrEmpty(currentUserId))
@@ -73,8 +73,6 @@ namespace CabinCrewCareer.Application.EvaluationForms.Commands.CreateInterviewEv
                 var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration((int)RoundConfigurationType.RecruitmentInterview) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
 
                 form.ConfigurationId = round.RoundConfigurationId;
-
-
 
                 if (finalScorePercentage > await _unitOfWork.RoundConfigurations.RecruitmentInterviewBenchmark())
                 {
