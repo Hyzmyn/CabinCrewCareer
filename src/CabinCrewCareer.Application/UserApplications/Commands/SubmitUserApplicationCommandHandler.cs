@@ -313,19 +313,29 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 }
             }
 
-            if (cccdDob.HasValue && cccdDob != request.DateOfBirth)
+            DateOnly? Dob = null;
+                if (!string.IsNullOrWhiteSpace(request.DateOfBirth))
+                {
+                    if (DateOnly.TryParseExact(request.DateOfBirth, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsedDob))
+                    {
+                        Dob = parsedDob;
+                    }
+                }
+
+
+            if (cccdDob.HasValue && cccdDob != Dob)
             {
-                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, CCCD: {CccdDOB}", request.DateOfBirth, cccdDob);
+                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, CCCD: {CccdDOB}", Dob, cccdDob);
                 return CreateErrorResponse(
-                    $"Ngày sinh trên CCCD ({cccdDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({request.DateOfBirth:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
+                    $"Ngày sinh trên CCCD ({cccdDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({Dob:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
                     "DOB_MISMATCH_CCCD");
             }
 
-            if (toeicDob.HasValue && toeicDob != request.DateOfBirth)
+            if (toeicDob.HasValue && toeicDob != Dob)
             {
-                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, TOEIC: {ToeicDOB}", request.DateOfBirth, toeicDob);
+                _logger.LogWarning("Ngày sinh không khớp. Form: {FormDOB}, TOEIC: {ToeicDOB}", Dob, toeicDob);
                 return CreateErrorResponse(
-                    $"Ngày sinh trên chứng chỉ TOEIC ({toeicDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({request.DateOfBirth:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
+                    $"Ngày sinh trên chứng chỉ TOEIC ({toeicDob:dd/MM/yyyy}) không khớp với thông tin đăng ký ({Dob:dd/MM/yyyy}). Vui lòng kiểm tra lại.",
                     "DOB_MISMATCH_TOEIC");
             }
 
@@ -380,7 +390,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 Email = request.Email,
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
-                DateOfBirth = request.DateOfBirth,
+                DateOfBirth = Dob,
                 Gender = request.Gender,
                 Height = request.Height,
                 Weight = request.Weight,
