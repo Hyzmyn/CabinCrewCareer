@@ -160,7 +160,14 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                     };
                 }
             }
-
+                    DateOnly? Dob = null;
+                                    if (!string.IsNullOrWhiteSpace(request.DateOfBirth))
+                                    {
+                                        if (DateOnly.TryParseExact(request.DateOfBirth, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsedDob))
+                                        {
+                                            Dob = parsedDob;
+                                        }
+                                    }
             //var application = new UserApplication
             //{
             //    ApplicationStatus = ApplicationStatus.Draft,
@@ -199,7 +206,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands
                 Email = request.Email,
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
-                DateOfBirth = request.DateOfBirth,
+                DateOfBirth = Dob,
                 Gender = request.Gender,
                 Height = request.Height,
                 Weight = request.Weight,

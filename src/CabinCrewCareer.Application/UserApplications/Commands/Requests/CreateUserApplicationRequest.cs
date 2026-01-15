@@ -27,7 +27,7 @@ namespace CabinCrewCareer.Application.UserApplications.Commands.Requests
         [Required]
         public string PhoneNumber { get; set; } = string.Empty;
         [Required]
-        public DateOnly? DateOfBirth { get; set; }
+        public string DateOfBirth { get; set; } = string.Empty;
         [Required]
         public Gender Gender { get; set; }
         // 5 loại tài liệu
