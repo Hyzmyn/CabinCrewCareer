@@ -153,6 +153,9 @@ namespace CabinCrewCareer.Application.Common.Enums
         [Description("Location not found")]
         LOCATION_NOT_FOUND = 48,
 
+        [Description("Invalid effective date")]
+        INVALID_EFFECTIVE_DATE = 49,
+
         #endregion
     }
 }
