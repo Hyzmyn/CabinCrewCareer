@@ -46,17 +46,31 @@ namespace CabinCrewCareer.Application.Configurations.Commands.CreateConfiguratio
 
             var round = await _unitOfWork.RoundConfigurations.GetCurrentlyEffectiveConfiguration(request.RoundTypeId) ?? throw new ApiException(ResponseCode.ROUND_NOT_FOUND);
 
+            // Check if today <= EffectiveDate of the latest configuration
+            if (round.EffectiveDate.HasValue && _dateTimeProvider.Today <= round.EffectiveDate.Value)
+            {
+                throw new ApiException(ResponseCode.INVALID_EFFECTIVE_DATE);
+            }
+
+            // Set old configuration's ExpiredDate = Today
             round.Status = false;
             round.ExpiredDate = _dateTimeProvider.Today;
 
             await _unitOfWork.RoundConfigurations.UpdateAsync(round);
 
+            // New EffectiveDate = Today + 1
+            var newEffectiveDate = _dateTimeProvider.Today.AddDays(1);
+
             RoundConfiguration ward = new()
             {
                 RoundTypeId = request.RoundTypeId,
                 Benchmark = request.Benchmark,
-                EffectiveDate = _dateTimeProvider.Today.AddDays(1)
+                EffectiveDate = newEffectiveDate,
+                ExpiredDate = null // ExpiredDate is null when creating, will be set when next configuration is created
             };
+
+            // Validation: ExpiredDate should be greater than EffectiveDate (this will be checked when updating)
+            // For new configuration, ExpiredDate is null, so no validation needed at creation time
 
             await _unitOfWork.RoundConfigurations.AddAsync(ward);
             await _unitOfWork.CompleteAsync();
