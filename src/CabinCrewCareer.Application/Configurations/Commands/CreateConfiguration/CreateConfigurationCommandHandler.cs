@@ -59,7 +59,7 @@ namespace CabinCrewCareer.Application.Configurations.Commands.CreateConfiguratio
             await _unitOfWork.RoundConfigurations.UpdateAsync(round);
 
             // New EffectiveDate = Today + 1
-            var newEffectiveDate = _dateTimeProvider.Today.AddDays(1);
+            var newEffectiveDate = _dateTimeProvider.Today;
 
             RoundConfiguration ward = new()
             {
