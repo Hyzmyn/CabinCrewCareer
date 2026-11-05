@@ -34,6 +34,17 @@ Main features: campaigns and campaign rounds, applications, airline partners and
 
 ## My part (Trần Duy Hưng, [@Hyzmyn](https://github.com/Hyzmyn))
 
+### Team leader
+
+Much of this work does not show up as commits:
+
+- Planned the backlog and assigned tasks across the backend and frontend teams; tracked progress to the final defense.
+- Set up and managed the team's database environments (local and deployed) and coordinated schema changes with the backend team.
+- Defined the requirements and flows for the AI document checks (ID cards and TOEIC certificates via Azure OCR and Gemini), implemented by [@NguyenHNN](https://github.com/NguyenHNN).
+- Supported both sides of the stack: helped debug frontend–API integration and backend issues, and reviewed teammates' work before merge.
+
+### Hands-on: online exam module
+
 I owned the **online exam module** end to end:
 
 - APIs for tests, test questions and test sessions: create exams, time limits, serve questions to candidates, submit answers, score.
