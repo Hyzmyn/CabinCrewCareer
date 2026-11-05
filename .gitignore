@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Local credentials (never commit)
+src/CabinCrewCareer.Api/firebase-adminsdk.json
+appsettings.*.local.json
+.env
